@@ -1,0 +1,60 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\OrganizationProfile;
+use App\Models\Region;
+use Illuminate\Contracts\View\View;
+
+class RegionController extends Controller
+{
+    /**
+     * Halaman "Wilayah" — sebaran wilayah kerja PERWAMA INA.
+     */
+    public function index(): View
+    {
+        $provinces = Region::query()
+            ->active()
+            ->whereNull('parent_id')
+            ->withCount(['organizations', 'branches'])
+            ->ordered()
+            ->get();
+
+        return view('pages.region-index', [
+            'profile' => OrganizationProfile::current(),
+            'provinces' => $provinces,
+            'regionsByIsland' => $provinces->groupBy(fn (Region $region) => $region->island ?: 'Lainnya'),
+            'totals' => [
+                'region' => Region::query()->active()->count(),
+                'province' => Region::query()->active()->where('type', 'province')->count(),
+                'organization' => \App\Models\Organization::query()->active()->count(),
+                'member' => \App\Models\Member::query()->active()->count(),
+            ],
+        ]);
+    }
+
+    /**
+     * Detail satu wilayah beserta organisasi, kegiatan, dan cerita di dalamnya.
+     */
+    public function show(string $slug): View
+    {
+        $region = Region::query()
+            ->active()
+            ->where('slug', $slug)
+            ->with([
+                'parent',
+                'children' => fn ($q) => $q->active()->ordered(),
+                'organizations' => fn ($q) => $q->active()->ordered(),
+                'activities' => fn ($q) => $q->published()->ordered()->take(6),
+                'events' => fn ($q) => $q->upcoming()->take(4),
+                'stories' => fn ($q) => $q->published()->ordered()->take(3),
+            ])
+            ->firstOrFail();
+
+        return view('pages.region-show', [
+            'profile' => OrganizationProfile::current(),
+            'region' => $region,
+            'provinces' => Region::query()->active()->provinces()->ordered()->get(),
+        ]);
+    }
+}
