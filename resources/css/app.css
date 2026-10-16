@@ -669,6 +669,14 @@
         background-color: rgba(255, 255, 255, 0.4);
     }
 
+    /*
+     * Indikator berada di tengah bawah, 2.5rem dari dasar hero. Angka ini
+     * dipadukan dengan padding bawah isi hero pada home.blade.php: 5rem di
+     * ponsel (pb-20) dan 4rem di layar besar (md:py-16). Sisanya (≈2.1rem,
+     * setelah tinggi titik 0.375rem) menjadi jeda ke tombol CTA, terutama di
+     * ponsel yang tombolnya menumpuk selebar layar sehingga titik indikator
+     * tidak lagi menempel pada "Jelajahi Program".
+     */
     .hero-bg-dots {
         position: absolute;
         bottom: 2.5rem;

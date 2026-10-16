@@ -58,9 +58,13 @@
                     </div>
                 @endif
 
-                <div class="mt-14">
-                    {{ $programs->links() }}
-                </div>
+                @if ($programs->hasPages())
+                    {{-- Jangan render pembungkus kosong saat hanya ada satu halaman:
+                         div ber-margin mt-14 tetap menyumbang 3.5rem ruang kosong. --}}
+                    <div class="mt-14">
+                        {{ $programs->links() }}
+                    </div>
+                @endif
             @else
                 <div class="mt-10 rounded-2xl border border-navy/10 bg-white p-12 text-center">
                     <p class="font-display text-2xl font-semibold text-navy">Belum ada program</p>

@@ -73,7 +73,12 @@
                         <x-story-card :story="$story" />
                     @endforeach
                 </div>
-                <div class="mt-12">{{ $stories->links() }}</div>
+                @if ($stories->hasPages())
+                    {{-- Pembungkus hanya dirender bila ada halaman lain; div kosong
+                         ber-margin (mt-12) tetap menyumbang 3rem ruang kosong sehingga
+                         jeda ke kartu penutup jadi tidak seimbang. --}}
+                    <div class="mt-12">{{ $stories->links() }}</div>
+                @endif
             @else
                 <div class="mt-10 rounded-2xl border border-navy/10 bg-white p-12 text-center">
                     <p class="font-display text-2xl font-semibold text-navy">Belum ada cerita</p>
@@ -85,7 +90,14 @@
     </section>
 
     {{-- ================= CTA ================= --}}
-    <section class="pb-24 md:pb-32">
+    {{--
+        Kartu penutup halaman. Jeda atas dan jeda bawahnya dibuat sama besar
+        (10rem di ponsel, 12.5rem di layar besar): padding bawah .section-y di
+        atasnya ditambah pt-20 / md:pt-25, lalu padding bawah kartu (pb-40 /
+        md:pb-50) dipatok sebesar jumlah itu. Ritmenya sama dengan CTA beranda
+        dan halaman Tentang Kami.
+    --}}
+    <section class="pt-20 pb-40 md:pt-25 md:pb-50">
         <div class="container-page">
             <div class="relative isolate overflow-hidden rounded-3xl bg-navy px-8 py-14 text-center md:px-16">
                 <div class="hero-pattern absolute inset-0" aria-hidden="true"></div>

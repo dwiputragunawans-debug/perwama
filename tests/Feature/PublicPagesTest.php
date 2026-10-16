@@ -113,7 +113,7 @@ class PublicPagesTest extends TestCase
         // Tata letak lama (daftar teks dengan garis pemisah) sudah tidak dipakai.
         $this->assertStringNotContainsString('lg:border-l lg:border-navy/10 lg:pl-14', $html);
 
-        $dom = new DOMDocument();
+        $dom = new DOMDocument;
         libxml_use_internal_errors(true);
         $dom->loadHTML($html);
         libxml_clear_errors();
@@ -242,12 +242,17 @@ class PublicPagesTest extends TestCase
 
     /**
      * Halaman Tentang Kami tidak lagi menampilkan bagian "Mitra", dan bagian
-     * penutup "Ingin tahu lebih banyak?" memakai ritme penutup situs: tanpa
-     * padding atas (jarak atas sudah disumbang padding bawah bagian sebelumnya)
-     * dan padding bawah `pb-24` / `md:pb-32` seperti CTA beranda dan halaman
-     * Cerita — lega sebelum footer tanpa jeda bertumpuk.
+     * penutup "Ingin tahu lebih banyak?" memakai ritme penutup situs yang
+     * berimbang: jeda atas dan jeda bawah kartu sama besar.
+     *
+     * Jeda atas = padding bawah `.section-y` bagian sebelumnya (5rem di ponsel,
+     * 6.25rem di layar besar) + `pt-20` / `md:pt-25` yang nilainya sama dengan
+     * `.section-y`, yaitu 10rem / 12.5rem. Padding bawah kartu dipatok sebesar
+     * jumlah itu (`pb-40` / `md:pb-50`) sehingga kartu tidak tampak menempel
+     * pada bagian di atasnya sambil melayang dari pita footer — ritme yang sama
+     * dipakai CTA beranda dan halaman Cerita.
      */
-    public function test_halaman_tentang_tanpa_mitra_dan_cta_memakai_ritme_penutup_situs(): void
+    public function test_halaman_tentang_tanpa_mitra_dan_cta_memakai_ritme_penutup_berimbang(): void
     {
         $response = $this->get('/tentang')->assertOk();
 
@@ -263,21 +268,48 @@ class PublicPagesTest extends TestCase
 
         $this->assertNotNull($cta, 'Bagian penutup "Ingin tahu lebih banyak?" tidak ditemukan.');
 
-        $kelas = array_values(array_filter(preg_split('/\s+/', trim($cta->getAttribute('class'))) ?: []));
+        // Padding .section-y tetangga di atas kartu penutup menentukan jeda
+        // atas; nilainya dibaca dari CSS supaya perubahan `.section-y` ikut
+        // menyeret ritme penutup halaman.
+        $css = file_get_contents(resource_path('css/app.css'));
 
-        // Tidak ada padding atas: jeda atas berasal dari bagian sebelumnya.
-        $this->assertSame(
-            [],
-            array_values(array_filter(
-                $kelas,
-                fn (string $token): bool => (bool) preg_match('/^((sm|md|lg|xl|2xl):)?pt-/', $token),
-            )),
-            'Bagian CTA memakai padding atas sehingga jeda dengan bagian sebelumnya menumpuk.',
+        $this->assertMatchesRegularExpression(
+            '/\.section-y\s*\{[^}]*padding-block:\s*([\d.]+)rem;/s',
+            $css,
+            'Padding .section-y di ponsel tidak ditemukan di resources/css/app.css.',
+        );
+        $this->assertMatchesRegularExpression(
+            '/@media \(min-width: 768px\)\s*\{\s*\.section-y\s*\{[^}]*padding-block:\s*([\d.]+)rem;/s',
+            $css,
+            'Padding .section-y di layar besar tidak ditemukan di resources/css/app.css.',
         );
 
-        // Padding bawah memakai ritme penutup halaman: pb-24 / md:pb-32.
-        $this->assertContains('pb-24', $kelas);
-        $this->assertContains('md:pb-32', $kelas);
+        preg_match('/\.section-y\s*\{[^}]*padding-block:\s*([\d.]+)rem;/s', $css, $ponsel);
+        preg_match('/@media \(min-width: 768px\)\s*\{\s*\.section-y\s*\{[^}]*padding-block:\s*([\d.]+)rem;/s', $css, $layarBesar);
+
+        // 1rem = 4 satuan skala spasi Tailwind: padding atas kartu = padding
+        // .section-y di atasnya, padding bawah kartu = dua kali lipatnya.
+        $diharapkan = [
+            'pt-'.(float) $ponsel[1] * 4,
+            'pb-'.(float) $ponsel[1] * 8,
+            'md:pt-'.(float) $layarBesar[1] * 4,
+            'md:pb-'.(float) $layarBesar[1] * 8,
+        ];
+
+        $kelas = array_values(array_filter(preg_split('/\s+/', trim($cta->getAttribute('class'))) ?: []));
+
+        $paddingBagian = array_values(array_filter(
+            $kelas,
+            fn (string $token): bool => (bool) preg_match('/^((sm|md|lg|xl|2xl):)?p[btxy]-/', $token),
+        ));
+
+        $this->assertEqualsCanonicalizing(
+            $diharapkan,
+            $paddingBagian,
+            'Bagian penutup harus memakai '.implode(' ', $diharapkan)
+                .' agar jeda atas dan jeda bawah kartu sama besar; ritme lama '
+                .'(pb-24 md:pb-32) menyisakan jeda bawah yang berbeda dari jeda atas.',
+        );
 
         // Ritme penutup halaman Tentang sama dengan penutup halaman lain yang
         // memakai kartu ajakan (beranda dan halaman Cerita).
@@ -291,12 +323,65 @@ class PublicPagesTest extends TestCase
     }
 
     /**
+     * Pembungkus navigasi halaman tidak dirender bila daftar hanya satu halaman.
+     *
+     * Regresi: div kosong ber-margin (`mt-12` = 3rem / `mt-14` = 3.5rem) tetap
+     * menyumbang ruang di dalam bagian terakhir halaman daftar — mis. /berita
+     * menjadi 128px bukan 80px, dan pada halaman Cerita jeda di atas kartu
+     * penutup menjadi 208px/248px sedangkan di bawahnya 160px/200px.
+     */
+    public function test_daftar_satu_halaman_tidak_menyisakan_pembungkus_paginasi_kosong(): void
+    {
+        foreach ($this->publicUrls() as $url) {
+            $html = $this->get($url)->assertOk()->getContent();
+
+            $this->assertDoesNotMatchRegularExpression(
+                '/<div class="mt-1[24]">\s*<\/div>/',
+                $html,
+                "Ada pembungkus navigasi halaman yang kosong pada {$url}; div ber-margin tetap menambah jarak di dalam bagian terakhir halaman.",
+            );
+        }
+    }
+
+    /**
+     * Navigasi halaman tetap dirender saat daftar memuat lebih dari satu halaman.
+     *
+     * Penjaga `hasPages()` pada halaman daftar hanya membuang pembungkus kosong:
+     * begitu jumlah item melewati batas per halaman, div ber-margin dan tautan
+     * ke halaman kedua harus tetap ada.
+     */
+    public function test_paginasi_tetap_tampil_saat_daftar_lebih_dari_satu_halaman(): void
+    {
+        // 8 berita terbit bawaan + 4 salinan = 12 item, melewati 9 per halaman.
+        News::query()->published()->ordered()->limit(4)->get()
+            ->each(function (News $news, int $index): void {
+                $salinan = $news->replicate();
+                $salinan->title = $news->title.' — salinan '.($index + 1);
+                $salinan->slug = $news->slug.'-salinan-'.($index + 1);
+                $salinan->save();
+            });
+
+        $html = $this->get('/berita')->assertOk()->getContent();
+
+        $this->assertMatchesRegularExpression(
+            '/<div class="mt-12">\s*<nav\b/',
+            $html,
+            'Pembungkus navigasi halaman hilang padahal daftar berita memuat lebih dari satu halaman.',
+        );
+        $this->assertStringContainsString(
+            'page=2',
+            $html,
+            'Tautan ke halaman kedua tidak dirender.',
+        );
+    }
+
+    /**
      * Atribut class <section> terakhir di dalam <main> — bagian penutup
      * halaman yang berbatasan langsung dengan footer.
      */
     private function bagianPenutup(string $html): ?string
     {
-        $dom = new DOMDocument();
+        $dom = new DOMDocument;
         libxml_use_internal_errors(true);
         $dom->loadHTML($html);
         libxml_clear_errors();
@@ -313,7 +398,7 @@ class PublicPagesTest extends TestCase
      */
     private function bagianCta(string $html): ?\DOMElement
     {
-        $dom = new DOMDocument();
+        $dom = new DOMDocument;
         libxml_use_internal_errors(true);
         $dom->loadHTML($html);
         libxml_clear_errors();
@@ -365,7 +450,7 @@ class PublicPagesTest extends TestCase
         // Warna tombol kartu disamakan dengan tombol emas acuan situs (tombol
         // hero "Bergabung Bersama Kami"): keduanya memakai kelas "btn btn-gold"
         // yang sama, sehingga warnanya selalu identik dengan tombol utama.
-        $dom = new DOMDocument();
+        $dom = new DOMDocument;
         libxml_use_internal_errors(true);
         $dom->loadHTML($html);
         libxml_clear_errors();
@@ -497,7 +582,7 @@ class PublicPagesTest extends TestCase
     {
         $html = $this->get('/')->assertOk()->getContent();
 
-        $dom = new DOMDocument();
+        $dom = new DOMDocument;
         libxml_use_internal_errors(true);
         $dom->loadHTML($html);
         libxml_clear_errors();
@@ -523,6 +608,67 @@ class PublicPagesTest extends TestCase
             2,
             $xpath->query('.//*[@data-carousel-dot]', $carousel)->length,
             'Titik indikator harus berada di dalam [data-carousel].',
+        );
+    }
+
+    /**
+     * Isi hero beranda memesan ruang bawah ekstra pada ponsel agar deretan
+     * indikator carousel tidak menempel pada tombol CTA.
+     *
+     * Regresi: di ponsel tombol "Jelajahi Program" menumpuk selebar layar,
+     * sedangkan isi hero hanya memakai padding bawah 3rem (py-12) sementara
+     * indikator dipatok 2.5rem dari dasar hero — tersisa ~8px saja sehingga
+     * titik indikator tampak menempel pada tombol. Kini ponsel memakai pb-20
+     * (5rem) sehingga jeda ke titik indikator tersisa ±2.1rem, sementara layar
+     * besar (md:py-16) tidak berubah.
+     */
+    public function test_hero_beranda_memesan_ruang_bawah_untuk_indikator(): void
+    {
+        $dom = new DOMDocument;
+        libxml_use_internal_errors(true);
+        $dom->loadHTML($this->get('/')->assertOk()->getContent());
+        libxml_clear_errors();
+
+        $xpath = new DOMXPath($dom);
+
+        $hero = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' hero-full ')]")->item(0);
+        $this->assertNotNull($hero, 'Bagian hero beranda tidak ditemukan.');
+
+        $konten = $xpath->query(
+            ".//*[contains(concat(' ', normalize-space(@class), ' '), ' container-page ')]",
+            $hero,
+        )->item(0);
+        $this->assertNotNull($konten, 'Wadah isi hero beranda tidak ditemukan.');
+
+        $kelas = preg_split('/\s+/', trim($konten->getAttribute('class'))) ?: [];
+
+        $this->assertContains(
+            'pb-20',
+            $kelas,
+            'Isi hero harus memesan padding bawah 5rem di ponsel agar indikator tidak menempel pada tombol CTA.',
+        );
+        $this->assertNotContains(
+            'py-12',
+            $kelas,
+            'Padding bawah 3rem pada ponsel membuat titik indikator nyaris bersentuhan dengan tombol "Jelajahi Program".',
+        );
+        $this->assertContains(
+            'md:py-16',
+            $kelas,
+            'Padding layar besar harus tetap md:py-16 agar tata letak desktop tidak berubah.',
+        );
+
+        $this->assertNotNull(
+            $xpath->query(".//*[contains(concat(' ', normalize-space(@class), ' '), ' hero-bg-dots ')]", $hero)->item(0),
+            'Deretan indikator carousel tidak ditemukan di dalam hero.',
+        );
+
+        // Jarak indikator dari dasar hero dipatok di CSS; dipadukan dengan
+        // padding bawah 5rem maka selalu tersisa 2.5rem jeda ke tombol CTA.
+        $this->assertMatchesRegularExpression(
+            '/\.hero-bg-dots\s*\{[^}]*bottom:\s*2\.5rem;/s',
+            file_get_contents(resource_path('css/app.css')),
+            'Jarak indikator dari dasar hero berubah; sesuaikan padding isi hero pada home.blade.php.',
         );
     }
 
@@ -560,7 +706,7 @@ class PublicPagesTest extends TestCase
         $langgar = [];
 
         foreach ($this->publicUrls() as $url) {
-            $dom = new DOMDocument();
+            $dom = new DOMDocument;
             libxml_use_internal_errors(true);
             $dom->loadHTML($this->get($url)->assertOk()->getContent());
             libxml_clear_errors();
@@ -592,14 +738,15 @@ class PublicPagesTest extends TestCase
      * Footer tidak boleh menambah margin atas.
      *
      * Setiap halaman mengakhiri kontennya dengan <section> yang sudah memiliki
-     * padding bawah (mis. .section-y = 80–100px atau pb-24/pb-32 pada CTA).
+     * padding bawah (mis. .section-y = 80–100px atau pt-20 pb-40 / md:pt-25
+     * md:pb-50 = 160–200px pada kartu penutup).
      * Menambahkan margin atas pada footer membuat dua jeda bertumpuk sehingga
      * jarak ke footer terasa terlalu jauh, terutama pada CTA "Bergabung" beranda.
      */
     public function test_footer_tidak_menambah_margin_atas_bertumpuk(): void
     {
         foreach ($this->publicUrls() as $url) {
-            $dom = new DOMDocument();
+            $dom = new DOMDocument;
             libxml_use_internal_errors(true);
             $dom->loadHTML($this->get($url)->assertOk()->getContent());
             libxml_clear_errors();

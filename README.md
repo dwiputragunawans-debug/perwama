@@ -50,6 +50,41 @@ memakai istilah tetap, mis. `created_at` → "Dibuat", `updated_at` →
 agar tiap kolom pada seluruh resource memiliki label eksplisit dan halaman
 daftar tidak lagi menampilkan judul kolom berbahasa Inggris.
 
+### Profil Organisasi (Data Tunggal)
+
+**Tentang → Profil Organisasi** menyimpan data organisasi pada **satu baris**
+tabel `organization_profiles` (`OrganizationProfile::current()` memakai
+`firstOrCreate` pada id 1). Karena itu tombol **Buat Profil Organisasi** hanya
+tersedia selama tabel masih kosong: `OrganizationProfileResource` menimpa
+`getCreateAuthorizationResponse()` dan menolak pembuatan data begitu ada satu
+baris. Filament memakai respons yang sama untuk menyembunyikan aksi Buat pada
+halaman daftar sekaligus menolak `/admin/organization-profiles/create` dengan
+**403** — `Resource::canCreate()` bawaan memang diturunkan dari respons itu,
+jadi satu penimpaan sudah mencakup keduanya. Halaman panel sendiri memanggil
+`OrganizationProfile::current()` lewat `PanelSetting::displayName()` (fallback
+nama & tagline), sehingga baris profil dibuat otomatis pada kunjungan pertama
+ke panel dan tombol tersebut praktis selalu tersembunyi.
+
+Formulir suntingnya dikelompokkan menjadi lima bagian agar tidak lagi berupa
+satu kolom isian yang panjang. Tingkat atas dipaksa satu kolom
+(`->columns(1)`), sebab halaman Ubah/Buat bawaan Filament menyuntikkan dua
+kolom — sebelumnya itu membuat bagian **Visi, Misi & Gambar Kartu Beranda**
+hanya selebar separuh formulir sehingga tiga unggahan gambar tampak terjepit:
+
+| Bagian | Isian |
+| --- | --- |
+| Identitas Organisasi | `name`, `abbreviation`, `tagline`, `founded_year`, `slogan` |
+| Visi, Misi & Gambar Kartu Beranda | `vision`, `mission`, lalu `about_card_image`, `vision_card_image`, `mission_card_image` dalam satu grid tiga kolom (`imagePreviewHeight('14rem')` agar kartu sama besar) |
+| Deskripsi | `short_description`, `description` |
+| Alamat & Kontak | `address`, `city`, `province`, `postal_code`, `email`, `phone`, `whatsapp`, `map_embed` |
+| Media Sosial | `facebook`, `instagram`, `youtube`, `twitter`, `tiktok` |
+
+Visi & Misi tetap berada pada satu bagian bersama ketiga gambar kartu beranda
+(seperti sebelumnya) — dijaga oleh
+`Tests\Feature\OrganizationProfileCardImagesTest`, sedangkan susunan bagian,
+tata letak grid gambar, dan aturan tombol Buat dijaga
+`Tests\Feature\OrganizationProfileAdminFormTest`.
+
 ## Dasbor Panel (Ringkasan Pengunjung & Organisasi)
 
 Halaman pertama setelah masuk (**Dasbor**, `App\Filament\Pages\Dashboard`)
@@ -257,6 +292,13 @@ php artisan migrate
   kontras; slideshow berjalan otomatis (6 detik) dan dapat dinavigasi lewat
   tombol panah naik/turun di sisi kanan serta indikator di tengah bawah. Kartu
   **Agenda terdekat** disamakan tingginya dengan kolom teks di sisi kiri.
+  Isi hero memakai padding bawah lebih besar di ponsel (`pb-20` = 5rem,
+  sedangkan layar besar tetap `md:py-16` = 4rem): tombol CTA menumpuk selebar
+  layar pada ponsel, sehingga dengan padding 3rem titik indikator (dipatok
+  `bottom: 2.5rem` di `resources/css/app.css`) hanya menyisakan ~8px jarak ke
+  tombol "Jelajahi Program". Dengan `pb-20` tombol selalu berada 5rem di atas
+  dasar hero sehingga jeda ke titik indikator tetap ±2.1rem — dijaga oleh
+  `Tests\Feature\PublicPagesTest::test_hero_beranda_memesan_ruang_bawah_untuk_indikator`.
 - **Logo header** website memakai sumber yang sama dengan logo panel admin
   (Pengaturan → Tampilan Panel); favicon website mengikuti pengaturan favicon.
 - **Kartu "Tentang kami"** pada beranda (Tentang Kami, Visi, Misi) memakai
@@ -275,6 +317,26 @@ php artisan migrate
   persegi** (`.card-media-square`) di kolom kanan. Beranda memuat empat berita
   terbaru (`take(4)`), memakai warna, tipografi, dan bidang gambar yang sama
   dengan kartu di halaman lain.
+- **Penutup beranda ("Bergabung")** memakai jeda atas dan jeda bawah yang sama
+  besar supaya kartu tidak tampak menempel pada bagian "Berita" sambil
+  melayang jauh dari pita footer. Bagian ini memakai
+  `pt-20 pb-40 md:pt-25 md:pb-50`: padding atas 5rem/6.25rem (sama dengan
+  `.section-y`) ditambah padding bawah bagian sebelumnya — juga 5rem/6.25rem —
+  menghasilkan jeda atas 10rem/12.5rem (160px/200px), dan padding bawah kartu
+  dipatok sebesar jumlah itu. Jadi jaraknya ke bagian di atas = jarak ke footer
+  = ritme antar bagian lain di beranda, bukan lagi 8rem/12rem seperti pola
+  `pb-24 md:pb-32` yang lama. Pola ini sama dengan kartu penutup halaman Tentang
+  Kami dan Cerita, dan dijaga oleh
+  `Tests\Feature\PublicPagesTest::test_halaman_tentang_tanpa_mitra_dan_cta_memakai_ritme_penutup_berimbang`.
+- **Pembungkus navigasi halaman** pada halaman daftar (Berita, Cerita, Program,
+  Publikasi, Galeri, Video, Kegiatan) hanya dirender bila `hasPages()` — yaitu
+  bila memang ada halaman lain. Tanpa penjagaan itu, `{{ $x->links() }}` yang
+  kosong tetap menyisakan `<div class="mt-12">` / `mt-14` dengan margin yang
+  runtuh (*margin collapse*) sehingga menambah 3–3.5rem ruang kosong di dalam
+  bagian terakhir halaman: mis. jarak ke footer pada `/berita` menjadi 128px
+  (bukan 80px) dan jeda di atas kartu penutup `/cerita` menjadi 208px/248px
+  (bukan 160px/200px). Dijaga oleh
+  `Tests\Feature\PublicPagesTest::test_daftar_satu_halaman_tidak_menyisakan_pembungkus_paginasi_kosong`.
 - Tipografi situs memakai **Poppins, sans-serif** (`resources/css/app.css`).
 - Formulir pada halaman **Bergabung** ditampilkan rata tengah agar lebih rapi.
 - **Ketahanan formulir:** token CSRF disegarkan berkala (dan saat tab kembali
@@ -328,9 +390,14 @@ dan komponennya tetap memakai tema situs:
   lokasi, judul, deskripsi, baris lokasi berpeta, dan foto pada panel navy
   (`Tentang → Sejarah`: tahun, judul, deskripsi, lokasi, gambar).
 - **Penutup:** kartu ajakan **Ingin tahu lebih banyak?** (navy) memakai ritme
-  penutup situs — tanpa padding atas karena jeda atas sudah disumbang padding
-  bawah bagian sebelumnya — dengan `pb-24 md:pb-32` sebelum footer, sama seperti
-  CTA beranda dan halaman Cerita.
+  penutup situs yang **berimbang**: `pt-20 pb-40 md:pt-25 md:pb-50`. Padding
+  atas kartu (5rem/6.25rem, sama dengan `.section-y`) ditambah padding bawah
+  bagian sebelumnya — juga 5rem/6.25rem — menghasilkan jeda atas 10rem di
+  ponsel dan 12.5rem di layar besar; padding bawah kartu dipatok sebesar
+  jumlah itu sehingga jaraknya ke bagian di atas sama dengan jaraknya ke pita
+  footer. Ritme yang sama dipakai CTA Beranda dan halaman Cerita, dan dijaga
+  oleh
+  `Tests\Feature\PublicPagesTest::test_halaman_tentang_tanpa_mitra_dan_cta_memakai_ritme_penutup_berimbang`.
 
 ## About Laravel
 

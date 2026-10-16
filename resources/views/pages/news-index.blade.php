@@ -84,7 +84,11 @@
                         <x-news-card :item="$item" />
                     @endforeach
                 </div>
-                <div class="mt-12">{{ $newsItems->links() }}</div>
+                @if ($newsItems->hasPages())
+                    {{-- Jangan render pembungkus kosong saat hanya ada satu halaman:
+                         div ber-margin mt-12 tetap menyumbang 3rem ruang kosong. --}}
+                    <div class="mt-12">{{ $newsItems->links() }}</div>
+                @endif
             @else
                 <div class="mt-10 rounded-2xl border border-navy/10 bg-white p-12 text-center">
                     <p class="font-display text-2xl font-semibold text-navy">Berita tidak ditemukan</p>

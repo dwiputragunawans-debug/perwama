@@ -98,7 +98,12 @@
                         </div>
                     @endif
 
-                    <div class="mt-14">{{ $activities->links() }}</div>
+                    @if ($activities->hasPages())
+                        {{-- Jangan render pembungkus kosong saat hanya ada satu
+                             halaman: div ber-margin mt-14 tetap menyumbang
+                             3.5rem ruang kosong. --}}
+                        <div class="mt-14">{{ $activities->links() }}</div>
+                    @endif
                 @else
                     <p class="mt-8 rounded-2xl border border-navy/10 bg-white p-10 text-center meta">
                         Tidak ada kegiatan yang cocok dengan filter tersebut.

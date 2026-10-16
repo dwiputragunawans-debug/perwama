@@ -88,7 +88,17 @@
         {{-- Overlay gradien agar teks tetap terbaca di atas foto. --}}
         <div class="hero-overlay absolute inset-0" aria-hidden="true"></div>
 
-        <div class="container-page relative z-20 py-12 md:py-16">
+        {{--
+            Padding bawah isi hero lebih besar di ponsel (pb-20 = 5rem) daripada
+            di layar besar (md:py-16 = 4rem). Sebabnya, indikator carousel
+            (.hero-bg-dots) dipatok 2.5rem dari dasar hero dan tombol CTA
+            menumpuk selebar layar di ponsel: dengan padding 3rem (py-12) hanya
+            tersisa ~8px sehingga titik indikator nyaris menempel pada tombol
+            "Jelajahi Program". Dengan pb-20 tombol selalu berada 5rem di atas
+            dasar hero, jadi jeda ke titik indikator tetap ±2.1rem (2.5rem
+            dikurangi tinggi titik, 0.375rem) tak peduli setinggi apa isinya.
+        --}}
+        <div class="container-page relative z-20 pt-12 pb-20 md:py-16">
             <div class="grid items-stretch gap-14 lg:grid-cols-12 lg:gap-10">
                 {{-- Kolom kiri: judul, ringkasan, dan tombol. --}}
                 <div class="lg:col-span-7 xl:col-span-6">
@@ -389,7 +399,20 @@
     @endif
 
     {{-- ================= CTA BERGABUNG ================= --}}
-    <section class="pb-24 md:pb-32">
+    {{--
+        Kartu penutup beranda. Jeda atas dan jeda bawahnya dibuat sama besar
+        supaya kartu tidak tampak menempel pada bagian di atasnya lalu melayang
+        jauh dari pita footer.
+
+        Jeda atas = padding bawah bagian sebelumnya (.section-y: 5rem di ponsel,
+        6.25rem di layar besar) + padding atas bagian ini (pt-20 / md:pt-25,
+        nilainya mengikuti .section-y) = 10rem / 12.5rem. Angka itu persis ritme
+        antar bagian lain di beranda, sehingga kartu ini duduk pada irama yang
+        sama dengan bagian lain. Padding bawah kartu (pb-40 = 10rem, md:pb-50 =
+        12.5rem) dipatok sebesar jumlah tadi, jadi jarak ke bagian di atas sama
+        dengan jarak ke footer.
+    --}}
+    <section class="pt-20 pb-40 md:pt-25 md:pb-50">
         <div class="container-page">
             <div class="relative isolate overflow-hidden rounded-3xl bg-navy-deep px-8 py-16 md:px-16 md:py-24">
                 <div class="hero-pattern absolute inset-0" aria-hidden="true"></div>

@@ -423,14 +423,19 @@
 
     {{-- ================= CTA ================= --}}
     {{--
-        Bagian penutup halaman. Jarak atas sengaja tanpa padding karena bagian
-        sebelumnya sudah menyumbang padding bawah .section-y; menambah padding
-        atas akan menumpuk dua jeda sehingga jarak terasa terlalu jauh.
-        Padding bawah memakai ritme penutup halaman lain (pb-24 / pb-32, sama
-        seperti CTA beranda dan halaman Cerita) sehingga kartu berjarak lega
-        dan seragam sebelum footer.
+        Bagian penutup halaman. Jeda atas dan jeda bawahnya dibuat sama besar
+        supaya kartu tidak tampak menempel pada bagian di atasnya lalu melayang
+        jauh dari pita footer.
+
+        Jeda atas = padding bawah bagian sebelumnya (.section-y: 5rem di ponsel,
+        6.25rem di layar besar) + padding atas bagian ini (pt-20 / md:pt-25,
+        nilainya mengikuti .section-y) = 10rem / 12.5rem — persis ritme antar
+        bagian di halaman ini. Padding bawah kartu (pb-40 = 10rem, md:pb-50 =
+        12.5rem) dipatok sebesar jumlah tadi, jadi jaraknya ke bagian di atas
+        sama dengan jaraknya ke footer. Ritme penutup ini sama dengan CTA
+        beranda dan halaman Cerita.
     --}}
-    <section class="pb-24 md:pb-32">
+    <section class="pt-20 pb-40 md:pt-25 md:pb-50">
         <div class="container-page">
             <div class="relative isolate overflow-hidden rounded-3xl bg-navy px-8 py-14 text-center md:px-16">
                 <div class="hero-pattern absolute inset-0" aria-hidden="true"></div>

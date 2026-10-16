@@ -9,11 +9,12 @@ use App\Filament\Resources\OrganizationProfiles\Schemas\OrganizationProfileForm;
 use App\Filament\Resources\OrganizationProfiles\Tables\OrganizationProfilesTable;
 use App\Models\OrganizationProfile;
 use BackedEnum;
-use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Auth\Access\Response;
+use UnitEnum;
 
 class OrganizationProfileResource extends Resource
 {
@@ -32,6 +33,25 @@ class OrganizationProfileResource extends Resource
     protected static ?string $pluralModelLabel = 'Profil Organisasi';
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    /**
+     * Profil organisasi bersifat tunggal (satu baris data): begitu datanya ada,
+     * akses membuat record baru ditolak. Filament memakai respons ini untuk
+     * menyembunyikan tombol "Buat Profil Organisasi" pada halaman daftar,
+     * sekaligus menolak halaman /create — `Resource::canCreate()` bawaan
+     * memang diturunkan dari respons ini, jadi tidak perlu ditimpa terpisah.
+     *
+     * Pemeriksaan kebijakan (policy) bawaan tetap dijalankan selama tabel masih
+     * kosong, sehingga aturan tambahan dari policy tidak hilang.
+     */
+    public static function getCreateAuthorizationResponse(): Response
+    {
+        if (OrganizationProfile::query()->exists()) {
+            return Response::deny();
+        }
+
+        return parent::getCreateAuthorizationResponse();
+    }
 
     public static function form(Schema $schema): Schema
     {
