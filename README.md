@@ -399,6 +399,55 @@ dan komponennya tetap memakai tema situs:
   oleh
   `Tests\Feature\PublicPagesTest::test_halaman_tentang_tanpa_mitra_dan_cta_memakai_ritme_penutup_berimbang`.
 
+## Aset Front-end: Kenapa Lokal Bisa Berbeda dari Hosting
+
+Kelas Tailwind pada berkas Blade tidak dibaca saat halaman dibuka. Semuanya
+dikompilasi lebih dahulu oleh Vite menjadi satu berkas CSS beralamat isi
+(`public/build/assets/app-<hash>.css`), dan `@vite(...)` pada
+`resources/views/layouts/app.blade.php` mengambil nama berkas itu dari
+`public/build/manifest.json`. Artinya: **kelas baru yang belum ada di dalam
+bundel CSS tidak berpengaruh apa pun**, meski sudah ditulis di Blade.
+
+Direktori `/public/build` sengaja diabaikan Git (`.gitignore` baris 16),
+sehingga `git push` **tidak pernah** membawa CSS. Hosting selalu memakai bundel
+terakhir yang pernah diunggah ke sana. Gejala yang pernah terjadi karena hal
+ini: hero beranda kehilangan padding bawah (`pb-20`) sehingga titik indikator
+carousel (`.hero-bg-dots`, dipatok `bottom: 2.5rem`) tampak menumpuk pada tombol
+**Jelajahi Program**, dan jarak atas sebelum baris *eyebrow* hilang (`pt-12`).
+
+Cara memastikan hosting memakai bundel yang sama dengan lokal:
+
+```bash
+# 1. Lokal: bangun ulang lalu lihat nama berkas CSS-nya
+npm run build
+cat public/build/manifest.json          # -> assets/app-XXXXXXXX.css
+
+# 2. Hosting: berkas CSS yang dirujuk halaman harus sama
+curl -s https://CONTOH-DOMAIN/ | grep -o 'assets/app-[^"]*\.css'
+
+# 3. Hosting: aturan baru harus ada di bundel yang dipakai
+grep -c 'pb-20{' public/build/assets/app-*.css     # hasil minimal 1
+```
+
+Menyusulkan bundel (pilih salah satu):
+
+- **Bangun di hosting** (bila Node tersedia):
+  `git pull && npm ci && npm run build && php artisan optimize:clear`.
+- **Unggah bundel** (hosting tanpa Node): bangun di lokal, lalu kirim seluruh
+  `public/build` — atau pakai bundel yang sudah disiapkan pada
+  `public/build.zip` (isi: `build/manifest.json`, `build/assets/*`):
+  `cd public && unzip -o build.zip && php artisan view:clear`. Ubah isi zip
+  dengan `cd public && rm -f build.zip && zip -r build.zip build -x '__MACOSX/*'`
+  (jangan pakai *Compress* Finder — hasilnya menambah entri `__MACOSX/`).
+- **Ikutkan lewat Git**: hapus `/public/build` dari `.gitignore` lalu
+  `git add -f public/build`, dengan catatan setiap perubahan kelas Tailwind
+  wajib diikuti `npm run build` sebelum `git commit`.
+
+Setelah bundel baru terpasang, nama berkas CSS ikut berubah sehingga peramban
+otomatis memuat berkas baru (tidak perlu *hard refresh*). Perubahan pada
+`resources/js/app.js` memakai nama berkas JS terpisah (`app-<hash>.js`), jadi
+ubah CSS saja tidak mengubah nama berkas JS.
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
