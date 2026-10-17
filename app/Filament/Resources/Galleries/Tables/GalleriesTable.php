@@ -32,7 +32,8 @@ class GalleriesTable
                     ->label('Kategori Album')
                     ->searchable(),
                 ImageColumn::make('cover_image')
-                    ->label('Gambar Sampul'),
+                    ->label('Gambar Sampul')
+                    ->disk('public'),
                 TextColumn::make('event_date')
                     ->label('Tanggal Acara')
                     ->date()

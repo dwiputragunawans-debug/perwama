@@ -45,7 +45,8 @@ class RegionsTable
                     ->numeric()
                     ->sortable(),
                 ImageColumn::make('cover_image')
-                    ->label('Gambar Sampul'),
+                    ->label('Gambar Sampul')
+                    ->disk('public'),
                 TextColumn::make('sort_order')
                     ->label('Urutan')
                     ->numeric()

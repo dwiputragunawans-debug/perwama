@@ -26,7 +26,8 @@ class OrganizationHistoriesTable
                     ->label('Lokasi')
                     ->searchable(),
                 ImageColumn::make('image')
-                    ->label('Gambar'),
+                    ->label('Gambar')
+                    ->disk('public'),
                 TextColumn::make('sort_order')
                     ->label('Urutan')
                     ->numeric()

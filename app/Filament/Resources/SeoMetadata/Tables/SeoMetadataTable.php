@@ -29,7 +29,8 @@ class SeoMetadataTable
                     ->label('Kata Kunci Meta')
                     ->searchable(),
                 ImageColumn::make('og_image')
-                    ->label('Gambar OG'),
+                    ->label('Gambar OG')
+                    ->disk('public'),
                 TextColumn::make('canonical_url')
                     ->label('URL Kanonik')
                     ->searchable(),

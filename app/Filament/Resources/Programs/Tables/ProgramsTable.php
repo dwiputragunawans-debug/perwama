@@ -33,7 +33,8 @@ class ProgramsTable
                     ->label('Jenis')
                     ->searchable(),
                 ImageColumn::make('cover_image')
-                    ->label('Gambar Sampul'),
+                    ->label('Gambar Sampul')
+                    ->disk('public'),
                 TextColumn::make('document')
                     ->label('Dokumen')
                     ->searchable(),

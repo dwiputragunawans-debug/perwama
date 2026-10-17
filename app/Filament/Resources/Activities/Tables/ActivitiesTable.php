@@ -55,7 +55,8 @@ class ActivitiesTable
                     ->numeric()
                     ->sortable(),
                 ImageColumn::make('cover_image')
-                    ->label('Gambar Sampul'),
+                    ->label('Gambar Sampul')
+                    ->disk('public'),
                 IconColumn::make('is_featured')
                     ->label('Unggulan')
                     ->boolean(),

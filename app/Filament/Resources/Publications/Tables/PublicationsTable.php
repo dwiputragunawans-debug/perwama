@@ -32,7 +32,8 @@ class PublicationsTable
                     ->label('Berkas')
                     ->searchable(),
                 ImageColumn::make('cover_image')
-                    ->label('Gambar Sampul'),
+                    ->label('Gambar Sampul')
+                    ->disk('public'),
                 TextColumn::make('year')
                     ->label('Tahun')
                     ->searchable(),
