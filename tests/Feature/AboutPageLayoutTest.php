@@ -496,6 +496,71 @@ class AboutPageLayoutTest extends TestCase
     }
 
     /**
+     * Foto pengurus tampil dalam bulatan kecil sehingga sulit dikenali.
+     * Setiap foto karena itu dibungkus tautan pratinjau (lightbox) yang
+     * menunjuk berkas aslinya, dan tetap berfungsi sebagai tautan biasa bila
+     * JavaScript tidak aktif.
+     */
+    public function test_foto_pengurus_dapat_dibuka_sebagai_pratinjau(): void
+    {
+        $jumlahFoto = Management::query()->active()->whereNotNull('photo')->count();
+
+        $this->assertGreaterThan(0, $jumlahFoto, 'Data pengurus harus memiliki foto untuk diuji.');
+
+        $xpath = $this->xpath('/tentang');
+        $bagian = $this->bagian($xpath, 'Struktur Pengurus');
+
+        $this->assertNotNull($bagian, 'Bagian Struktur Pengurus tidak ditemukan.');
+
+        $gambar = $xpath->query('.//img', $bagian);
+        $pratinjau = $xpath->query('.//a[@data-lightbox]', $bagian);
+
+        $this->assertSame(
+            $jumlahFoto,
+            $gambar->length,
+            'Setiap pengurus berfoto harus tampil pada bagian Struktur Pengurus.',
+        );
+
+        $this->assertSame(
+            $gambar->length,
+            $pratinjau->length,
+            'Setiap foto pengurus harus menjadi pemicu pratinjau saat diklik.',
+        );
+
+        foreach ($pratinjau as $tautan) {
+            $this->assertInstanceOf(DOMElement::class, $tautan);
+
+            $foto = $xpath->query('.//img', $tautan)->item(0);
+
+            $this->assertNotNull($foto, 'Tautan pratinjau harus membungkus foto pengurus.');
+
+            $berkas = $tautan->getAttribute('data-lightbox');
+
+            $this->assertNotSame('', $berkas, 'Tautan pratinjau harus menunjuk berkas foto.');
+            $this->assertSame(
+                $berkas,
+                $tautan->getAttribute('href'),
+                'Tanpa JavaScript, klik foto tetap membuka berkas asli.',
+            );
+            $this->assertSame($berkas, $foto->getAttribute('src'));
+            $this->assertNotSame(
+                '',
+                $foto->getAttribute('alt'),
+                'Foto memakai nama pengurus sebagai teks alternatif.',
+            );
+            $this->assertStringContainsString('Perbesar foto', $tautan->getAttribute('aria-label'));
+
+            // Foto tetap terpusat di kartu pada layar ponsel, sama seperti
+            // sebelum dibungkus tautan (mx-auto dulu melekat pada <img>).
+            $this->assertStringContainsString(
+                'mx-auto',
+                $tautan->getAttribute('class'),
+                'Foto pratinjau harus tetap terpusat di dalam kartu.',
+            );
+        }
+    }
+
+    /**
      * Sejarah organisasi dan ajakan penutup tetap tampil pada halaman.
      */
     public function test_sejarah_dan_ajakan_penutup_tetap_tampil(): void

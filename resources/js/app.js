@@ -248,29 +248,53 @@ document.addEventListener('DOMContentLoaded', () => {
         const overlay = document.createElement('div');
         overlay.className =
             'fixed inset-0 z-[100] hidden items-center justify-center bg-navy-deep/95 p-4 md:p-10';
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-modal', 'true');
+        overlay.setAttribute('aria-label', 'Pratinjau foto');
+        overlay.setAttribute('aria-hidden', 'true');
         overlay.innerHTML =
-            '<button type="button" data-lightbox-close class="absolute right-5 top-5 text-3xl leading-none text-white/80 hover:text-white">&times;</button>' +
+            '<button type="button" data-lightbox-close aria-label="Tutup pratinjau" class="absolute right-5 top-5 text-3xl leading-none text-white/80 hover:text-white">&times;</button>' +
             '<img data-lightbox-image class="max-h-full max-w-full rounded-lg shadow-2xl" alt="">';
         document.body.appendChild(overlay);
 
         const image = overlay.querySelector('[data-lightbox-image]');
+        const tombolTutup = overlay.querySelector('[data-lightbox-close]');
+        let pemicuTerakhir = null;
+
         const close = () => {
             overlay.classList.add('hidden');
             overlay.classList.remove('flex');
+            overlay.setAttribute('aria-hidden', 'true');
             document.body.style.overflow = '';
+
+            // Kembalikan fokus ke foto yang tadi diklik agar pengguna papan
+            // ketik tidak kehilangan posisi setelah pratinjau ditutup.
+            if (pemicuTerakhir) {
+                pemicuTerakhir.focus();
+                pemicuTerakhir = null;
+            }
         };
 
         triggers.forEach((trigger) => {
             trigger.addEventListener('click', (event) => {
                 event.preventDefault();
+
+                const gambarKecil = trigger.querySelector('img');
+
                 image.src = trigger.getAttribute('data-lightbox');
+                image.alt = gambarKecil ? gambarKecil.getAttribute('alt') || '' : '';
+                pemicuTerakhir = trigger;
+
                 overlay.classList.remove('hidden');
                 overlay.classList.add('flex');
+                overlay.setAttribute('aria-hidden', 'false');
                 document.body.style.overflow = 'hidden';
+
+                tombolTutup.focus();
             });
         });
 
-        overlay.querySelector('[data-lightbox-close]').addEventListener('click', close);
+        tombolTutup.addEventListener('click', close);
         overlay.addEventListener('click', (event) => {
             if (event.target === overlay) {
                 close();

@@ -28,8 +28,19 @@
     <article class="card mt-8 grid items-center gap-6 p-8 md:grid-cols-[auto_1fr]">
         <div class="mx-auto md:mx-0">
             @if ($leader->photo)
-                <img src="{{ media_url($leader->photo) }}" alt="{{ $leader->name }}"
-                     class="h-28 w-28 rounded-full object-cover" loading="lazy">
+                {{--
+                    Foto dibungkus tautan pratinjau: bingkai lingkaran kecil
+                    menyulitkan pengenalan wajah, jadi klik (atau Enter) membuka
+                    berkas asli pada lightbox app.js. Tanpa JavaScript tautan
+                    tetap membuka foto secara langsung.
+                --}}
+                <a href="{{ media_url($leader->photo) }}"
+                   data-lightbox="{{ media_url($leader->photo) }}"
+                   aria-label="Perbesar foto {{ $leader->name }}"
+                   class="group mx-auto block h-28 w-28 cursor-zoom-in overflow-hidden rounded-full ring-2 ring-transparent transition duration-300 hover:ring-gold focus-visible:outline-none focus-visible:ring-gold md:mx-0">
+                    <img src="{{ media_url($leader->photo) }}" alt="{{ $leader->name }}"
+                         class="h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy">
+                </a>
             @else
                 <span class="flex h-28 w-28 items-center justify-center rounded-full bg-navy font-display text-3xl font-semibold text-white">
                     {{ Str::substr($leader->name, 0, 1) }}
@@ -59,8 +70,14 @@
         @foreach ($lainnya as $orang)
             <article class="card p-6 text-center" data-reveal>
                 @if ($orang->photo)
-                    <img src="{{ media_url($orang->photo) }}" alt="{{ $orang->name }}"
-                         class="mx-auto h-24 w-24 rounded-full object-cover" loading="lazy">
+                    {{-- Sama seperti kartu utama: klik foto membuka pratinjau asli. --}}
+                    <a href="{{ media_url($orang->photo) }}"
+                       data-lightbox="{{ media_url($orang->photo) }}"
+                       aria-label="Perbesar foto {{ $orang->name }}"
+                       class="group mx-auto block h-24 w-24 cursor-zoom-in overflow-hidden rounded-full ring-2 ring-transparent transition duration-300 hover:ring-gold focus-visible:outline-none focus-visible:ring-gold">
+                        <img src="{{ media_url($orang->photo) }}" alt="{{ $orang->name }}"
+                             class="h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy">
+                    </a>
                 @else
                     <span class="mx-auto flex h-24 w-24 items-center justify-center rounded-full {{ $warnaAvatar[$loop->index % 4] }} font-display text-3xl font-semibold">
                         {{ Str::substr($orang->name, 0, 1) }}
