@@ -55,9 +55,11 @@ class RegionForm
                     ->maxSize(10240),
                 TextInput::make('sort_order')
                     ->label('Urutan')
+                    ->helperText('Angka kecil tampil lebih dulu. Record baru otomatis diletakkan di urutan terakhir.')
                     ->required()
-                    ->numeric()
-                    ->default(0),
+                    ->integer()
+                    ->minValue(0)
+                    ->default(fn (): int => (int) (Region::query()->max('sort_order') ?? 0) + 1),
                 Toggle::make('is_active')
                     ->label('Aktif')
                     ->required(),

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\OrganizationHistories\Schemas;
 
+use App\Models\OrganizationHistory;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
@@ -36,9 +37,11 @@ class OrganizationHistoryForm
                     ->maxSize(10240),
                 TextInput::make('sort_order')
                     ->label('Urutan')
+                    ->helperText('Angka kecil tampil lebih dulu. Record baru otomatis diletakkan di urutan terakhir.')
                     ->required()
-                    ->numeric()
-                    ->default(0),
+                    ->integer()
+                    ->minValue(0)
+                    ->default(fn (): int => (int) (OrganizationHistory::query()->max('sort_order') ?? 0) + 1),
                 Toggle::make('is_active')
                     ->label('Aktif')
                     ->required(),

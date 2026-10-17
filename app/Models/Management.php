@@ -38,6 +38,9 @@ class Management extends Model
 
     public function scopeOrdered($query)
     {
-        return $query->orderBy('sort_order');
+        // Urutan di panel admin (kolom Urutan) menentukan urutan tampil di
+        // situs. Id dipakai sebagai penentu terakhir agar susunan tetap stabil
+        // bila dua pengurus diberi Urutan yang sama.
+        return $query->orderBy('sort_order')->orderBy('id');
     }
 }

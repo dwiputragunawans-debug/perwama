@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Partners\Schemas;
 
+use App\Models\Partner;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
@@ -29,9 +30,11 @@ class PartnerForm
                     ->columnSpanFull(),
                 TextInput::make('sort_order')
                     ->label('Urutan')
+                    ->helperText('Angka kecil tampil lebih dulu. Record baru otomatis diletakkan di urutan terakhir.')
                     ->required()
-                    ->numeric()
-                    ->default(0),
+                    ->integer()
+                    ->minValue(0)
+                    ->default(fn (): int => (int) (Partner::query()->max('sort_order') ?? 0) + 1),
                 Toggle::make('is_active')
                     ->label('Aktif')
                     ->required(),

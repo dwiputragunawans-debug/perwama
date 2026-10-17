@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\MenuItem;
 use Database\Seeders\MenuItemSeeder;
+use DOMDocument;
+use DOMXPath;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -222,5 +224,80 @@ class MenuVisibilityTest extends TestCase
         ]);
 
         $this->assertSame([], MenuItem::navigation());
+    }
+
+    /**
+     * Kolom Urutan pada panel admin kini menentukan susunan header: urutan di
+     * dalam kelompok dan posisi kelompoknya. Sebelumnya susunan dikunci oleh
+     * daftar kunci pada MenuItem::GROUPS sehingga Urutan tidak berpengaruh.
+     */
+    public function test_urutan_menu_dari_panel_menentukan_susunan_header(): void
+    {
+        $this->seed(MenuItemSeeder::class);
+
+        // Galeri (8) diberi nomor 1 agar mendahului Berita (7).
+        MenuItem::query()->where('key', 'gallery')->update(['sort_order' => 1]);
+        MenuItem::flushNavigationCache();
+
+        $menu = MenuItem::navigation();
+
+        $publikasi = collect($menu)->firstWhere('label', 'Publikasi');
+
+        $this->assertSame(['Galeri', 'Berita'], array_column($publikasi['items'], 'label'));
+
+        // Kelompok Publikasi ikut naik karena memuat menu bernomor terkecil.
+        $this->assertSame(['Beranda', 'Publikasi'], array_column(array_slice($menu, 0, 2), 'label'));
+
+        $this->assertSame(
+            ['Beranda', 'Publikasi', 'Galeri', 'Berita', 'Profil', 'Tentang', 'Wilayah', 'Program & Kegiatan', 'Program', 'Kegiatan', 'Cerita', 'Kontak'],
+            $this->tautanNavigasi($this->get('/')->assertOk()->getContent()),
+        );
+    }
+
+    /**
+     * Menu tambahan dari panel diletakkan menurut Urutan, bukan selalu di akhir.
+     */
+    public function test_menu_tambahan_mengikuti_urutan(): void
+    {
+        $this->seed(MenuItemSeeder::class);
+
+        MenuItem::query()->create([
+            'key' => 'panduan',
+            'label' => 'Panduan Relawan',
+            'route_name' => 'contact',
+            'pattern' => 'kontak',
+            'is_active' => true,
+            'sort_order' => 0,
+        ]);
+
+        MenuItem::flushNavigationCache();
+
+        $this->assertSame('Panduan Relawan', MenuItem::navigation()[0]['label']);
+    }
+
+    /**
+     * Teks tautan navigasi header sesuai urutan render (termasuk tombol
+     * pembuka kelompok tarik-turun).
+     *
+     * @return list<string>
+     */
+    private function tautanNavigasi(string $html): array
+    {
+        $dom = new DOMDocument;
+        libxml_use_internal_errors(true);
+        $dom->loadHTML($html);
+        libxml_clear_errors();
+
+        $xpath = new DOMXPath($dom);
+
+        $hasil = [];
+
+        $nodes = $xpath->query('//nav//*[self::a or self::button][contains(@class, "site-nav-link") or contains(@class, "site-nav-dropdown-link")]');
+
+        foreach ($nodes as $node) {
+            $hasil[] = trim((string) preg_replace('/\s+/u', ' ', $node->textContent));
+        }
+
+        return $hasil;
     }
 }

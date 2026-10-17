@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Media\Schemas;
 
+use App\Models\Media;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
@@ -38,9 +39,11 @@ class MediaForm
                     ->label('Teks Alternatif'),
                 TextInput::make('sort_order')
                     ->label('Urutan')
+                    ->helperText('Angka kecil tampil lebih dulu. Record baru otomatis diletakkan di urutan terakhir.')
                     ->required()
-                    ->numeric()
-                    ->default(0),
+                    ->integer()
+                    ->minValue(0)
+                    ->default(fn (): int => (int) (Media::query()->max('sort_order') ?? 0) + 1),
             ]);
     }
 }

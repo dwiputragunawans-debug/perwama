@@ -289,8 +289,9 @@ class AboutPageLayoutTest extends TestCase
     }
 
     /**
-     * Struktur pengurus memakai tab per tingkat, dan ketua tiap tingkat
-     * ditampilkan lebih besar daripada pengurus lainnya.
+     * Struktur pengurus memakai tab per tingkat, dan kartu pertama tiap tingkat
+     * (pengurus dengan Urutan terkecil) tampil lebih besar daripada pengurus
+     * lainnya.
      */
     public function test_struktur_pengurus_memakai_tab_per_tingkat(): void
     {
@@ -328,7 +329,8 @@ class AboutPageLayoutTest extends TestCase
             );
         }
 
-        // Ketua tampil pada kartu tersendiri di awal panel, pengurus lain menyusul.
+        // Kartu pertama panel adalah pengurus dengan Urutan terkecil; pada data
+        // contoh kebetulan ketua tingkat. Pengurus lain menyusul.
         foreach ([['dpp', 'Ketua Umum'], ['dpw', 'Ketua DPW Maluku'], ['pc', 'Ketua PC Kota Ambon']] as [$tingkat, $jabatan]) {
             $panelTingkat = $xpath->query("//*[@data-tab-panel=\"{$tingkat}\"]")->item(0);
 
@@ -347,6 +349,65 @@ class AboutPageLayoutTest extends TestCase
 
             $this->assertStringContainsString($namaKetua, $ketua->textContent);
         }
+    }
+
+    /**
+     * Urutan kartu pengurus di situs sepenuhnya mengikuti kolom Urutan di panel
+     * admin (Pengurus → Urutan), termasuk pada kartu pertama yang tampil lebih
+     * besar. Dulu kartu utama dipilih dari "orang pertama yang jabatannya
+     * mengandung kata ketua", sehingga susunan yang sudah diatur admin — mis.
+     * Penasehat (1), Ketua Bidang III (2), Ketua Umum (3) — tidak dipakai.
+     */
+    public function test_urutan_kartu_pengurus_mengikuti_kolom_urutan_di_panel_admin(): void
+    {
+        // Susunan seperti data pada panel admin: Penasehat (Urutan 1),
+        // Ketua Bidang III (Urutan 2), baru kemudian Ketua Umum (Urutan 3).
+        Management::query()->where('level', 'dpp')->where('position', 'Wakil Ketua Umum')
+            ->update(['position' => 'Penasehat', 'sort_order' => 1]);
+
+        Management::query()->where('level', 'dpp')->where('position', 'Sekretaris Jenderal')
+            ->update(['position' => 'Ketua Bidang III', 'sort_order' => 2]);
+
+        Management::query()->where('level', 'dpp')->where('position', 'Ketua Umum')
+            ->update(['sort_order' => 3]);
+
+        $xpath = $this->xpath('/tentang');
+
+        foreach (['dpp', 'dpw', 'pc'] as $tingkat) {
+            $panel = $xpath->query("//*[@data-tab-panel=\"{$tingkat}\"]")->item(0);
+
+            $this->assertNotNull($panel, "Panel tingkat {$tingkat} tidak ditemukan.");
+
+            $kartu = $xpath->query('.//article', $panel);
+            $nama = Management::query()
+                ->active()
+                ->where('level', $tingkat)
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->pluck('name');
+
+            $this->assertSame(
+                $nama->count(),
+                $kartu->length,
+                "Setiap pengurus tingkat {$tingkat} tampil tepat satu kartu.",
+            );
+
+            foreach ($nama->values() as $index => $satu) {
+                $this->assertStringContainsString(
+                    $satu,
+                    $kartu->item($index)->textContent,
+                    'Kartu ke-'.($index + 1)." tingkat {$tingkat} harus berisi {$satu} sesuai kolom Urutan.",
+                );
+            }
+        }
+
+        // Kartu pertama DPP adalah pengurus dengan Urutan 1 (Penasehat), bukan
+        // Ketua Umum yang Urutan-nya 3.
+        $pertama = $xpath->query('//*[@data-tab-panel="dpp"]//article')->item(0);
+
+        $this->assertNotNull($pertama, 'Kartu pertama tingkat DPP tidak ditemukan.');
+        $this->assertStringContainsString('Martha Latuconsina, M.Pd.', $pertama->textContent);
+        $this->assertStringContainsString('Penasehat', $pertama->textContent);
     }
 
     /**

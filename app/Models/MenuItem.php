@@ -103,6 +103,9 @@ class MenuItem extends Model
      * Menu yang ditampilkan pada navigasi situs publik, sudah dikelompokkan
      * mengikuti GROUPS (lima menu utama).
      *
+     * Susunan menu di dalam tiap kelompok — dan posisi kelompoknya — mengikuti
+     * kolom Urutan pada panel admin, bukan urutan kunci pada GROUPS.
+     *
      * Hanya menu aktif dan berute valid yang dipakai. Bila tabel menu belum
      * pernah diisi, menu bawaan dipakai; bila seluruh menu dimatikan oleh
      * pengelola, hasilnya boleh kosong (bukan kembali ke bawaan). Menu yang
@@ -141,28 +144,37 @@ class MenuItem extends Model
         $kelompok = [];
 
         foreach (static::GROUPS as $grup) {
+            /*
+             * Kolom Urutan pada panel admin menentukan susunan menu di dalam
+             * kelompok. Kunci pada GROUPS hanya menentukan menu mana yang
+             * sekelompok, bukan urutan tampilnya.
+             */
             $anggota = collect($grup['items'])
                 ->map(fn (string $kunci): ?self => $items->get($kunci))
                 ->filter()
-                ->map(fn (self $item): array => static::navigationItem($item))
-                ->values()
-                ->all();
+                ->sortBy(fn (self $item): int => (int) $item->sort_order)
+                ->values();
 
-            if ($anggota === []) {
+            if ($anggota->isEmpty()) {
                 continue;
             }
+
+            $tautan = $anggota
+                ->map(fn (self $item): array => static::navigationItem($item))
+                ->all();
 
             /*
              * Kelompok bertaut tunggal (Beranda, Kontak) tampil sebagai tautan
              * biasa dan memakai nama menunya, bukan nama kelompok.
              */
-            $kelompok[] = count($anggota) === 1 && $grup['label'] === null
-                ? [...$anggota[0], 'items' => []]
+            $kelompok[] = count($tautan) === 1 && $grup['label'] === null
+                ? [...$tautan[0], 'items' => [], '_urutan' => (int) $anggota->first()->sort_order]
                 : [
                     'label' => $grup['label'],
                     'route' => null,
-                    'pattern' => array_column($anggota, 'pattern'),
-                    'items' => $anggota,
+                    'pattern' => array_column($tautan, 'pattern'),
+                    'items' => $tautan,
+                    '_urutan' => (int) $anggota->min('sort_order'),
                 ];
         }
 
@@ -181,10 +193,23 @@ class MenuItem extends Model
         $sisa = $items->reject(fn (self $item): bool => in_array($item->key, $disebut, true));
 
         foreach ($sisa as $item) {
-            $kelompok[] = [...static::navigationItem($item), 'items' => []];
+            $kelompok[] = [...static::navigationItem($item), 'items' => [], '_urutan' => (int) $item->sort_order];
         }
 
-        return static::$cached = $kelompok;
+        /*
+         * Urutan kelompok pun mengikuti kolom Urutan: kelompok yang memuat menu
+         * bernomor terkecil tampil lebih dulu. `_urutan` hanya dipakai untuk
+         * pengurutan dan tidak ikut dikembalikan ke header.
+         */
+        return static::$cached = collect($kelompok)
+            ->sortBy('_urutan')
+            ->map(function (array $grup): array {
+                unset($grup['_urutan']);
+
+                return $grup;
+            })
+            ->values()
+            ->all();
     }
 
     /**

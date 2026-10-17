@@ -13,6 +13,7 @@ class MediaTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->defaultSort('sort_order')
             ->columns([
                 TextColumn::make('model_type')
                     ->label('Jenis Model')

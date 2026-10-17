@@ -7,15 +7,16 @@
     /*
      * Satu tingkat kepengurusan (DPP, DPW, atau PC).
      *
-     * Ketua tingkat tersebut ditampilkan lebih besar — mengikuti acuan
-     * tampilan — sedangkan pengurus lain tampil sebagai kartu sejajar. Warna
-     * dan tipografi memakai tema situs: navy, terracotta, hijau, gold, dan
-     * Poppins. Bulatan inisial dipakai bila foto pengurus belum diunggah.
+     * Urutan kartu sepenuhnya mengikuti kolom Urutan di panel admin
+     * (Manajemen → Pengurus). Kartu dengan Urutan terkecil tampil lebih besar
+     * sebagai pembuka tingkat, sedangkan sisanya tampil sebagai kartu sejajar
+     * dengan urutan yang sama. Warna dan tipografi memakai tema situs: navy,
+     * terracotta, hijau, gold, dan Poppins. Bulatan inisial dipakai bila foto
+     * pengurus belum diunggah.
      */
-    $leader = $people->first(fn ($orang): bool => str_contains(mb_strtolower((string) $orang->position), 'ketua'))
-        ?? $people->first();
+    $leader = $people->first();
 
-    $lainnya = $people->reject(fn ($orang): bool => $orang->is($leader));
+    $lainnya = $people->skip(1);
 
     // Warna bulatan inisial bergilir memakai palet situs.
     $warnaAvatar = ['bg-navy text-white', 'bg-terracotta text-white', 'bg-green text-white', 'bg-gold text-navy-deep'];

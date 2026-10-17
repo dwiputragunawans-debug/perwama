@@ -16,6 +16,7 @@ class ManagementTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->defaultSort('sort_order')
             ->columns([
                 ImageColumn::make('photo')
                     ->label('Foto')

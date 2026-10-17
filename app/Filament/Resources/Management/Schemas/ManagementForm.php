@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Management\Schemas;
 
+use App\Models\Management;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -57,9 +58,11 @@ class ManagementForm
                     ->columnSpanFull(),
                 TextInput::make('sort_order')
                     ->label('Urutan')
+                    ->helperText('Angka kecil tampil lebih dulu. Record baru otomatis diletakkan di urutan terakhir.')
                     ->required()
-                    ->numeric()
-                    ->default(0),
+                    ->integer()
+                    ->minValue(0)
+                    ->default(fn (): int => (int) (Management::query()->max('sort_order') ?? 0) + 1),
                 Toggle::make('is_active')
                     ->label('Aktif')
                     ->required(),

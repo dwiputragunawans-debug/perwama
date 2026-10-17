@@ -15,6 +15,7 @@ class ProgramsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->defaultSort('sort_order')
             ->columns([
                 TextColumn::make('program_category_id')
                     ->label('Kategori Program')

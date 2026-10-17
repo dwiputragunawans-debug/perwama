@@ -6,6 +6,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class GalleryItemsTable
@@ -13,6 +14,7 @@ class GalleryItemsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->defaultSort('sort_order')
             ->columns([
                 TextColumn::make('gallery.title')
                     ->label('Galeri')
@@ -45,7 +47,13 @@ class GalleryItemsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                // Urutan item hanya berlaku di dalam satu galeri, jadi daftar
+                // perlu dapat disaring per galeri agar susunannya terbaca.
+                SelectFilter::make('gallery_id')
+                    ->label('Galeri')
+                    ->relationship('gallery', 'title')
+                    ->searchable()
+                    ->preload(),
             ])
             ->recordActions([
                 EditAction::make(),

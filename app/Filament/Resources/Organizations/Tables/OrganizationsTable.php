@@ -15,6 +15,7 @@ class OrganizationsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->defaultSort('sort_order')
             ->columns([
                 TextColumn::make('region.name')
                     ->label('Wilayah')
