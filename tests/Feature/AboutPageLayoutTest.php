@@ -382,6 +382,31 @@ class AboutPageLayoutTest extends TestCase
     }
 
     /**
+     * Keterangan masa jabatan memakai satu istilah saja — "Periode" — baik pada
+     * kartu ketua maupun kartu pengurus lainnya, sehingga tidak ada lagi kartu
+     * yang memakai "Masa bakti" dan kartu lain memakai "Periode".
+     */
+    public function test_keterangan_masa_jabatan_pengurus_memakai_satu_istilah(): void
+    {
+        $periode = Management::query()
+            ->active()
+            ->whereNotNull('period')
+            ->distinct()
+            ->pluck('period');
+
+        $this->assertNotEmpty($periode, 'Data pengurus harus memiliki periode untuk diuji.');
+
+        $response = $this->get('/tentang')->assertOk();
+
+        foreach ($periode as $nilai) {
+            $response->assertSee('Periode '.$nilai, false);
+        }
+
+        $response->assertDontSee('Masa bakti', false);
+        $response->assertDontSee('Masa Bakti', false);
+    }
+
+    /**
      * Pengurus yang belum memiliki foto memakai bulatan inisial berwarna palet
      * situs (bukan gambar kosong), dengan warna teks eksplisit.
      */

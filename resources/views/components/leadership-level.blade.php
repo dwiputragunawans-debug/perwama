@@ -41,7 +41,7 @@
             <h4 class="mt-2 font-display text-2xl font-semibold text-navy">{{ $leader->name }}</h4>
 
             @if ($leader->period)
-                <p class="meta mt-1">Masa bakti {{ $leader->period }}</p>
+                <p class="meta mt-1">Periode {{ $leader->period }}</p>
             @endif
             @if ($leader->region)
                 <p class="meta">{{ $leader->region->name }}</p>
