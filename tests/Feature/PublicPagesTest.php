@@ -555,6 +555,55 @@ class PublicPagesTest extends TestCase
     }
 
     /**
+     * Identitas organisasi tampil dua baris pada header — nama singkat di atas
+     * dan nama lengkap di bawahnya — pada semua ukuran layar, termasuk ponsel.
+     *
+     * Regresi: baris nama lengkap dulu memakai `hidden sm:block` sehingga di
+     * layar di bawah 640px hanya singkatan "PERWAMA INA" yang terlihat.
+     */
+    public function test_header_menampilkan_nama_lengkap_di_bawah_singkatan(): void
+    {
+        $panel = PanelSetting::current();
+        $tagline = $panel->displayTagline();
+
+        $this->assertNotEmpty($tagline, 'Nama lengkap organisasi harus tersedia sebagai baris kedua header.');
+
+        $dom = new DOMDocument;
+        libxml_use_internal_errors(true);
+        $dom->loadHTML($this->get('/')->assertOk()->getContent());
+        libxml_clear_errors();
+
+        $xpath = new DOMXPath($dom);
+        $header = $xpath->query('//*[@data-site-header]')->item(0);
+
+        $this->assertNotNull($header, 'Header situs [data-site-header] tidak ditemukan pada beranda.');
+
+        // Nama singkat dan nama lengkap berada pada satu tautan merek yang sama.
+        $merek = $xpath->query('.//a[@href="'.route('home').'"][contains(@class, "items-center")]', $header)->item(0);
+
+        $this->assertNotNull($merek, 'Tautan merek (logo + nama) tidak ditemukan pada header.');
+        $this->assertStringContainsString($panel->displayName(), $merek->textContent);
+        $this->assertStringContainsString($tagline, $merek->textContent);
+
+        // Baris nama lengkap harus tampil tanpa syarat lebar layar.
+        foreach ($xpath->query('.//span', $merek) as $span) {
+            if (trim($span->textContent) !== $tagline || $span->getElementsByTagName('span')->length) {
+                continue;
+            }
+
+            $kelas = $span->getAttribute('class');
+
+            $this->assertStringContainsString('block', $kelas, 'Baris nama lengkap harus tampil sebagai baris tersendiri.');
+            $this->assertStringNotContainsString('hidden', $kelas, 'Nama lengkap organisasi disembunyikan pada layar kecil.');
+            $this->assertStringNotContainsString('sm:block', $kelas, 'Nama lengkap organisasi hanya muncul mulai 640px.');
+
+            return;
+        }
+
+        $this->fail('Baris nama lengkap organisasi tidak ditemukan di bawah nama singkat pada header.');
+    }
+
+    /**
      * Hero beranda memakai carousel foto sebagai latar penuh, dilengkapi
      * overlay gelap, kontrol navigasi, indikator, dan kartu agenda.
      */
@@ -838,6 +887,177 @@ class PublicPagesTest extends TestCase
         ])->assertRedirect(route('join'));
 
         $this->assertDatabaseHas('partnership_requests', ['email' => 'yohanes@example.com']);
+    }
+
+    /**
+     * Informasi kontak tidak boleh meluber melewati padding kanan halaman.
+     *
+     * Regresi: `<dd>` tanpa `min-w-0` membuat kolom kisi memakai lebar
+     * min-content dari surel `sekretariat@perwama-ina.or.id` (189px pada 14px),
+     * sehingga pada layar ±340px trek kisi lebih lebar daripada isi
+     * `.container-page`: alamat, label, dan judul bagian terpotong di tepi
+     * kanan. Label sekarang bertumpuk di atas nilainya pada layar sempit dan
+     * setiap nilai boleh menyusut serta dipatahkan.
+     */
+    public function test_informasi_kontak_tidak_meluber_pada_layar_sempit(): void
+    {
+        $dom = new DOMDocument;
+        libxml_use_internal_errors(true);
+        $dom->loadHTML($this->get('/kontak')->assertOk()->getContent());
+        libxml_clear_errors();
+
+        $xpath = new DOMXPath($dom);
+        $baris = $xpath->query('//dl[.//dt[normalize-space()="Alamat"]]/div');
+
+        $this->assertGreaterThan(0, $baris->length, 'Daftar informasi kontak tidak ditemukan pada /kontak.');
+
+        foreach ($baris as $div) {
+            $kelas = $div->getAttribute('class');
+
+            $this->assertStringContainsString('flex-col', $kelas, 'Label dan nilai informasi kontak harus bertumpuk pada layar sempit.');
+            $this->assertStringContainsString('sm:flex-row', $kelas, 'Label dan nilai informasi kontak harus kembali sejajar mulai 640px.');
+
+            $nilai = $xpath->query('./dd', $div)->item(0);
+
+            $this->assertNotNull($nilai, 'Setiap label informasi kontak harus memiliki nilai <dd>.');
+
+            $kelasNilai = $nilai->getAttribute('class');
+
+            $this->assertStringContainsString('min-w-0', $kelasNilai, 'Nilai tanpa `min-w-0` memaksa kolom kisi melebar ke kanan.');
+            $this->assertStringContainsString('wrap-anywhere', $kelasNilai, 'Surel dan tautan panjang harus boleh dipatahkan.');
+        }
+
+        $kolom = $xpath->query('//dl[.//dt[normalize-space()="Alamat"]]/parent::div')->item(0);
+
+        $this->assertNotNull($kolom, 'Kolom informasi kontak tidak ditemukan.');
+        $this->assertStringContainsString('min-w-0', $kolom->getAttribute('class'), 'Kolom kisi informasi kontak harus boleh menyusut.');
+    }
+
+    /**
+     * Kartu sekretariat pada halaman Tentang Kami memakai aturan yang sama.
+     *
+     * Regresi: surel panjang pada `<dd>` membuat min-content kartu 373px,
+     * sehingga seluruh kolom kiri halaman ikut melebar dan terpotong pada
+     * layar 320–390px.
+     */
+    public function test_kartu_sekretariat_tentang_tidak_meluber_pada_layar_sempit(): void
+    {
+        $dom = new DOMDocument;
+        libxml_use_internal_errors(true);
+        $dom->loadHTML($this->get('/tentang')->assertOk()->getContent());
+        libxml_clear_errors();
+
+        $xpath = new DOMXPath($dom);
+        $baris = $xpath->query('//dl[.//dt[normalize-space()="Email"]]/div[.//a[starts-with(@href, "mailto:")]]');
+
+        $this->assertGreaterThan(0, $baris->length, 'Baris surel sekretariat tidak ditemukan pada /tentang.');
+
+        foreach ($baris as $div) {
+            $kelas = $div->getAttribute('class');
+
+            $this->assertStringContainsString('flex-col', $kelas, 'Label dan surel sekretariat harus bertumpuk pada layar sempit.');
+            $this->assertStringContainsString('sm:flex-row', $kelas, 'Label dan surel sekretariat harus kembali sejajar mulai 640px.');
+
+            $nilai = $xpath->query('./dd', $div)->item(0);
+
+            $this->assertNotNull($nilai, 'Baris surel sekretariat harus memiliki nilai <dd>.');
+
+            $kelasNilai = $nilai->getAttribute('class');
+
+            $this->assertStringContainsString('min-w-0', $kelasNilai, 'Nilai tanpa `min-w-0` memaksa kartu sekretariat melebar ke kanan.');
+            $this->assertStringContainsString('wrap-anywhere', $kelasNilai, 'Surel panjang harus boleh dipatahkan.');
+        }
+    }
+
+    /**
+     * Trek `1fr` pada kisi bagian profil mengambil lebar min-content anaknya
+     * selama `min-width` anak masih `auto`. Kartu sekretariat berisi surel yang
+     * tak bisa dipatahkan (±265px pada 16px, ±336px saat ukuran teks sistem
+     * diperbesar) sehingga trek melebar melewati padding kanan
+     * `.container-page`; judul, tagline, dan paragraf di kolom kiri ikut
+     * terpotong di tepi kanan. `min-w-0` pada setiap anak kisi memutus
+     * ketergantungan itu tanpa mengubah tampilan pada ukuran teks normal.
+     */
+    public function test_anak_kisi_bagian_profil_tentang_memakai_min_w_0(): void
+    {
+        $dom = new DOMDocument;
+        libxml_use_internal_errors(true);
+        $dom->loadHTML($this->get('/tentang')->assertOk()->getContent());
+        libxml_clear_errors();
+
+        $xpath = new DOMXPath($dom);
+        $kisi = $xpath->query('//div[contains(@class, "container-page") and contains(@class, "grid") and contains(@class, "lg:grid-cols-[1.1fr_0.9fr]")]');
+
+        $this->assertGreaterThan(0, $kisi->length, 'Kisi dua kolom bagian profil tidak ditemukan pada /tentang.');
+
+        $anak = $xpath->query('./*', $kisi->item(0));
+
+        $this->assertGreaterThanOrEqual(2, $anak->length, 'Kisi bagian profil harus berisi kolom narasi dan kartu sekretariat.');
+
+        foreach ($anak as $kolom) {
+            $kelas = preg_split('/\s+/', trim($kolom->getAttribute('class'))) ?: [];
+
+            $this->assertContains(
+                'min-w-0',
+                $kelas,
+                'Setiap anak kisi bagian profil wajib `min-w-0`, jika tidak trek melebar melewati padding kanan pada layar sempit atau saat ukuran teks diperbesar.',
+            );
+        }
+    }
+
+    /**
+     * Dropdown (<select>) formulir memakai chevron sendiri, bukan panah
+     * bawaan peramban yang menempel di tepi kanan kotak.
+     *
+     * Regresi: panah bawaan hanya menyisakan ±4px dari garis tepi sementara
+     * teks di kiri berjarak 1rem, sehingga ikon tampak rapat dan tidak
+     * konsisten antar peramban. Chevron SVG kini diposisikan 1rem dari tepi
+     * kanan dengan ruang teks 2.75rem agar pilihan panjang tidak menimpanya.
+     */
+    public function test_dropdown_formulir_memakai_chevron_dengan_jarak_dari_tepi_kanan(): void
+    {
+        $response = $this->get('/bergabung')->assertOk();
+
+        $dom = new DOMDocument;
+        libxml_use_internal_errors(true);
+        $dom->loadHTML($response->getContent());
+        libxml_clear_errors();
+
+        $dropdown = (new DOMXPath($dom))->query('//form//select');
+
+        $this->assertSame(
+            2,
+            $dropdown->length,
+            'Jumlah dropdown pada formulir pendaftaran berubah; periksa apakah ada dropdown baru yang belum tertata.',
+        );
+
+        foreach ($dropdown as $select) {
+            $kelas = preg_split('/\s+/', trim($select->getAttribute('class'))) ?: [];
+
+            $this->assertContains(
+                'field-input',
+                $kelas,
+                sprintf('Dropdown #%s harus memakai kelas .field-input agar chevron formulir ikut tertata.', $select->getAttribute('id')),
+            );
+        }
+
+        $css = file_get_contents(resource_path('css/app.css'));
+
+        $this->assertMatchesRegularExpression(
+            '/select\.field-input\s*\{[^}]*appearance:\s*none;/s',
+            $css,
+            'Panah bawaan <select> harus dimatikan agar posisi chevron bisa diatur sendiri.',
+        );
+        $this->assertMatchesRegularExpression(
+            '/select\.field-input\s*\{[^}]*padding-right:\s*2\.75rem;/s',
+            $css,
+            'Dropdown butuh ruang kanan 2.75rem supaya teks pilihan tidak menimpa chevron.',
+        );
+        $this->assertMatchesRegularExpression(
+            '/select\.field-input\s*\{[^}]*background-position:\s*right 1rem center;/s',
+            $css,
+            'Chevron harus berjarak 1rem dari tepi kanan — sejajar padding teks 1rem di sisi kiri.',
+        );
     }
 
     /**

@@ -953,6 +953,31 @@
         border-color: var(--color-gold);
         box-shadow: 0 0 0 3px rgba(217, 180, 74, 0.25);
     }
+
+    /*
+     * Dropdown (<select>) pada formulir. `.field-input` dipakai bersama oleh
+     * input teks, tetapi <select> masih menggambar panah bawaan peramban yang
+     * menempel ±4px dari tepi kanan kotak: terlalu rapat, tebal tipisnya
+     * berbeda antar peramban, dan tidak bisa digeser. Panah bawaan dimatikan
+     * (`appearance: none`) lalu diganti chevron SVG sendiri yang berjarak
+     * 1rem dari tepi kanan — sejajar dengan padding teks 1rem di sisi kiri.
+     * `padding-right: 2.75rem` menyisakan ruang ikon 1rem + jarak 0.75rem
+     * sehingga pilihan terpanjang pun tidak menimpa chevron (sisanya
+     * dipotong dengan elipsis). Ditulis sebagai `select.field-input` agar
+     * setiap dropdown formulir yang memakai kelas itu ikut tertata tanpa
+     * perlu kelas tambahan di Blade.
+     */
+    select.field-input {
+        -webkit-appearance: none;
+        appearance: none;
+        padding-right: 2.75rem;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%232c3a5c' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5.5 8.25 4.5 4.5 4.5-4.5'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 1rem 1rem;
+        cursor: pointer;
+        text-overflow: ellipsis;
+    }
 }
 
 @layer utilities {

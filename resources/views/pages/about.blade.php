@@ -41,8 +41,17 @@
 
     {{-- ================= PROFIL ================= --}}
     <section class="section-y">
+        {{--
+            `min-w-0` pada SETIAP anak kisi wajib: tanpa itu trek `1fr`
+            memakai lebar min-content anaknya (kartu sekretariat dengan surel
+            yang tak bisa dipatahkan ±265px, dan ±336px bila pengguna
+            memperbesar ukuran teks sistem), sehingga trek melebar melewati
+            padding kanan `.container-page` dan seluruh narasi ikut terpotong.
+            Dengan `min-width: 0` trek selalu selebar kontainer dan teks
+            membungkus di dalamnya, berapa pun ukuran hurufnya.
+        --}}
         <div class="container-page grid gap-14 lg:grid-cols-[1.1fr_0.9fr]">
-            <div data-reveal>
+            <div class="min-w-0" data-reveal>
                 <p class="section-eyebrow">Sekilas Organisasi</p>
                 <h2 class="section-title mt-3 text-3xl md:text-4xl">{{ $profile->abbreviation ?: 'PERWAMA INA' }}</h2>
                 <div class="gold-rule mt-6"></div>
@@ -63,7 +72,7 @@
                 </div>
             </div>
 
-            <aside class="space-y-6" data-reveal>
+            <aside class="min-w-0 space-y-6" data-reveal>
                 @php
                     /*
                      * Empat angka pertama sudah tampil pada pita statistik di
@@ -84,23 +93,23 @@
 
                         <dl class="mt-5 space-y-2 text-base">
                             @if ($profile->email)
-                                <div class="flex gap-3">
-                                    <dt class="meta w-24 shrink-0">Email</dt>
-                                    <dd class="min-w-0">
+                                <div class="flex flex-col gap-1 sm:flex-row sm:gap-3">
+                                    <dt class="meta sm:w-24 sm:shrink-0">Email</dt>
+                                    <dd class="min-w-0 wrap-anywhere">
                                         <a href="mailto:{{ $profile->email }}" class="font-semibold break-words text-terracotta hover:underline">{{ $profile->email }}</a>
                                     </dd>
                                 </div>
                             @endif
                             @if ($profile->phone)
-                                <div class="flex gap-3">
-                                    <dt class="meta w-24 shrink-0">Telepon</dt>
-                                    <dd>{{ $profile->phone }}</dd>
+                                <div class="flex flex-col gap-1 sm:flex-row sm:gap-3">
+                                    <dt class="meta sm:w-24 sm:shrink-0">Telepon</dt>
+                                    <dd class="min-w-0 wrap-anywhere">{{ $profile->phone }}</dd>
                                 </div>
                             @endif
                             @if ($profile->whatsapp)
-                                <div class="flex gap-3">
-                                    <dt class="meta w-24 shrink-0">WhatsApp</dt>
-                                    <dd>
+                                <div class="flex flex-col gap-1 sm:flex-row sm:gap-3">
+                                    <dt class="meta sm:w-24 sm:shrink-0">WhatsApp</dt>
+                                    <dd class="min-w-0 wrap-anywhere">
                                         <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $profile->whatsapp) }}" target="_blank" rel="noopener" class="font-semibold text-terracotta hover:underline">{{ $profile->whatsapp }}</a>
                                     </dd>
                                 </div>
@@ -132,7 +141,7 @@
                 melintang penuh di bawah narasi profil serta data sekretariat.
             --}}
             @if ($statistics->isNotEmpty())
-                <div class="stat-band lg:col-span-2" data-reveal>
+                <div class="stat-band min-w-0 lg:col-span-2" data-reveal>
                     @foreach ($statistics->take(4) as $stat)
                         <div class="stat-item">
                             <p class="stat-value">

@@ -413,7 +413,10 @@ sehingga `git push` **tidak pernah** membawa CSS. Hosting selalu memakai bundel
 terakhir yang pernah diunggah ke sana. Gejala yang pernah terjadi karena hal
 ini: hero beranda kehilangan padding bawah (`pb-20`) sehingga titik indikator
 carousel (`.hero-bg-dots`, dipatok `bottom: 2.5rem`) tampak menumpuk pada tombol
-**Jelajahi Program**, dan jarak atas sebelum baris *eyebrow* hilang (`pt-12`).
+**Jelajahi Program**, jarak atas sebelum baris *eyebrow* hilang (`pt-12`), dan
+panah dropdown formulir (`select.field-input`) kembali menempel ke tepi kanan
+kotak karena peramban memakai bundel lama tanpa chevron SVG dari
+`resources/css/app.css`.
 
 Cara memastikan hosting memakai bundel yang sama dengan lokal:
 
@@ -427,6 +430,7 @@ curl -s https://CONTOH-DOMAIN/ | grep -o 'assets/app-[^"]*\.css'
 
 # 3. Hosting: aturan baru harus ada di bundel yang dipakai
 grep -c 'pb-20{' public/build/assets/app-*.css     # hasil minimal 1
+grep -c 'select\.field-input{' public/build/assets/app-*.css   # chevron dropdown
 ```
 
 Menyusulkan bundel (pilih salah satu):
@@ -447,6 +451,14 @@ Setelah bundel baru terpasang, nama berkas CSS ikut berubah sehingga peramban
 otomatis memuat berkas baru (tidak perlu *hard refresh*). Perubahan pada
 `resources/js/app.js` memakai nama berkas JS terpisah (`app-<hash>.js`), jadi
 ubah CSS saja tidak mengubah nama berkas JS.
+
+Jalankan `php artisan view:clear` **sebelum** `npm run build`. Berkas
+`resources/css/app.css` (baris 4) ikut memindai
+`storage/framework/views/*.php`, sehingga sisa tampilan terkompilasi — termasuk
+milik panel Filament — turut masuk bundel. Tanpa `view:clear`, bundel pernah
+membengkak dari ±74 kB menjadi ±89 kB tanpa satu pun kelas yang benar-benar
+dipakai halaman publik; hasil build setelah `view:clear` deterministik karena
+hanya membaca `resources/views` dan `resources/js`.
 
 ## About Laravel
 

@@ -12,15 +12,21 @@
     <section class="section-y">
         <div class="container-page grid gap-12 lg:grid-cols-[1fr_1.2fr]">
             {{-- ================= INFORMASI KONTAK ================= --}}
-            <div>
+            {{-- Daftar informasi kontak: pada layar sempit label ditumpuk di
+                 atas nilainya (`flex-col` → `sm:flex-row`) supaya nilai memakai
+                 lebar penuh. `min-w-0` pada kolom kisi dan setiap `<dd>` wajib:
+                 tanpa itu kolom mengambil lebar min-content dari surel
+                 terpanjang sehingga seluruh isi meluber melewati padding kanan
+                 `.container-page` pada layar ±340px. --}}
+            <div class="min-w-0">
                 <p class="section-eyebrow">Sekretariat</p>
                 <h2 class="section-title mt-3 text-2xl md:text-3xl">{{ $profile->name }}</h2>
 
                 <dl class="mt-8 space-y-5 text-sm">
                     @if ($profile->address)
-                        <div class="flex gap-4">
-                            <dt class="w-28 flex-none text-sm font-semibold tracking-[0.01em] text-ink-soft">Alamat</dt>
-                            <dd class="leading-relaxed text-ink-soft">
+                        <div class="flex flex-col gap-1 sm:flex-row sm:gap-4">
+                            <dt class="text-sm font-semibold tracking-[0.01em] text-ink-soft sm:w-28 sm:flex-none">Alamat</dt>
+                            <dd class="min-w-0 wrap-anywhere leading-relaxed text-ink-soft">
                                 {{ $profile->address }}
                                 @if ($profile->city), {{ $profile->city }}@endif
                                 @if ($profile->province) {{ $profile->province }}@endif
@@ -30,23 +36,23 @@
                     @endif
 
                     @if ($profile->email)
-                        <div class="flex gap-4">
-                            <dt class="w-28 flex-none text-sm font-semibold tracking-[0.01em] text-ink-soft">Email</dt>
-                            <dd><a href="mailto:{{ $profile->email }}" class="text-navy transition hover:text-terracotta">{{ $profile->email }}</a></dd>
+                        <div class="flex flex-col gap-1 sm:flex-row sm:gap-4">
+                            <dt class="text-sm font-semibold tracking-[0.01em] text-ink-soft sm:w-28 sm:flex-none">Email</dt>
+                            <dd class="min-w-0 wrap-anywhere"><a href="mailto:{{ $profile->email }}" class="text-navy transition hover:text-terracotta">{{ $profile->email }}</a></dd>
                         </div>
                     @endif
 
                     @if ($profile->phone)
-                        <div class="flex gap-4">
-                            <dt class="w-28 flex-none text-sm font-semibold tracking-[0.01em] text-ink-soft">Telepon</dt>
-                            <dd class="text-ink-soft">{{ $profile->phone }}</dd>
+                        <div class="flex flex-col gap-1 sm:flex-row sm:gap-4">
+                            <dt class="text-sm font-semibold tracking-[0.01em] text-ink-soft sm:w-28 sm:flex-none">Telepon</dt>
+                            <dd class="min-w-0 wrap-anywhere text-ink-soft">{{ $profile->phone }}</dd>
                         </div>
                     @endif
 
                     @if ($profile->whatsapp)
-                        <div class="flex gap-4">
-                            <dt class="w-28 flex-none text-sm font-semibold tracking-[0.01em] text-ink-soft">WhatsApp</dt>
-                            <dd>
+                        <div class="flex flex-col gap-1 sm:flex-row sm:gap-4">
+                            <dt class="text-sm font-semibold tracking-[0.01em] text-ink-soft sm:w-28 sm:flex-none">WhatsApp</dt>
+                            <dd class="min-w-0 wrap-anywhere">
                                 <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $profile->whatsapp) }}"
                                    target="_blank" rel="noopener" class="text-navy transition hover:text-terracotta">
                                     {{ $profile->whatsapp }}
@@ -94,7 +100,7 @@
             </div>
 
             {{-- ================= FORMULIR ================= --}}
-            <div>
+            <div class="min-w-0">
                 <div class="rounded-2xl border border-navy/10 bg-white p-6 md:p-8">
                     <p class="section-eyebrow">Formulir</p>
                     <h2 class="section-title mt-3 text-2xl">Kirim pesan</h2>

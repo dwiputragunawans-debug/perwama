@@ -18,16 +18,29 @@
 
 <header data-site-header class="sticky top-0 z-50 bg-navy-deep/95 backdrop-blur">
     <div class="container-page flex items-center justify-between gap-4 py-3.5">
-        <a href="{{ route('home') }}" class="flex items-center gap-3">
+        <a href="{{ route('home') }}" class="flex min-w-0 items-center gap-3">
             @if ($headerLogo)
-                <img src="{{ $headerLogo }}" alt="{{ $panelBrand->displayName() }}" class="h-11 w-11 rounded-full bg-white object-contain p-0.5">
+                <img src="{{ $headerLogo }}" alt="{{ $panelBrand->displayName() }}" class="h-11 w-11 shrink-0 rounded-full bg-white object-contain p-0.5">
             @else
-                <span class="flex h-11 w-11 items-center justify-center rounded-full bg-gold font-display text-xl font-bold text-navy-deep">P</span>
+                <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gold font-display text-xl font-bold text-navy-deep">P</span>
             @endif
-            <span class="leading-tight">
+            {{--
+                Identitas organisasi tampil dua baris pada semua ukuran layar:
+                nama singkat (tebal, putih) di atas dan nama lengkap (emas) di
+                bawahnya — bentuk yang sama dengan tampilan desktop. Baris nama
+                lengkap dulu disembunyikan di bawah 640px (`hidden sm:block`)
+                sehingga di ponsel hanya singkatan yang terlihat. Di ponsel
+                baris itu memakai 11px karena langkah terkecil tema ini
+                (`text-xs` = 14px) terlalu lebar untuk muat satu baris di
+                samping logo; mulai 640px ukurannya kembali `text-xs` seperti
+                desktop. `min-w-0` pada tautan dan bungkus teks membuat baris
+                itu boleh menyusut dan membungkus pada layar sangat sempit
+                (mis. 320px), bukan menabrak tombol menu.
+            --}}
+            <span class="min-w-0 leading-tight">
                 <span class="block font-display text-lg font-semibold text-white">{{ $panelBrand->displayName() }}</span>
                 @if (filled($panelBrand->displayTagline()))
-                    <span class="hidden text-xs tracking-[0.01em] text-gold sm:block">{{ $panelBrand->displayTagline() }}</span>
+                    <span class="block text-[11px] leading-snug tracking-[0.01em] text-gold sm:text-xs">{{ $panelBrand->displayTagline() }}</span>
                 @endif
             </span>
         </a>
