@@ -34,7 +34,8 @@ class OrganizationProfileForm
                         TextInput::make('name')
                             ->label('Nama')
                             ->required()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->helperText('Nama lengkap organisasi. Tampil sebagai baris kedua pada header website dan panel admin selama kolom "Slogan" di Pengaturan → Tampilan Panel dikosongkan.'),
                         TextInput::make('abbreviation')
                             ->label('Singkatan')
                             ->maxLength(255),

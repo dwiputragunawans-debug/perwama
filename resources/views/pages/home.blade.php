@@ -104,7 +104,7 @@
                 <div class="lg:col-span-7 xl:col-span-6">
                     <div class="flex items-center gap-3">
                         <span class="h-[2px] w-8 bg-gold" aria-hidden="true"></span>
-                        <p class="section-eyebrow text-gold">{{ $profile->tagline ?: 'Persatuan Wanita Maluku — Indonesia' }}</p>
+                        <p class="section-eyebrow text-gold">{{ $profile->tagline ?: 'Persatuan Wanita Maluku Indonesia' }}</p>
                     </div>
 
                     <h1 class="mt-6 max-w-3xl font-display text-4xl font-bold leading-[1.1] text-white sm:text-5xl lg:text-6xl">

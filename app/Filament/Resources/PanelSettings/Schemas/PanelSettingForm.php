@@ -37,7 +37,7 @@ class PanelSettingForm
                         TextInput::make('brand_tagline')
                             ->label('Slogan')
                             ->maxLength(160)
-                            ->helperText('Teks kecil di bawah nama brand. Kosongkan untuk memakai tagline dari Profil Organisasi.'),
+                            ->helperText('Teks kecil di bawah nama brand pada panel admin dan header website. Bila diisi, teks ini MENIMPA nama organisasi; kosongkan agar header memakai kolom "Nama" pada Profil Organisasi.'),
                         FileUpload::make('favicon')
                             ->label('Favicon')
                             ->image()

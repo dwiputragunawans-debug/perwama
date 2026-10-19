@@ -83,7 +83,7 @@ class FrontendSeeder extends Seeder
     private function seedProfile(): void
     {
         OrganizationProfile::query()->updateOrCreate(['id' => 1], [
-            'name' => 'Persatuan Wanita Maluku — Indonesia',
+            'name' => 'Persatuan Wanita Maluku Indonesia',
             'abbreviation' => 'PERWAMA INA',
             'tagline' => 'Perempuan Maluku untuk Indonesia',
             'slogan' => 'Perempuan Maluku Bersatu, Berdaya, dan Berkarya untuk Indonesia',

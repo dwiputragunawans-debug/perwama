@@ -604,6 +604,64 @@ class PublicPagesTest extends TestCase
     }
 
     /**
+     * Bila slogan panel dikosongkan, baris kedua header website mengikuti
+     * kolom "Nama" pada Profil Organisasi — sehingga mengubah nama organisasi
+     * lewat admin langsung terlihat pada header.
+     *
+     * Regresi: slogan lama yang masih tersimpan di Pengaturan → Tampilan Panel
+     * menimpa nama organisasi, sehingga perubahan nama tidak pernah tampil.
+     */
+    public function test_header_mengikuti_nama_profil_saat_slogan_panel_dikosongkan(): void
+    {
+        OrganizationProfile::current()->update(['name' => 'Persatuan Wanita Maluku Indonesia']);
+        PanelSetting::current()->update(['brand_tagline' => null]);
+        PanelSetting::flushCache();
+        OrganizationProfile::flushCache();
+
+        $this->assertStringContainsString(
+            'Persatuan Wanita Maluku Indonesia',
+            $this->teks_merek_header(),
+            'Header harus memakai nama organisasi dari Profil Organisasi bila slogan panel kosong.',
+        );
+    }
+
+    /**
+     * Slogan pada Pengaturan → Tampilan Panel bersifat menimpa: bila diisi,
+     * teks itulah yang tampil pada header, bukan nama organisasi.
+     */
+    public function test_slogan_panel_menimpa_nama_organisasi_pada_header(): void
+    {
+        OrganizationProfile::current()->update(['name' => 'Persatuan Wanita Maluku Indonesia']);
+        PanelSetting::current()->update(['brand_tagline' => 'Slogan khusus panel']);
+        PanelSetting::flushCache();
+        OrganizationProfile::flushCache();
+
+        $teks = $this->teks_merek_header();
+
+        $this->assertStringContainsString('Slogan khusus panel', $teks);
+        $this->assertStringNotContainsString('Persatuan Wanita Maluku Indonesia', $teks);
+    }
+
+    /**
+     * Teks pada tautan merek (logo + nama + slogan) di header situs.
+     */
+    private function teks_merek_header(): string
+    {
+        $dom = new DOMDocument;
+        libxml_use_internal_errors(true);
+        $dom->loadHTML($this->get('/')->assertOk()->getContent());
+        libxml_clear_errors();
+
+        $merek = (new DOMXPath($dom))
+            ->query('//*[@data-site-header]//a[@href="'.route('home').'"]')
+            ->item(0);
+
+        $this->assertNotNull($merek, 'Tautan merek (logo + nama) tidak ditemukan pada header.');
+
+        return $merek->textContent;
+    }
+
+    /**
      * Hero beranda memakai carousel foto sebagai latar penuh, dilengkapi
      * overlay gelap, kontrol navigasi, indikator, dan kartu agenda.
      */

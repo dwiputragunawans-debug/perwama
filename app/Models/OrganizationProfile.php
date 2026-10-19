@@ -86,7 +86,7 @@ class OrganizationProfile extends Model
         }
 
         return static::$cached = static::query()->firstOrCreate(['id' => 1], [
-            'name' => 'Persatuan Wanita Maluku–Indonesia',
+            'name' => 'Persatuan Wanita Maluku Indonesia',
             'abbreviation' => 'PERWAMA INA',
         ]);
     }
