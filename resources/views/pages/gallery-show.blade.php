@@ -18,7 +18,8 @@
         <div class="container-page">
             @if ($gallery->description)
                 <div class="prose-perwama max-w-3xl text-base">
-                    <p>{{ $gallery->description }}</p>
+                    {{-- Deskripsi diisi lewat RichEditor pada panel admin. --}}
+                    {!! $gallery->descriptionHtml() !!}
                 </div>
             @endif
 
