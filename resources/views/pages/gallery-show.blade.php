@@ -38,10 +38,10 @@
             @if ($gallery->items->count())
                 <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     @foreach ($gallery->items as $item)
-                        @if ($item->isVideo() && $item->video_url)
+                        @if ($item->isVideo() && $item->embedUrl())
                             <div class="overflow-hidden rounded-2xl border border-navy/10 bg-navy">
                                 <div class="aspect-video [&>iframe]:h-full [&>iframe]:w-full">
-                                    <iframe src="{{ $item->video_url }}" title="{{ $item->caption ?: $gallery->title }}"
+                                    <iframe src="{{ $item->embedUrl() }}" title="{{ $item->caption ?: $gallery->title }}"
                                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                             allowfullscreen loading="lazy"></iframe>
                                 </div>

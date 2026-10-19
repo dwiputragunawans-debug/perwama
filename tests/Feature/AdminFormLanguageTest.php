@@ -83,7 +83,10 @@ class AdminFormLanguageTest extends TestCase
         foreach (Filament::getPanel('admin')->getResources() as $resource) {
             $schema = $resource::form(Schema::make());
 
-            foreach ($schema->getComponents() as $component) {
+            // withHidden: true — field bersyarat (visible/required bergantung
+            // pada isian lain) tetap diperiksa labelnya tanpa memerlukan
+            // konteks Livewire untuk mengevaluasi kondisinya.
+            foreach ($schema->getComponents(withHidden: true) as $component) {
                 $this->kumpulkanFieldTanpaLabel($component, $resource, $tanpaLabel);
             }
         }

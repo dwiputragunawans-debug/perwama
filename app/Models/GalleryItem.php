@@ -20,4 +20,30 @@ class GalleryItem extends Model
     {
         return $this->type === 'video';
     }
+
+    /**
+     * URL embed untuk iframe video.
+     *
+     * Data lama menyimpan tautan tonton (mis. youtube.com/watch?v=...), yang
+     * ditolak YouTube bila dipakai langsung sebagai `src` iframe. URL tersebut
+     * dinormalkan ke bentuk embed agar video tampil di halaman galeri.
+     */
+    public function embedUrl(): ?string
+    {
+        $url = $this->video_url;
+
+        if (blank($url)) {
+            return null;
+        }
+
+        if (preg_match('~(?:youtube\.com/(?:watch\?v=|embed/|shorts/)|youtu\.be/)([\w-]+)~i', $url, $m)) {
+            return 'https://www.youtube.com/embed/'.$m[1];
+        }
+
+        if (preg_match('~vimeo\.com/(\d+)~i', $url, $m)) {
+            return 'https://player.vimeo.com/video/'.$m[1];
+        }
+
+        return $url;
+    }
 }

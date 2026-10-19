@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\Galleries\Pages;
 
 use App\Filament\Resources\Galleries\GalleryResource;
+use App\Filament\Resources\GalleryItems\Actions\UploadGalleryPhotos;
+use App\Models\Gallery;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
@@ -12,7 +14,11 @@ class EditGallery extends EditRecord
 
     protected function getHeaderActions(): array
     {
+        /** @var Gallery $gallery */
+        $gallery = $this->getRecord();
+
         return [
+            UploadGalleryPhotos::make($gallery),
             DeleteAction::make(),
         ];
     }

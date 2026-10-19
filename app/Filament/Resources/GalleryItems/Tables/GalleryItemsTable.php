@@ -5,6 +5,7 @@ namespace App\Filament\Resources\GalleryItems\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -19,18 +20,25 @@ class GalleryItemsTable
                 TextColumn::make('gallery.title')
                     ->label('Galeri')
                     ->searchable(),
+                // Setelah unggah massal, keterangan adalah pembeda utama antar
+                // foto dalam satu album.
+                TextColumn::make('caption')
+                    ->label('Keterangan')
+                    ->limit(50)
+                    ->searchable()
+                    ->wrap(),
                 TextColumn::make('type')
                     ->label('Jenis')
                     ->searchable(),
-                TextColumn::make('file')
+                ImageColumn::make('file')
                     ->label('Berkas')
-                    ->searchable(),
+                    ->disk('public'),
                 TextColumn::make('video_url')
                     ->label('URL Video')
                     ->searchable(),
-                TextColumn::make('thumbnail')
+                ImageColumn::make('thumbnail')
                     ->label('Gambar Mini')
-                    ->searchable(),
+                    ->disk('public'),
                 TextColumn::make('sort_order')
                     ->label('Urutan')
                     ->numeric()
