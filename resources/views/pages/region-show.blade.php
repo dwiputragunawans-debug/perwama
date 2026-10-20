@@ -19,7 +19,7 @@
             <div>
                 @if ($region->description)
                     <div class="prose-perwama text-base">
-                        {!! nl2br(e($region->description)) !!}
+                        {!! $region->descriptionHtml() !!}
                     </div>
                 @endif
 
