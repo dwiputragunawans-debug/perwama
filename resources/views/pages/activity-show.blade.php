@@ -59,7 +59,10 @@
                         <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             @foreach ($activity->gallery->items as $item)
                                 @if ($item->file && ! $item->isVideo())
-                                    <a href="{{ media_url($item->file) }}" data-lightbox="{{ media_url($item->file) }}" class="block overflow-hidden rounded-xl">
+                                    <a href="{{ media_url($item->file) }}" data-lightbox="{{ media_url($item->file) }}"
+                                       data-lightbox-group="activity-gallery-{{ $activity->gallery->getKey() }}"
+                                       data-lightbox-caption="{{ $item->caption }}"
+                                       class="block overflow-hidden rounded-xl">
                                         <img src="{{ media_url($item->thumbnail ?: $item->file) }}"
                                              alt="{{ $item->caption ?: $activity->title }}"
                                              class="card-media transition duration-500 hover:scale-105" loading="lazy">

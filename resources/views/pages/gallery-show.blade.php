@@ -17,7 +17,7 @@
     <section class="section-y">
         <div class="container-page">
             @if ($gallery->description)
-                <div class="prose-perwama max-w-3xl text-base">
+                <div class="prose-perwama text-base">
                     {{-- Deskripsi diisi lewat RichEditor pada panel admin. --}}
                     {!! $gallery->descriptionHtml() !!}
                 </div>
@@ -53,6 +53,8 @@
                         @elseif ($item->file)
                             <figure class="overflow-hidden rounded-2xl border border-navy/10 bg-white">
                                 <a href="{{ media_url($item->file) }}" data-lightbox="{{ media_url($item->file) }}"
+                                   data-lightbox-group="gallery-{{ $gallery->getKey() }}"
+                                   data-lightbox-caption="{{ $item->caption }}"
                                    class="block overflow-hidden">
                                     <img src="{{ media_url($item->thumbnail ?: $item->file) }}"
                                          alt="{{ $item->caption ?: $gallery->title }}"

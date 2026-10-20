@@ -9,11 +9,11 @@ use App\Filament\Resources\MembershipApplications\Schemas\MembershipApplicationF
 use App\Filament\Resources\MembershipApplications\Tables\MembershipApplicationsTable;
 use App\Models\MembershipApplication;
 use BackedEnum;
-use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class MembershipApplicationResource extends Resource
 {

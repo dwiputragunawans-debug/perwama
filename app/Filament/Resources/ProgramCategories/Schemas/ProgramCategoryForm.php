@@ -5,7 +5,6 @@ namespace App\Filament\Resources\ProgramCategories\Schemas;
 use App\Models\ProgramCategory;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 

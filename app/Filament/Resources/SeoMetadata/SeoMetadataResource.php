@@ -9,11 +9,11 @@ use App\Filament\Resources\SeoMetadata\Schemas\SeoMetadataForm;
 use App\Filament\Resources\SeoMetadata\Tables\SeoMetadataTable;
 use App\Models\SeoMetadata;
 use BackedEnum;
-use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class SeoMetadataResource extends Resource
 {

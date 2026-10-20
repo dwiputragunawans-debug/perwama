@@ -1,10 +1,15 @@
 <?php
 
+use App\Models\Activity;
+use App\Models\Gallery;
+use App\Models\News;
+use App\Models\Publication;
+use App\Models\Story;
+
 /**
  * Skrip sekali pakai untuk merapikan resource Filament hasil `make:filament-resource --generate`.
  * Jalankan: php database/seeders/support/filament_customize.php
  */
-
 $root = dirname(__DIR__, 3);
 $base = $root.'/app/Filament/Resources';
 
@@ -51,11 +56,11 @@ $enums = [
     'Programs:type' => ['kerja_anggaran' => 'Program Kerja & Anggaran', 'lainnya' => 'Program Lainnya'],
     'Programs:status' => ['planned' => 'Direncanakan', 'ongoing' => 'Berjalan', 'completed' => 'Selesai'],
     'News:type' => ['berita' => 'Berita', 'artikel' => 'Artikel', 'opini' => 'Opini', 'pengumuman' => 'Pengumuman'],
-    'News:category' => \App\Models\News::CATEGORIES,
-    'Activities:category' => \App\Models\Activity::CATEGORIES,
-    'Stories:category' => \App\Models\Story::CATEGORIES,
-    'Publications:category' => \App\Models\Publication::CATEGORIES,
-    'Galleries:album_category' => \App\Models\Gallery::ALBUMS,
+    'News:category' => News::CATEGORIES,
+    'Activities:category' => Activity::CATEGORIES,
+    'Stories:category' => Story::CATEGORIES,
+    'Publications:category' => Publication::CATEGORIES,
+    'Galleries:album_category' => Gallery::ALBUMS,
     'Events:status' => ['upcoming' => 'Akan Datang', 'ongoing' => 'Berlangsung', 'completed' => 'Selesai', 'cancelled' => 'Dibatalkan'],
     'Members:status' => ['pending' => 'Menunggu', 'active' => 'Aktif', 'inactive' => 'Tidak Aktif', 'rejected' => 'Ditolak'],
     'MembershipApplications:status' => ['pending' => 'Menunggu', 'approved' => 'Disetujui', 'rejected' => 'Ditolak'],
@@ -99,7 +104,7 @@ foreach ($nav as $folder => [$group, $sort, $icon, $label, $singular, $plural, $
     }
 
     $props = "protected static string|UnitEnum|null \$navigationGroup = '".$group."';\n\n"
-        ."    protected static ?int \$navigationSort = ".$sort.";\n\n"
+        .'    protected static ?int $navigationSort = '.$sort.";\n\n"
         ."    protected static ?string \$navigationLabel = '".addslashes($label)."';\n\n"
         ."    protected static ?string \$modelLabel = '".addslashes($singular)."';\n\n"
         ."    protected static ?string \$pluralModelLabel = '".addslashes($plural)."';\n\n"
@@ -114,7 +119,7 @@ foreach ($nav as $folder => [$group, $sort, $icon, $label, $singular, $plural, $
 
     $content = preg_replace(
         '/protected static string\|BackedEnum\|null \$navigationIcon = [^;]+;/',
-        "protected static string|BackedEnum|null \$navigationIcon = Heroicon::".$icon.";",
+        'protected static string|BackedEnum|null $navigationIcon = Heroicon::'.$icon.';',
         $content,
         1
     );
@@ -252,7 +257,7 @@ foreach (glob($base.'/*/Schemas/*.php') as $formFile) {
     }
 
     file_put_contents($formFile, $content);
-    echo "OK form: ".basename($formFile)."\n";
+    echo 'OK form: '.basename($formFile)."\n";
 }
 
 echo "\nSelesai.\n";

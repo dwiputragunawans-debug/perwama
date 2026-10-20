@@ -12,6 +12,11 @@ use App\Http\Controllers\PublicationController;
 use App\Http\Controllers\RegionController;
 use App\Http\Controllers\StoryController;
 use App\Http\Controllers\VisitController;
+use App\Models\Activity;
+use App\Models\News;
+use App\Models\OrganizationProfile;
+use App\Models\Program;
+use App\Models\Story;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -63,12 +68,12 @@ Route::get('/cari', function (Request $request) {
     $term = trim((string) $request->query('q'));
 
     return view('pages.search', [
-        'profile' => \App\Models\OrganizationProfile::current(),
+        'profile' => OrganizationProfile::current(),
         'term' => $term,
-        'programs' => $term === '' ? collect() : \App\Models\Program::query()->published()->where('title', 'like', "%{$term}%")->ordered()->take(6)->get(),
-        'newsItems' => $term === '' ? collect() : \App\Models\News::query()->published()->where('title', 'like', "%{$term}%")->ordered()->take(6)->get(),
-        'stories' => $term === '' ? collect() : \App\Models\Story::query()->published()->where('title', 'like', "%{$term}%")->ordered()->take(6)->get(),
-        'activities' => $term === '' ? collect() : \App\Models\Activity::query()->published()->where('title', 'like', "%{$term}%")->ordered()->take(6)->get(),
+        'programs' => $term === '' ? collect() : Program::query()->published()->where('title', 'like', "%{$term}%")->ordered()->take(6)->get(),
+        'newsItems' => $term === '' ? collect() : News::query()->published()->where('title', 'like', "%{$term}%")->ordered()->take(6)->get(),
+        'stories' => $term === '' ? collect() : Story::query()->published()->where('title', 'like', "%{$term}%")->ordered()->take(6)->get(),
+        'activities' => $term === '' ? collect() : Activity::query()->published()->where('title', 'like', "%{$term}%")->ordered()->take(6)->get(),
     ]);
 })->name('search');
 

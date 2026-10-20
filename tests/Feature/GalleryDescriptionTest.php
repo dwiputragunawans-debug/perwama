@@ -32,7 +32,10 @@ class GalleryDescriptionTest extends TestCase
         $this->get(route('gallery.show', $gallery->slug))
             ->assertOk()
             ->assertSee('<p>Dokumentasi <strong>MUNAS VIII</strong> Tahun 2025.</p>', false)
-            ->assertDontSee('&lt;p&gt;', false);
+            ->assertDontSee('&lt;p&gt;', false)
+            // Deskripsi selebar kontainer seperti halaman detail lain, bukan
+            // dipersempit sehingga kalimat pendek terpotong di desktop.
+            ->assertDontSee('prose-perwama max-w-3xl', false);
     }
 
     public function test_deskripsi_galeri_teks_biasa_tetap_tampil_sebagai_paragraf(): void

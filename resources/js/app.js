@@ -242,23 +242,57 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     /* --- Lightbox galeri sederhana --- */
-    const triggers = document.querySelectorAll('[data-lightbox]');
+    /*
+     * Foto dalam album yang sama memakai data-lightbox-group yang sama,
+     * sehingga pratinjau bisa berpindah foto lewat tombol panah, tombol
+     * kiri/kanan pada papan ketik, atau geser (swipe) di layar sentuh.
+     * Pemicu tanpa atribut grup tetap tampil sendiri seperti sebelumnya.
+     */
+    const triggers = Array.from(document.querySelectorAll('[data-lightbox]'));
 
     if (triggers.length > 0) {
+        const grup = new Map();
+
+        triggers.forEach((trigger) => {
+            const kunci = trigger.getAttribute('data-lightbox-group');
+
+            if (!kunci) {
+                return;
+            }
+
+            if (!grup.has(kunci)) {
+                grup.set(kunci, []);
+            }
+
+            grup.get(kunci).push(trigger);
+        });
+
         const overlay = document.createElement('div');
         overlay.className =
-            'fixed inset-0 z-[100] hidden items-center justify-center bg-navy-deep/95 p-4 md:p-10';
+            'fixed inset-0 z-[100] hidden touch-pan-y items-center justify-center bg-navy-deep/95 p-4 md:p-10';
         overlay.setAttribute('role', 'dialog');
         overlay.setAttribute('aria-modal', 'true');
         overlay.setAttribute('aria-label', 'Pratinjau foto');
         overlay.setAttribute('aria-hidden', 'true');
         overlay.innerHTML =
-            '<button type="button" data-lightbox-close aria-label="Tutup pratinjau" class="absolute right-5 top-5 text-3xl leading-none text-white/80 hover:text-white">&times;</button>' +
-            '<img data-lightbox-image class="max-h-full max-w-full rounded-lg shadow-2xl" alt="">';
+            '<button type="button" data-lightbox-close aria-label="Tutup pratinjau" class="absolute right-5 top-5 z-10 text-3xl leading-none text-white/80 hover:text-white">&times;</button>' +
+            '<button type="button" data-lightbox-prev aria-label="Foto sebelumnya" class="absolute left-3 top-1/2 z-10 hidden -translate-y-1/2 rounded-full bg-white/10 px-3 py-3 text-3xl leading-none text-white/80 transition hover:bg-white/20 hover:text-white md:left-6 md:px-4 md:py-4">&lsaquo;</button>' +
+            '<button type="button" data-lightbox-next aria-label="Foto berikutnya" class="absolute right-3 top-1/2 z-10 hidden -translate-y-1/2 rounded-full bg-white/10 px-3 py-3 text-3xl leading-none text-white/80 transition hover:bg-white/20 hover:text-white md:right-6 md:px-4 md:py-4">&rsaquo;</button>' +
+            '<div class="flex max-h-full w-full flex-col items-center justify-center gap-3 px-10 md:px-16">' +
+            '<img data-lightbox-image class="max-h-[75vh] max-w-full rounded-lg shadow-2xl" alt="">' +
+            '<p data-lightbox-caption class="hidden max-w-3xl text-center text-sm leading-relaxed text-white/80"></p>' +
+            '</div>' +
+            '<p data-lightbox-counter aria-live="polite" class="absolute left-5 top-6 z-10 hidden rounded-full bg-white/10 px-3 py-1 text-xs font-semibold tracking-[0.08em] text-white/80"></p>';
         document.body.appendChild(overlay);
 
         const image = overlay.querySelector('[data-lightbox-image]');
         const tombolTutup = overlay.querySelector('[data-lightbox-close]');
+        const tombolSebelumnya = overlay.querySelector('[data-lightbox-prev]');
+        const tombolBerikutnya = overlay.querySelector('[data-lightbox-next]');
+        const keterangan = overlay.querySelector('[data-lightbox-caption]');
+        const penghitung = overlay.querySelector('[data-lightbox-counter]');
+        let aktif = [];
+        let indeks = 0;
         let pemicuTerakhir = null;
 
         const close = () => {
@@ -275,15 +309,58 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
+        const tampilkan = (posisi) => {
+            if (aktif.length === 0) {
+                return;
+            }
+
+            indeks = (posisi + aktif.length) % aktif.length;
+
+            const trigger = aktif[indeks];
+            const gambarKecil = trigger.querySelector('img');
+            const teksKeterangan = (trigger.getAttribute('data-lightbox-caption') || '').trim();
+            const banyak = aktif.length > 1;
+
+            image.src = trigger.getAttribute('data-lightbox');
+            image.alt = gambarKecil ? gambarKecil.getAttribute('alt') || '' : '';
+
+            keterangan.textContent = teksKeterangan;
+            keterangan.classList.toggle('hidden', teksKeterangan === '');
+
+            tombolSebelumnya.classList.toggle('hidden', !banyak);
+            tombolBerikutnya.classList.toggle('hidden', !banyak);
+            penghitung.classList.toggle('hidden', !banyak);
+            penghitung.textContent = `${indeks + 1} / ${aktif.length}`;
+
+            pemicuTerakhir = trigger;
+
+            // Muat lebih awal foto tetangga agar perpindahan terasa mulus.
+            if (banyak) {
+                [aktif[(indeks + 1) % aktif.length], aktif[(indeks - 1 + aktif.length) % aktif.length]].forEach(
+                    (tetangga) => {
+                        const pramuat = new Image();
+                        pramuat.src = tetangga.getAttribute('data-lightbox');
+                    },
+                );
+            }
+        };
+
+        const sebelumnya = () => tampilkan(indeks - 1);
+        const berikutnya = () => tampilkan(indeks + 1);
+
         triggers.forEach((trigger) => {
             trigger.addEventListener('click', (event) => {
                 event.preventDefault();
 
-                const gambarKecil = trigger.querySelector('img');
+                const kunci = trigger.getAttribute('data-lightbox-group');
 
-                image.src = trigger.getAttribute('data-lightbox');
-                image.alt = gambarKecil ? gambarKecil.getAttribute('alt') || '' : '';
-                pemicuTerakhir = trigger;
+                aktif = kunci && grup.has(kunci) ? grup.get(kunci) : [trigger];
+
+                if (!aktif.includes(trigger)) {
+                    aktif = [trigger];
+                }
+
+                tampilkan(aktif.indexOf(trigger));
 
                 overlay.classList.remove('hidden');
                 overlay.classList.add('flex');
@@ -295,14 +372,64 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         tombolTutup.addEventListener('click', close);
+        tombolSebelumnya.addEventListener('click', sebelumnya);
+        tombolBerikutnya.addEventListener('click', berikutnya);
+
         overlay.addEventListener('click', (event) => {
             if (event.target === overlay) {
                 close();
             }
         });
+
+        // Geser ke kiri/kanan untuk berpindah foto pada layar sentuh.
+        let awalSentuh = null;
+
+        overlay.addEventListener(
+            'touchstart',
+            (event) => {
+                awalSentuh = event.touches.length === 1 ? event.touches[0].clientX : null;
+            },
+            { passive: true },
+        );
+
+        overlay.addEventListener(
+            'touchend',
+            (event) => {
+                if (awalSentuh === null || aktif.length < 2) {
+                    awalSentuh = null;
+
+                    return;
+                }
+
+                const jarak = event.changedTouches[0].clientX - awalSentuh;
+                awalSentuh = null;
+
+                if (Math.abs(jarak) < 40) {
+                    return;
+                }
+
+                if (jarak < 0) {
+                    berikutnya();
+                } else {
+                    sebelumnya();
+                }
+            },
+            { passive: true },
+        );
+
         document.addEventListener('keydown', (event) => {
+            if (overlay.classList.contains('hidden')) {
+                return;
+            }
+
             if (event.key === 'Escape') {
                 close();
+            } else if (event.key === 'ArrowLeft') {
+                event.preventDefault();
+                sebelumnya();
+            } else if (event.key === 'ArrowRight') {
+                event.preventDefault();
+                berikutnya();
             }
         });
     }

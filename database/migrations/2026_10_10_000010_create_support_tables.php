@@ -54,7 +54,7 @@ return new class extends Migration
             $table->string('organization_name')->nullable();
             $table->string('email')->nullable();
             $table->string('phone')->nullable();
-            $table->string('type')->default('mitra'); //anggota | relawan | mitra | kolaborasi
+            $table->string('type')->default('mitra'); // anggota | relawan | mitra | kolaborasi
             $table->text('message')->nullable();
             $table->string('status')->default('pending'); // pending | processed | rejected
             $table->text('admin_notes')->nullable();

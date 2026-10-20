@@ -31,7 +31,7 @@ class AdminImageColumnDiskTest extends TestCase
 
         // Komponen Livewire apa pun yang mengimplementasikan HasTable cukup
         // untuk membangun tabel tanpa konteks Livewire penuh.
-        $livewire = new ListRegions();
+        $livewire = new ListRegions;
 
         foreach (Filament::getPanel('admin')->getResources() as $resource) {
             $table = $resource::table(Table::make($livewire));

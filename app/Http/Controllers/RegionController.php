@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Member;
+use App\Models\Organization;
 use App\Models\OrganizationProfile;
 use App\Models\Region;
 use Illuminate\Contracts\View\View;
@@ -27,8 +29,8 @@ class RegionController extends Controller
             'totals' => [
                 'region' => Region::query()->active()->count(),
                 'province' => Region::query()->active()->where('type', 'province')->count(),
-                'organization' => \App\Models\Organization::query()->active()->count(),
-                'member' => \App\Models\Member::query()->active()->count(),
+                'organization' => Organization::query()->active()->count(),
+                'member' => Member::query()->active()->count(),
             ],
         ]);
     }

@@ -3,8 +3,8 @@
 namespace App\Filament\Resources\SeoMetadata\Schemas;
 
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
 class SeoMetadataForm
