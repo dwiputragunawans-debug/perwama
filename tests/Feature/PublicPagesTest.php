@@ -213,7 +213,7 @@ class PublicPagesTest extends TestCase
      */
     public function test_bagian_wilayah_memakai_istilah_wilayah(): void
     {
-        $this->get('/di-indonesia')
+        $this->get('/wilayah')
             ->assertOk()
             ->assertSee('Wilayah', false)
             ->assertDontSee('Di Indonesia', false);
@@ -1149,9 +1149,9 @@ class PublicPagesTest extends TestCase
             '/program?kategori=pendidikan',
             '/program?q=beasiswa',
             '/program/'.$slug['program'],
-            '/di-indonesia',
-            '/di-indonesia/'.$slug['provinsi'],
-            '/di-indonesia/'.$slug['kabupaten'],
+            '/wilayah',
+            '/wilayah/'.$slug['provinsi'],
+            '/wilayah/'.$slug['kabupaten'],
             '/kegiatan',
             '/kegiatan?tab=agenda',
             '/kegiatan?kategori=pelatihan',

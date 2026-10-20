@@ -19,7 +19,7 @@ class MenuItem extends Model
         ['key' => 'home', 'label' => 'Beranda', 'route_name' => 'home', 'pattern' => '/', 'sort_order' => 1],
         ['key' => 'about', 'label' => 'Tentang', 'route_name' => 'about', 'pattern' => 'tentang', 'sort_order' => 2],
         ['key' => 'program', 'label' => 'Program', 'route_name' => 'program.index', 'pattern' => 'program*', 'sort_order' => 3],
-        ['key' => 'region', 'label' => 'Wilayah', 'route_name' => 'region.index', 'pattern' => 'di-indonesia*', 'sort_order' => 4],
+        ['key' => 'region', 'label' => 'Wilayah', 'route_name' => 'region.index', 'pattern' => 'wilayah*', 'sort_order' => 4],
         ['key' => 'activity', 'label' => 'Kegiatan', 'route_name' => 'activity.index', 'pattern' => 'kegiatan*', 'sort_order' => 5],
         ['key' => 'story', 'label' => 'Cerita', 'route_name' => 'story.index', 'pattern' => 'cerita*', 'sort_order' => 6],
         ['key' => 'news', 'label' => 'Berita', 'route_name' => 'news.index', 'pattern' => 'berita*', 'sort_order' => 7],

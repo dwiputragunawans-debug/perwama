@@ -299,7 +299,7 @@ class SortOrderTest extends TestCase
     {
         $this->balikUrutan(Region::class);
 
-        $xpath = $this->xpath('/di-indonesia');
+        $xpath = $this->xpath('/wilayah');
 
         $diharapkan = Region::query()
             ->active()
@@ -331,7 +331,7 @@ class SortOrderTest extends TestCase
 
         $this->assertNotNull($region, 'Tidak ada wilayah dengan lebih dari satu organisasi pada data seeder.');
 
-        $xpath = $this->xpath('/di-indonesia/'.$region->slug);
+        $xpath = $this->xpath('/wilayah/'.$region->slug);
 
         $this->assertSame(
             $region->organizations()->active()->ordered()->pluck('name')->all(),

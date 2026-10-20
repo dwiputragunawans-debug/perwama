@@ -210,7 +210,7 @@ dirapikan menjadi **lima menu utama** melalui `MenuItem::GROUPS`:
   pada `GROUPS` tetap tampil sebagai tautan tunggal agar menu tambahan dari
   panel tidak pernah hilang.
 - Halaman anggota membuat kelompoknya ikut ditandai aktif (mis. membuka
-  `/di-indonesia` menandai **Profil** aktif). Pola penanda aktif boleh memuat
+  `/wilayah` menandai **Profil** aktif). Pola penanda aktif boleh memuat
   beberapa pola sekaligus dan dihitung oleh helper `menu_aktif()`.
 
 Pada perangkat seluler seluruh kelompok diuraikan menjadi daftar tegak: nama

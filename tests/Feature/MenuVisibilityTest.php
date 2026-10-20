@@ -48,6 +48,7 @@ class MenuVisibilityTest extends TestCase
             'key' => 'region',
             'label' => 'Wilayah',
             'route_name' => 'region.index',
+            'pattern' => 'wilayah*',
         ]);
 
         $this->get('/')
@@ -155,7 +156,7 @@ class MenuVisibilityTest extends TestCase
     {
         $this->seed(MenuItemSeeder::class);
 
-        $this->get('/di-indonesia')
+        $this->get('/wilayah')
             ->assertOk()
             ->assertSee('site-nav-trigger is-active', false)
             ->assertSee('site-nav-dropdown-link is-active', false);

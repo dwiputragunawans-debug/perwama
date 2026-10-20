@@ -25,7 +25,7 @@ use Illuminate\Support\Facades\Route;
 | Rute Situs Publik PERWAMA INA
 |--------------------------------------------------------------------------
 | Struktur mengikuti arsitektur informasi PRD:
-| Home · Tentang · Program · Di Indonesia · Kegiatan · Cerita ·
+| Home · Tentang · Program · Wilayah · Kegiatan · Cerita ·
 | Berita · Galeri · Bergabung · Kontak
 */
 
@@ -35,8 +35,8 @@ Route::get('/tentang', AboutController::class)->name('about');
 Route::get('/program', [ProgramController::class, 'index'])->name('program.index');
 Route::get('/program/{slug}', [ProgramController::class, 'show'])->name('program.show');
 
-Route::get('/di-indonesia', [RegionController::class, 'index'])->name('region.index');
-Route::get('/di-indonesia/{slug}', [RegionController::class, 'show'])->name('region.show');
+Route::get('/wilayah', [RegionController::class, 'index'])->name('region.index');
+Route::get('/wilayah/{slug}', [RegionController::class, 'show'])->name('region.show');
 
 Route::get('/kegiatan', [ActivityController::class, 'index'])->name('activity.index');
 Route::get('/kegiatan/agenda/{slug}', [ActivityController::class, 'showEvent'])->name('event.show');

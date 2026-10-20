@@ -61,7 +61,7 @@ class MenuItemForm
             'home' => '/',
             'about' => 'tentang',
             'program.index' => 'program*',
-            'region.index' => 'di-indonesia*',
+            'region.index' => 'wilayah*',
             'activity.index' => 'kegiatan*',
             'story.index' => 'cerita*',
             'news.index' => 'berita*',
