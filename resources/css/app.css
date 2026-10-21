@@ -18,7 +18,7 @@
      * - meta & label  : 14px (text-xs)
      * - judul kartu   : 22–24px (text-xl / text-2xl)
      * - judul bagian  : 32–40px (text-3xl / text-4xl)
-     * - judul hero    : 40–56px (text-4xl / text-6xl)
+     * - judul hero    : 32–44px (text-3xl / text-[2.75rem])
      */
     --text-xs: 0.875rem;
     --text-xs--line-height: 1.5;
@@ -579,17 +579,21 @@
 
     /* ===================== Hero beranda (latar penuh) ===================== */
     /*
-     * Hero beranda memakai foto galeri sebagai latar penuh (full-bleed) dengan
-     * carousel fade. Semua slide ditumpuk absolut; perpindahan gambar hanya
-     * berupa perubahan opacity sehingga tinggi bagian tetap stabil.
+     * Hero beranda mengisi satu layar penuh di bawah header sticky. Tinggi
+     * header adalah 4.5rem saat bilah kontak belum tampil (ponsel/tablet) dan
+     * 7.5rem mulai 1280px ketika bilah kontak muncul. `100vh` dipakai sebagai
+     * cadangan peramban lama, lalu `100svh` agar tinggi tetap stabil saat bilah
+     * alamat ponsel berubah.
      */
     .hero-full {
-        min-height: 26rem;
+        min-height: calc(100vh - 4.5rem);
+        min-height: calc(100svh - 4.5rem);
     }
 
-    @media (min-width: 1024px) {
+    @media (min-width: 1280px) {
         .hero-full {
-            min-height: 30rem;
+            min-height: calc(100vh - 7.5rem);
+            min-height: calc(100svh - 7.5rem);
         }
     }
 
@@ -623,14 +627,28 @@
         );
     }
 
-    /* Overlay gelap dari kiri ke kanan agar teks tetap kontras. */
+    /* Overlay gelap dari kiri ke kanan agar teks tetap kontras, tetapi cukup
+     * tipis di sisi kanan supaya foto latar tetap terlihat jelas. */
     .hero-overlay {
         background-image: linear-gradient(
             to right,
-            rgba(21, 32, 56, 0.95) 0%,
-            rgba(21, 32, 56, 0.82) 45%,
-            rgba(21, 32, 56, 0.45) 100%
+            rgba(21, 32, 56, 0.86) 0%,
+            rgba(21, 32, 56, 0.62) 46%,
+            rgba(21, 32, 56, 0.2) 100%
         );
+    }
+
+    /* Di ponsel teks memakai hampir seluruh lebar, jadi overlay dibuat sedikit
+     * lebih merata agar judul tetap terbaca di atas bagian foto yang terang. */
+    @media (max-width: 767px) {
+        .hero-overlay {
+            background-image: linear-gradient(
+                to bottom,
+                rgba(21, 32, 56, 0.86) 0%,
+                rgba(21, 32, 56, 0.68) 58%,
+                rgba(21, 32, 56, 0.42) 100%
+            );
+        }
     }
 
     .hero-bg-controls {
@@ -1004,9 +1022,9 @@
     .hero-gradient {
         background-image: linear-gradient(
             135deg,
-            rgba(21, 32, 56, 0.94) 0%,
-            rgba(31, 42, 68, 0.88) 45%,
-            rgba(63, 107, 69, 0.82) 100%
+            rgba(21, 32, 56, 0.82) 0%,
+            rgba(31, 42, 68, 0.68) 45%,
+            rgba(63, 107, 69, 0.48) 100%
         );
     }
 

@@ -36,8 +36,8 @@
     {{--
         Hero beranda memakai gambar hero (Pengaturan → Tampilan Website) sebagai
         latar penuh (full-bleed) dengan carousel fade. Teks diletakkan di atas
-        overlay gelap agar tetap kontras, lalu dilengkapi kartu agenda terdekat
-        di sisi kanan yang tingginya disamakan dengan kolom teks.
+        overlay gelap agar tetap kontras. Teks hero dipusatkan agar fokus pada
+        pesan utama tanpa elemen tambahan di sisi kanan.
     --}}
     <section class="hero-full relative isolate flex items-center overflow-hidden bg-navy-deep">
         {{-- Latar carousel: hanya entri bergambar yang dipakai. --}}
@@ -99,68 +99,27 @@
             dikurangi tinggi titik, 0.375rem) tak peduli setinggi apa isinya.
         --}}
         <div class="container-page relative z-20 pt-12 pb-20 md:py-16">
-            <div class="grid items-stretch gap-14 lg:grid-cols-12 lg:gap-10">
-                {{-- Kolom kiri: judul, ringkasan, dan tombol. --}}
-                <div class="lg:col-span-7 xl:col-span-6">
-                    <div class="flex items-center gap-3">
-                        <span class="h-[2px] w-8 bg-gold" aria-hidden="true"></span>
-                        <p class="section-eyebrow text-gold">{{ $profile->tagline ?: 'Persatuan Wanita Maluku Indonesia' }}</p>
-                    </div>
-
-                    <h1 class="mt-6 max-w-3xl font-display text-4xl font-bold leading-[1.1] text-white sm:text-5xl lg:text-6xl">
-                        {{ $profile->slogan ?: 'Perempuan Maluku Bersatu, Berdaya, dan Berkarya untuk Indonesia' }}
-                    </h1>
-
-                    <p class="mt-7 max-w-2xl text-lg leading-[1.65] text-white/85">
-                        {{ $profile->short_description ?: 'PERWAMA INA menghimpun, memberdayakan, dan memperkuat peran perempuan Maluku di seluruh Indonesia melalui pendidikan, kesehatan, ekonomi, dan pelestarian budaya.' }}
-                    </p>
-
-                    <div class="mt-10 flex flex-wrap items-center gap-4">
-                        <a href="{{ route('join') }}" class="btn btn-gold">
-                            Bergabung Bersama Kami
-                            <span aria-hidden="true">&rarr;</span>
-                        </a>
-                        <a href="{{ route('program.index') }}" class="btn btn-outline">Jelajahi Program</a>
-                    </div>
+            <div class="mx-auto max-w-4xl text-center">
+                <div class="flex items-center justify-center gap-3">
+                    <span class="h-[2px] w-8 bg-gold" aria-hidden="true"></span>
+                    <p class="section-eyebrow text-gold">{{ $profile->tagline ?: 'Persatuan Wanita Maluku Indonesia' }}</p>
                 </div>
 
-                {{-- Kolom kanan: kartu agenda terdekat, tingginya disamakan dengan kolom kiri. --}}
-                @if ($agendas->count())
-                    <div class="hidden lg:col-span-5 lg:col-start-8 lg:flex">
-                        <div class="relative flex w-full flex-col overflow-hidden rounded-2xl border border-white/15 bg-navy/70 p-6 shadow-2xl backdrop-blur-md">
-                            <span class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-gold to-gold-warm" aria-hidden="true"></span>
+                <h1 class="mx-auto mt-6 max-w-4xl font-display text-3xl font-bold leading-[1.15] text-white sm:text-4xl lg:text-[2.75rem]">
+                    {{ $profile->slogan ?: 'Perempuan Maluku Bersatu, Berdaya, dan Berkarya untuk Indonesia' }}
+                </h1>
 
-                            <div class="flex items-center justify-between gap-4">
-                                <h2 class="text-lg font-semibold text-gold">Agenda terdekat</h2>
-                                <a href="{{ route('activity.index') }}" class="text-xs text-white/70 transition hover:text-white">
-                                    Lihat semua
-                                </a>
-                            </div>
+                <p class="mx-auto mt-6 max-w-2xl text-base leading-[1.7] text-white/90">
+                    {{ $profile->short_description ?: 'PERWAMA INA menghimpun, memberdayakan, dan memperkuat peran perempuan Maluku di seluruh Indonesia melalui pendidikan, kesehatan, ekonomi, dan pelestarian budaya.' }}
+                </p>
 
-                            <ul class="mt-5 space-y-2">
-                                @foreach ($agendas as $agenda)
-                                    <li>
-                                        <a href="{{ route('event.show', $agenda->slug) }}"
-                                           class="-mx-2 flex gap-4 rounded-xl border border-transparent p-3 transition hover:border-white/15 hover:bg-white/10">
-                                            <span class="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-lg bg-gold font-semibold text-navy-deep">
-                                                <span class="font-display text-xl leading-none">{{ optional($agenda->start_date)->format('d') }}</span>
-                                                <span class="mt-0.5 text-xs">{{ tanggal_id($agenda->start_date, 'M') }}</span>
-                                            </span>
-                                            <span class="min-w-0">
-                                                <span class="block text-base font-semibold leading-snug text-white">{{ $agenda->title }}</span>
-                                                <span class="mt-1 block text-sm text-white/70">{{ $agenda->location ?: ($agenda->region?->name ?: '—') }}</span>
-                                            </span>
-                                        </a>
-                                    </li>
-                                @endforeach
-                            </ul>
-
-                            <p class="mt-auto border-t border-white/15 pt-4 text-xs italic text-white/60">
-                                Latar: dokumentasi kegiatan pemberdayaan komunitas perempuan Maluku.
-                            </p>
-                        </div>
-                    </div>
-                @endif
+                <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
+                    <a href="{{ route('join') }}" class="btn btn-gold">
+                        Bergabung Bersama Kami
+                        <span aria-hidden="true">&rarr;</span>
+                    </a>
+                    <a href="{{ route('program.index') }}" class="btn btn-outline">Jelajahi Program</a>
+                </div>
             </div>
         </div>
     </section>

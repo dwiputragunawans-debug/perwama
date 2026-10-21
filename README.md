@@ -304,10 +304,11 @@ php artisan migrate
 
 - **Beranda** menampilkan hero dengan **latar penuh** (*full-bleed background
   carousel*) memakai gambar dari **Pengaturan → Tampilan Website** (cadangan:
-  cover galeri). Teks diletakkan di atas overlay gradien gelap agar tetap
+  cover galeri). Teks hero dipusatkan di atas overlay gradien gelap agar tetap
   kontras; slideshow berjalan otomatis (6 detik) dan dapat dinavigasi lewat
-  tombol panah naik/turun di sisi kanan serta indikator di tengah bawah. Kartu
-  **Agenda terdekat** disamakan tingginya dengan kolom teks di sisi kiri.
+  tombol panah naik/turun di sisi kanan serta indikator di tengah bawah. Hero
+  mengisi satu layar penuh di bawah header sticky (`min-height` memakai `svh`
+  dikurangi tinggi header), tanpa kartu **Agenda terdekat**.
   Isi hero memakai padding bawah lebih besar di ponsel (`pb-20` = 5rem,
   sedangkan layar besar tetap `md:py-16` = 4rem): tombol CTA menumpuk selebar
   layar pada ponsel, sehingga dengan padding 3rem titik indikator (dipatok

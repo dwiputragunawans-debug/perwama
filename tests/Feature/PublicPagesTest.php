@@ -663,7 +663,8 @@ class PublicPagesTest extends TestCase
 
     /**
      * Hero beranda memakai carousel foto sebagai latar penuh, dilengkapi
-     * overlay gelap, kontrol navigasi, indikator, dan kartu agenda.
+     * overlay gelap, kontrol navigasi, dan indikator carousel. Kartu agenda
+     * tidak lagi ditampilkan karena belum dibutuhkan di beranda.
      */
     public function test_hero_beranda_memakai_carousel_latar_penuh(): void
     {
@@ -675,7 +676,7 @@ class PublicPagesTest extends TestCase
             ->assertSee('data-carousel-slide', false)
             ->assertSee('hero-bg-controls', false)
             ->assertSee('hero-bg-dots', false)
-            ->assertSee('Agenda terdekat', false);
+            ->assertDontSee('Agenda terdekat', false);
     }
 
     /**
@@ -780,25 +781,100 @@ class PublicPagesTest extends TestCase
     }
 
     /**
-     * Kartu "Agenda terdekat" pada beranda menampilkan 4 agenda terdekat.
+     * Hero beranda mengisi satu layar penuh di bawah header sticky.
      *
-     * Regresi: sebelumnya dibatasi 3 agenda sehingga daftar terasa kurang.
+     * Tinggi header 4.5rem saat bilah kontak belum tampil (ponsel/tablet) dan
+     * 7.5rem pada layar >=1280px ketika bilah kontak muncul. Satuan `svh`
+     * menjaga tinggi tetap stabil saat bilah alamat ponsel berubah, sedangkan
+     * `vh` menjadi cadangan untuk peramban lama.
      */
-    public function test_kartu_agenda_terdekat_menampilkan_empat_agenda(): void
+    public function test_hero_beranda_mengisi_satu_layar_penuh(): void
     {
-        $agendaTerdekat = Event::query()->upcoming()->take(4)->get();
+        $css = file_get_contents(resource_path('css/app.css'));
 
-        $this->assertCount(
-            4,
-            $agendaTerdekat,
-            'Data contoh harus menyediakan minimal 4 agenda mendatang.',
+        $this->assertMatchesRegularExpression(
+            '/\.hero-full\s*\{[^}]*min-height:\s*calc\(100svh - 4\.5rem\);/s',
+            $css,
+            'Hero beranda harus mengisi layar penuh di bawah header 4.5rem pada ponsel/tablet.',
         );
 
-        $response = $this->get('/')->assertOk();
+        $this->assertMatchesRegularExpression(
+            '/@media \(min-width: 1280px\)\s*\{\s*\.hero-full\s*\{[^}]*min-height:\s*calc\(100svh - 7\.5rem\);/s',
+            $css,
+            'Hero beranda harus dikurangi tinggi header 7.5rem saat bilah kontak tampil.',
+        );
+    }
 
-        foreach ($agendaTerdekat as $agenda) {
-            $response->assertSee($agenda->title, false);
-        }
+    /**
+     * Teks hero beranda dipusatkan dan tidak lagi memuat kartu "Agenda
+     * terdekat" di sisi kanan.
+     */
+    public function test_hero_beranda_menempatkan_teks_di_tengah_tanpa_kartu_agenda(): void
+    {
+        $response = $this->get('/')->assertOk()->assertDontSee('Agenda terdekat', false);
+
+        $dom = new DOMDocument;
+        libxml_use_internal_errors(true);
+        $dom->loadHTML($response->getContent());
+        libxml_clear_errors();
+
+        $xpath = new DOMXPath($dom);
+
+        $hero = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' hero-full ')]")->item(0);
+        $this->assertNotNull($hero, 'Bagian hero beranda tidak ditemukan.');
+
+        $wadah = $xpath->query(
+            ".//*[contains(concat(' ', normalize-space(@class), ' '), ' container-page ')]",
+            $hero,
+        )->item(0);
+        $this->assertNotNull($wadah, 'Wadah isi hero beranda tidak ditemukan.');
+
+        $teks = $xpath->query(
+            "./div[contains(concat(' ', normalize-space(@class), ' '), ' text-center ')]",
+            $wadah,
+        )->item(0);
+        $this->assertNotNull($teks, 'Blok teks hero harus dibungkus wadah ber-text-center.');
+
+        $kelas = preg_split('/\s+/', trim($teks->getAttribute('class'))) ?: [];
+
+        $this->assertContains(
+            'mx-auto',
+            $kelas,
+            'Blok teks hero harus dipusatkan secara horizontal dengan mx-auto.',
+        );
+        $this->assertContains(
+            'max-w-4xl',
+            $kelas,
+            'Blok teks hero harus dibatasi agar tetap nyaman dibaca saat teks dipusatkan.',
+        );
+
+        $judul = $xpath->query('.//h1', $teks)->item(0);
+        $this->assertNotNull($judul, 'Judul hero beranda tidak ditemukan.');
+
+        $kelasJudul = preg_split('/\s+/', trim($judul->getAttribute('class'))) ?: [];
+        $this->assertContains(
+            'mx-auto',
+            $kelasJudul,
+            'Judul hero harus dipusatkan di dalam blok teks.',
+        );
+        $this->assertContains(
+            'max-w-4xl',
+            $kelasJudul,
+            'Lebar judul hero harus dibatasi agar barisnya tetap seimbang.',
+        );
+
+        $aksi = $xpath->query(
+            ".//div[contains(concat(' ', normalize-space(@class), ' '), ' flex-wrap ')]",
+            $teks,
+        )->item(0);
+        $this->assertNotNull($aksi, 'Deretan tombol hero beranda tidak ditemukan.');
+
+        $kelasAksi = preg_split('/\s+/', trim($aksi->getAttribute('class'))) ?: [];
+        $this->assertContains(
+            'justify-center',
+            $kelasAksi,
+            'Tombol hero harus ikut terpusat bersama judul dan deskripsi.',
+        );
     }
 
     /**

@@ -10,7 +10,7 @@
 
 <section class="relative isolate overflow-hidden bg-navy-deep">
     @if ($image)
-        <img src="{{ $image }}" alt="{{ $imageAlt ?? '' }}" class="absolute inset-0 h-full w-full object-cover opacity-30" loading="eager">
+        <img src="{{ $image }}" alt="{{ $imageAlt ?? '' }}" class="absolute inset-0 h-full w-full object-cover opacity-50" loading="eager">
     @endif
     <div class="hero-gradient absolute inset-0" aria-hidden="true"></div>
 
@@ -20,12 +20,12 @@
             <p class="section-eyebrow mt-5 text-gold">{{ $eyebrow }}</p>
         @endif
 
-        <h1 class="mt-4 max-w-4xl font-display text-4xl font-bold leading-[1.1] text-white sm:text-5xl lg:text-6xl">
+        <h1 class="mt-4 max-w-4xl font-display text-3xl font-bold leading-[1.15] text-white sm:text-4xl lg:text-[2.75rem]">
             {{ $title }}
         </h1>
 
         @if ($subtitle)
-            <p class="mt-6 max-w-2xl text-lg leading-[1.6] text-white/85">
+            <p class="mt-6 max-w-2xl text-base leading-[1.7] text-white/90">
                 {{ $subtitle }}
             </p>
         @endif
