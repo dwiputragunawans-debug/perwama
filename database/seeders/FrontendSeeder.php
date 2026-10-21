@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Activity;
+use App\Models\AlbumCategory;
 use App\Models\Branch;
 use App\Models\Event;
 use App\Models\Gallery;
@@ -767,6 +768,8 @@ class FrontendSeeder extends Seeder
             'https://www.youtube.com/watch?v=e-ORhEE9VVg',
         ];
 
+        $albumCategoryIds = AlbumCategory::query()->pluck('id', 'slug');
+
         foreach ($albums as $index => [$title, $album, $region, $description, $featured, $dayOffset]) {
             $gallery = Gallery::query()->updateOrCreate(
                 ['slug' => Str::slug($title)],
@@ -775,7 +778,7 @@ class FrontendSeeder extends Seeder
                     'program_id' => Program::query()->inRandomOrder()->value('id'),
                     'title' => $title,
                     'description' => $description,
-                    'album_category' => $album,
+                    'album_category_id' => $albumCategoryIds[$album] ?? null,
                     'cover_image' => $this->img('album-'.$index),
                     'event_date' => now()->addDays($dayOffset)->toDateString(),
                     'is_featured' => $featured,

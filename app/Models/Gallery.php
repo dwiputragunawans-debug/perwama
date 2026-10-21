@@ -11,20 +11,9 @@ class Gallery extends Model
 {
     use HasSlug;
 
-    public const ALBUMS = [
-        'hut_perwama_ina' => 'HUT PERWAMA INA',
-        'pelatihan' => 'Pelatihan',
-        'bakti_sosial' => 'Bakti Sosial',
-        'seminar' => 'Seminar',
-        'rapat_organisasi' => 'Rapat Organisasi',
-        'kunjungan' => 'Kunjungan',
-        'kegiatan_daerah' => 'Kegiatan Daerah',
-        'budaya' => 'Budaya',
-    ];
-
     protected $fillable = [
         'region_id', 'program_id', 'title', 'slug', 'description',
-        'album_category', 'cover_image', 'event_date', 'is_featured',
+        'album_category_id', 'cover_image', 'event_date', 'is_featured',
         'sort_order', 'is_active',
     ];
 
@@ -47,6 +36,11 @@ class Gallery extends Model
         return $this->belongsTo(Program::class);
     }
 
+    public function albumCategory(): BelongsTo
+    {
+        return $this->belongsTo(AlbumCategory::class, 'album_category_id');
+    }
+
     public function items(): HasMany
     {
         return $this->hasMany(GalleryItem::class)->orderBy('sort_order');
@@ -54,7 +48,7 @@ class Gallery extends Model
 
     public function albumLabel(): string
     {
-        return self::ALBUMS[$this->album_category] ?? 'Galeri';
+        return $this->albumCategory?->name ?? 'Galeri';
     }
 
     /**

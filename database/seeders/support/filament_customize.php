@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\Activity;
-use App\Models\Gallery;
 use App\Models\News;
 use App\Models\Publication;
 use App\Models\Story;
@@ -37,8 +36,9 @@ $nav = [
     'News' => ['Berita', 1, 'OutlinedNewspaper', 'Berita', 'Berita', 'Berita', 'title'],
     'Publications' => ['Berita', 2, 'OutlinedDocumentText', 'Publikasi', 'Publikasi', 'Publikasi', 'title'],
     'Galleries' => ['Galeri', 1, 'OutlinedPhoto', 'Galeri', 'Galeri', 'Galeri', 'title'],
-    'GalleryItems' => ['Galeri', 2, 'OutlinedSquare2Stack', 'Item Galeri', 'Item Galeri', 'Item Galeri', 'caption'],
-    'Videos' => ['Galeri', 3, 'OutlinedVideoCamera', 'Video', 'Video', 'Video', 'title'],
+    'AlbumCategories' => ['Galeri', 2, 'OutlinedTag', 'Kategori Album', 'Kategori Album', 'Kategori Album', 'name'],
+    'GalleryItems' => ['Galeri', 3, 'OutlinedSquare2Stack', 'Item Galeri', 'Item Galeri', 'Item Galeri', 'caption'],
+    'Videos' => ['Galeri', 4, 'OutlinedVideoCamera', 'Video', 'Video', 'Video', 'title'],
     'MembershipApplications' => ['Bergabung', 1, 'OutlinedUserPlus', 'Pendaftar Anggota', 'Pendaftar Anggota', 'Pendaftar Anggota', 'full_name'],
     'Members' => ['Bergabung', 2, 'OutlinedIdentification', 'Anggota', 'Anggota', 'Anggota', 'full_name'],
     'PartnershipRequests' => ['Bergabung', 3, 'OutlinedHandThumbUp', 'Permohonan Kerja Sama', 'Permohonan', 'Permohonan Kerja Sama', 'name'],
@@ -60,7 +60,6 @@ $enums = [
     'Activities:category' => Activity::CATEGORIES,
     'Stories:category' => Story::CATEGORIES,
     'Publications:category' => Publication::CATEGORIES,
-    'Galleries:album_category' => Gallery::ALBUMS,
     'Events:status' => ['upcoming' => 'Akan Datang', 'ongoing' => 'Berlangsung', 'completed' => 'Selesai', 'cancelled' => 'Dibatalkan'],
     'Members:status' => ['pending' => 'Menunggu', 'active' => 'Aktif', 'inactive' => 'Tidak Aktif', 'rejected' => 'Ditolak'],
     'MembershipApplications:status' => ['pending' => 'Menunggu', 'approved' => 'Disetujui', 'rejected' => 'Ditolak'],

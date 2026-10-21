@@ -29,9 +29,10 @@ class GalleriesTable
                 TextColumn::make('slug')
                     ->label('Slug')
                     ->searchable(),
-                TextColumn::make('album_category')
+                TextColumn::make('albumCategory.name')
                     ->label('Kategori Album')
-                    ->searchable(),
+                    ->searchable()
+                    ->placeholder('Belum dikategorikan'),
                 ImageColumn::make('cover_image')
                     ->label('Gambar Sampul')
                     ->disk('public'),

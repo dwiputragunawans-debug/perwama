@@ -50,6 +50,22 @@ memakai istilah tetap, mis. `created_at` → "Dibuat", `updated_at` →
 agar tiap kolom pada seluruh resource memiliki label eksplisit dan halaman
 daftar tidak lagi menampilkan judul kolom berbahasa Inggris.
 
+### Kategori Album (Master Data)
+
+Pilihan **Kategori Album** tidak lagi ditulis di dalam kode. Kategori dikelola
+dari **Galeri → Kategori Album** (tabel `album_categories`, model
+`App\Models\AlbumCategory`): nama, slug, deskripsi, urutan, dan status aktif.
+Form **Tambah/Ubah Galeri** mengambil pilihan langsung dari master data ini
+lewat relasi `album_category_id`, sehingga kategori baru langsung tersedia
+tanpa mengubah kode.
+
+Halaman publik `/galeri?album={slug}` tetap memakai slug kategori. Delapan
+kategori lama (`hut_perwama_ina`, `pelatihan`, `bakti_sosial`, `seminar`,
+`rapat_organisasi`, `kunjungan`, `kegiatan_daerah`, `budaya`) dipindahkan oleh
+migrasi beserta penugasan galeri yang sudah ada, jadi tautan lama tidak rusak.
+Kategori yang dihapus membuat galeri terkait tidak berkategori (label jatuh ke
+"Galeri"), bukan ikut terhapus.
+
 ### Profil Organisasi (Data Tunggal)
 
 **Tentang → Profil Organisasi** menyimpan data organisasi pada **satu baris**

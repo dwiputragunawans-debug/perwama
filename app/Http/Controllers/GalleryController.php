@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AlbumCategory;
 use App\Models\Gallery;
 use App\Models\OrganizationProfile;
 use App\Models\Video;
@@ -19,12 +20,20 @@ class GalleryController extends Controller
 
         return view('pages.gallery-index', [
             'profile' => OrganizationProfile::current(),
-            'albums' => Gallery::ALBUMS,
+            'albums' => AlbumCategory::query()
+                ->active()
+                ->ordered()
+                ->pluck('name', 'slug')
+                ->all(),
             'activeAlbum' => $album,
             'galleries' => Gallery::query()
                 ->active()
+                ->with('albumCategory')
                 ->withCount('items')
-                ->when($album, fn ($query) => $query->where('album_category', $album))
+                ->when($album, fn ($query) => $query->whereHas(
+                    'albumCategory',
+                    fn ($categoryQuery) => $categoryQuery->where('slug', $album),
+                ))
                 ->ordered()
                 ->paginate(9)
                 ->withQueryString(),
@@ -40,7 +49,7 @@ class GalleryController extends Controller
         $gallery = Gallery::query()
             ->active()
             ->where('slug', $slug)
-            ->with(['region', 'program', 'items' => fn ($q) => $q->orderBy('sort_order')])
+            ->with(['region', 'program', 'albumCategory', 'items' => fn ($q) => $q->orderBy('sort_order')])
             ->firstOrFail();
 
         return view('pages.gallery-show', [
@@ -48,6 +57,7 @@ class GalleryController extends Controller
             'gallery' => $gallery,
             'others' => Gallery::query()
                 ->active()
+                ->with('albumCategory')
                 ->whereKeyNot($gallery->getKey())
                 ->ordered()
                 ->take(4)

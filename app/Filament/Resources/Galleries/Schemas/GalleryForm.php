@@ -10,6 +10,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 
 class GalleryForm
 {
@@ -34,19 +35,17 @@ class GalleryForm
                 RichEditor::make('description')
                     ->label('Deskripsi')
                     ->columnSpanFull(),
-                Select::make('album_category')
+                Select::make('album_category_id')
                     ->label('Kategori Album')
-                    ->options([
-                        'hut_perwama_ina' => 'HUT PERWAMA INA',
-                        'pelatihan' => 'Pelatihan',
-                        'bakti_sosial' => 'Bakti Sosial',
-                        'seminar' => 'Seminar',
-                        'rapat_organisasi' => 'Rapat Organisasi',
-                        'kunjungan' => 'Kunjungan',
-                        'kegiatan_daerah' => 'Kegiatan Daerah',
-                        'budaya' => 'Budaya',
-                    ])
-                    ->required(),
+                    ->relationship(
+                        'albumCategory',
+                        'name',
+                        modifyQueryUsing: fn (Builder $query): Builder => $query->ordered(),
+                    )
+                    ->searchable()
+                    ->preload()
+                    ->required()
+                    ->helperText('Pilihan kategori dikelola melalui menu Galeri → Kategori Album.'),
                 FileUpload::make('cover_image')
                     ->label('Gambar Sampul')
                     ->image()

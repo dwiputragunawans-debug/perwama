@@ -25,7 +25,7 @@ class HomeController extends Controller
             // Satu berita unggulan + tiga kartu ringkas pada bagian "Berita".
             'newsItems' => News::query()->published()->ordered()->take(4)->get(),
             // Cover galeri dipakai sebagai cadangan slide hero bila gambar hero belum diunggah.
-            'galleries' => Gallery::query()->active()->ordered()->take(6)->get(),
+            'galleries' => Gallery::query()->active()->with('albumCategory')->ordered()->take(6)->get(),
         ]);
     }
 }

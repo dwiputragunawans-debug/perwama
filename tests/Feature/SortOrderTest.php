@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Filament\Resources\GalleryItems\Pages\CreateGalleryItem;
 use App\Filament\Resources\Statistics\Pages\CreateStatistic;
+use App\Models\AlbumCategory;
 use App\Models\Gallery;
 use App\Models\GalleryItem;
 use App\Models\Management;
@@ -66,6 +67,7 @@ class SortOrderTest extends TestCase
         $admin = User::factory()->create(['is_admin' => true]);
 
         $daftar = [
+            '/admin/album-categories' => AlbumCategory::class,
             '/admin/galleries' => Gallery::class,
             '/admin/gallery-items' => GalleryItem::class,
             '/admin/management' => Management::class,

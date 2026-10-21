@@ -34,7 +34,7 @@ class ActivityController extends Controller
                 ->ordered()
                 ->paginate(9)
                 ->withQueryString(),
-            'galleries' => Gallery::query()->active()->ordered()->take(6)->get(),
+            'galleries' => Gallery::query()->active()->with('albumCategory')->ordered()->take(6)->get(),
         ]);
     }
 
