@@ -63,7 +63,7 @@ class GalleryItemForm
                     ->label('URL Video')
                     ->url()
                     ->visible(fn (Get $get): bool => $get('type') === 'video')
-                    ->helperText('Tempel tautan video, mis. https://www.youtube.com/watch?v=...'),
+                    ->helperText('Tempel tautan YouTube/Vimeo. Format watch, live, shorts, atau youtu.be dapat dipakai, mis. https://www.youtube.com/watch?v=...'),
                 FileUpload::make('thumbnail')
                     ->label('Gambar Mini')
                     ->image()

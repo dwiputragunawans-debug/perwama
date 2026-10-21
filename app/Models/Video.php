@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasSlug;
+use App\Support\VideoUrl;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -42,21 +43,7 @@ class Video extends Model
      */
     public function embedUrl(): ?string
     {
-        $url = $this->url;
-
-        if (blank($url)) {
-            return null;
-        }
-
-        if (preg_match('~(?:youtube\.com/(?:watch\?v=|embed/)|youtu\.be/)([\w-]+)~i', $url, $m)) {
-            return 'https://www.youtube.com/embed/'.$m[1];
-        }
-
-        if (preg_match('~vimeo\.com/(\d+)~i', $url, $m)) {
-            return 'https://player.vimeo.com/video/'.$m[1];
-        }
-
-        return $url;
+        return VideoUrl::embed($this->url);
     }
 
     public function thumbnailUrl(): ?string
@@ -67,8 +54,8 @@ class Video extends Model
                 : asset('storage/'.$this->thumbnail);
         }
 
-        if (preg_match('~(?:youtube\.com/(?:watch\?v=|embed/)|youtu\.be/)([\w-]+)~i', (string) $this->url, $m)) {
-            return 'https://img.youtube.com/vi/'.$m[1].'/hqdefault.jpg';
+        if ($youtubeId = VideoUrl::youtubeId($this->url)) {
+            return 'https://img.youtube.com/vi/'.$youtubeId.'/hqdefault.jpg';
         }
 
         return null;

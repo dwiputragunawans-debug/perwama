@@ -22,6 +22,7 @@ class GalleryItemVideoEmbedTest extends TestCase
             'https://youtu.be/ScMzIvxBSi4?t=10' => 'https://www.youtube.com/embed/ScMzIvxBSi4',
             'https://www.youtube.com/embed/ScMzIvxBSi4' => 'https://www.youtube.com/embed/ScMzIvxBSi4',
             'https://www.youtube.com/shorts/ScMzIvxBSi4' => 'https://www.youtube.com/embed/ScMzIvxBSi4',
+            'https://www.youtube.com/live/ScMzIvxBSi4?si=contoh' => 'https://www.youtube.com/embed/ScMzIvxBSi4',
             'https://vimeo.com/123456789' => 'https://player.vimeo.com/video/123456789',
             'https://video.contoh.test/embed/abc' => 'https://video.contoh.test/embed/abc',
         ];

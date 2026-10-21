@@ -29,7 +29,8 @@ class VideoForm
                     ->columnSpanFull(),
                 TextInput::make('url')
                     ->label('URL')
-                    ->url(),
+                    ->url()
+                    ->helperText('Tempel tautan YouTube/Vimeo. Format watch, live, shorts, atau youtu.be dapat dipakai, mis. https://www.youtube.com/watch?v=...'),
                 TextInput::make('thumbnail')
                     ->label('Gambar Mini'),
                 Select::make('category')
