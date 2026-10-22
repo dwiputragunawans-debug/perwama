@@ -66,7 +66,7 @@ $enums = [
     'MembershipApplications:membership_type' => ['anggota' => 'Anggota', 'relawan' => 'Relawan', 'mitra' => 'Mitra', 'kolaborasi' => 'Kolaborasi'],
     'PartnershipRequests:type' => ['anggota' => 'Menjadi Anggota', 'relawan' => 'Menjadi Relawan', 'mitra' => 'Menjadi Mitra', 'kolaborasi' => 'Berkolaborasi'],
     'PartnershipRequests:status' => ['pending' => 'Menunggu', 'processed' => 'Diproses', 'rejected' => 'Ditolak'],
-    'Organizations:type' => ['dpp' => 'Dewan Pimpinan Pusat (DPP)', 'dpw' => 'Dewan Pimpinan Wilayah (DPW)', 'pc' => 'Pimpinan Cabang (PC)'],
+    'Organizations:type' => ['dpp' => 'Dewan Pimpinan Pusat (DPP)', 'dpw' => 'Dewan Pimpinan Daerah (DPD)', 'pc' => 'Pimpinan Cabang (PC)'],
     'Branches:type' => ['ranting' => 'Ranting', 'cabang' => 'Cabang', 'wilayah' => 'Wilayah'],
     'Regions:type' => ['province' => 'Provinsi', 'regency' => 'Kabupaten', 'city' => 'Kota'],
     'Management:level' => ['dpp' => 'DPP (Pusat)', 'dpw' => 'DPW (Wilayah)', 'pc' => 'PC (Cabang)'],

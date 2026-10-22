@@ -32,7 +32,7 @@ class ManagementForm
                     ->label('Tingkat')
                     ->options([
                         'dpp' => 'Dewan Pimpinan Pusat (DPP)',
-                        'dpw' => 'Dewan Pimpinan Wilayah (DPW)',
+                        'dpw' => 'Dewan Pimpinan Daerah (DPD)',
                         'pc' => 'Pimpinan Cabang (PC)',
                     ])
                     ->default('dpp')
