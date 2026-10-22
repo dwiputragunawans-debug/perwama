@@ -90,7 +90,7 @@ hanya selebar separuh formulir sehingga tiga unggahan gambar tampak terjepit:
 | Bagian | Isian |
 | --- | --- |
 | Identitas Organisasi | `name`, `abbreviation`, `tagline`, `founded_year`, `slogan` |
-| Visi, Misi & Gambar Kartu Beranda | `vision`, `mission`, lalu `about_card_image`, `vision_card_image`, `mission_card_image` dalam satu grid tiga kolom (`imagePreviewHeight('14rem')` agar kartu sama besar) |
+| Visi, Misi & Gambar Kartu Beranda | `vision`, `mission`, lalu `about_card_image`, `vision_card_image`, `mission_card_image` dalam satu grid tiga kolom (`imagePreviewHeight('224')` — piksel, karena FilePond tidak menerima satuan CSS — agar kartu sama besar) |
 | Deskripsi | `short_description`, `description` |
 | Alamat & Kontak | `address`, `city`, `province`, `postal_code`, `email`, `phone`, `whatsapp`, `map_embed` |
 | Media Sosial | `facebook`, `instagram`, `youtube`, `twitter`, `tiktok` |

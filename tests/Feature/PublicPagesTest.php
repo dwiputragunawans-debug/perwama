@@ -1068,6 +1068,65 @@ class PublicPagesTest extends TestCase
     }
 
     /**
+     * Nomor WhatsApp tanpa kode negara tetap menghasilkan tautan chat yang sah.
+     *
+     * Regresi: tautan lama hanya membuang karakter non-angka, sehingga nomor
+     * "0896…" menjadi `wa.me/0896…` dan tidak dikenali WhatsApp. Nomor lokal
+     * kini dinormalkan ke format `62…`; teks yang tampil tetap seperti yang
+     * diisi pengelola.
+     */
+    public function test_tautan_whatsapp_menormalkan_nomor_lokal_tanpa_kode_negara(): void
+    {
+        $this->assertSame('https://wa.me/6289662135974', whatsapp_url('0896-6213-5974'));
+        $this->assertSame('https://wa.me/6289662135974', whatsapp_url('89662135974'));
+        $this->assertSame('https://wa.me/6289662135974', whatsapp_url('+62 896 6213 5974'));
+        $this->assertSame('https://wa.me/6289662135974', whatsapp_url('62 896 6213 5974'));
+        $this->assertSame('https://wa.me/6289662135974', whatsapp_url('0062 896 6213 5974'));
+        $this->assertSame('https://wa.me/6289662135974', whatsapp_url('62 0896 6213 5974'));
+        $this->assertNull(whatsapp_url(''));
+        $this->assertNull(whatsapp_url(null));
+    }
+
+    /**
+     * Tautan WhatsApp pada Tentang, Kontak, header, dan footer memakai nomor
+     * yang sudah dinormalkan, bukan nomor lokal apa adanya.
+     */
+    public function test_halaman_tentang_dan_kontak_memakai_tautan_whatsapp_yang_benar(): void
+    {
+        OrganizationProfile::current()->update(['whatsapp' => '0896-6213-5974']);
+        OrganizationProfile::flushCache();
+
+        foreach (['/tentang', '/kontak'] as $url) {
+            $dom = new DOMDocument;
+            libxml_use_internal_errors(true);
+            $dom->loadHTML($this->get($url)->assertOk()->getContent());
+            libxml_clear_errors();
+
+            $tautan = (new DOMXPath($dom))->query('//a[starts-with(@href, "https://wa.me/")]');
+
+            $this->assertGreaterThanOrEqual(
+                3,
+                $tautan->length,
+                "Tautan WhatsApp pada header, isi, dan footer tidak lengkap di {$url}.",
+            );
+
+            foreach ($tautan as $anchor) {
+                $this->assertSame(
+                    'https://wa.me/6289662135974',
+                    $anchor->getAttribute('href'),
+                    "Tautan WhatsApp pada {$url} harus memakai kode negara 62.",
+                );
+            }
+
+            $this->assertStringContainsString(
+                '0896-6213-5974',
+                $dom->textContent,
+                "Nomor WhatsApp tetap ditampilkan seperti yang diisi pengelola pada {$url}.",
+            );
+        }
+    }
+
+    /**
      * Kartu sekretariat pada halaman Tentang Kami memakai aturan yang sama.
      *
      * Regresi: surel panjang pada `<dd>` membuat min-content kartu 373px,

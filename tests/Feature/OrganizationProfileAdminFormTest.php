@@ -111,9 +111,19 @@ class OrganizationProfileAdminFormTest extends TestCase
         $this->assertCount(3, $unggahan);
 
         foreach ($unggahan as $field) {
+            $tinggi = $field->getImagePreviewHeight();
+
+            // FilePond hanya menerima tinggi dalam piksel. Satuan CSS seperti
+            // "14rem" dipotong menjadi 14 px dan membuat pratinjau kolaps.
+            $this->assertMatchesRegularExpression(
+                '/^\d+$/',
+                (string) $tinggi,
+                "Tinggi pratinjau {$field->getName()} harus berupa angka piksel.",
+            );
+
             $this->assertSame(
-                '14rem',
-                $field->getImagePreviewHeight(),
+                '224',
+                $tinggi,
                 "Tinggi pratinjau {$field->getName()} harus seragam.",
             );
         }

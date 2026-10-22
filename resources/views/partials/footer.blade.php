@@ -68,8 +68,8 @@
                 @if ($profile->email)
                     <li><a href="mailto:{{ $profile->email }}" class="transition hover:text-gold">{{ $profile->email }}</a></li>
                 @endif
-                @if ($profile->whatsapp)
-                    <li><a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $profile->whatsapp) }}" target="_blank" rel="noopener" class="transition hover:text-gold">WhatsApp: {{ $profile->whatsapp }}</a></li>
+                @if (whatsapp_url($profile->whatsapp))
+                    <li><a href="{{ whatsapp_url($profile->whatsapp) }}" target="_blank" rel="noopener" class="transition hover:text-gold">WhatsApp: {{ $profile->whatsapp }}</a></li>
                 @endif
                 <li><a href="{{ route('contact') }}" class="inline-flex items-center gap-1.5 font-semibold text-gold transition hover:text-gold-warm">Kirim pesan →</a></li>
             </ul>

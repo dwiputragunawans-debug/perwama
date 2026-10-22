@@ -106,11 +106,11 @@
                                     <dd class="min-w-0 wrap-anywhere">{{ $profile->phone }}</dd>
                                 </div>
                             @endif
-                            @if ($profile->whatsapp)
+                            @if (whatsapp_url($profile->whatsapp))
                                 <div class="flex flex-col gap-1 sm:flex-row sm:gap-3">
                                     <dt class="meta sm:w-24 sm:shrink-0">WhatsApp</dt>
                                     <dd class="min-w-0 wrap-anywhere">
-                                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $profile->whatsapp) }}" target="_blank" rel="noopener" class="font-semibold text-terracotta hover:underline">{{ $profile->whatsapp }}</a>
+                                        <a href="{{ whatsapp_url($profile->whatsapp) }}" target="_blank" rel="noopener" class="font-semibold text-terracotta hover:underline">{{ $profile->whatsapp }}</a>
                                     </dd>
                                 </div>
                             @endif

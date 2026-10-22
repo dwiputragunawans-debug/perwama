@@ -40,6 +40,43 @@ if (! function_exists('media_or_placeholder')) {
     }
 }
 
+if (! function_exists('whatsapp_url')) {
+    /**
+     * Tautan chat WhatsApp dari nomor lokal maupun internasional.
+     *
+     * Nomor Indonesia yang diketik tanpa kode negara (`08…` atau `8…`) diubah
+     * menjadi format wa.me (`628…`). Awalan `+62`, `0062`, dan `62` tetap
+     * diterima, termasuk bila nomor setelahnya masih diawali `0`. Null
+     * dikembalikan bila tidak ada digit sama sekali.
+     */
+    function whatsapp_url(?string $number): ?string
+    {
+        $digits = preg_replace('/[^0-9]/', '', (string) $number) ?? '';
+
+        if ($digits === '') {
+            return null;
+        }
+
+        // Awalan akses internasional (0062…) diperlakukan sama dengan 62.
+        if (str_starts_with($digits, '0062')) {
+            $digits = substr($digits, 2);
+        }
+
+        // Nomor yang sudah memakai kode negara tetapi masih menyisakan awalan 0.
+        if (str_starts_with($digits, '620')) {
+            $digits = '62'.substr($digits, 3);
+        }
+
+        if (str_starts_with($digits, '0')) {
+            $digits = '62'.substr($digits, 1);
+        } elseif (str_starts_with($digits, '8')) {
+            $digits = '62'.$digits;
+        }
+
+        return 'https://wa.me/'.$digits;
+    }
+}
+
 if (! function_exists('tanggal_id')) {
     /**
      * Format tanggal berbahasa Indonesia.

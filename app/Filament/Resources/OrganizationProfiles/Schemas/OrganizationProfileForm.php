@@ -13,6 +13,13 @@ use Filament\Schemas\Schema;
 class OrganizationProfileForm
 {
     /**
+     * FilePond membaca imagePreviewHeight sebagai bilangan piksel. Nilai CSS
+     * seperti "14rem" dipotong menjadi 14 px sehingga pratinjau gambar kolaps;
+     * 224 px setara 14rem pada ukuran font dasar 16 px.
+     */
+    private const TINGGI_PRATINJAU_GAMBAR = '224';
+
+    /**
      * Isian Profil Organisasi dikelompokkan per bagian agar halaman sunting
      * mudah dipindai: identitas, visi & misi beserta gambar kartu beranda,
      * deskripsi, alamat & kontak, lalu media sosial.
@@ -73,7 +80,7 @@ class OrganizationProfileForm
                                     ->label('Gambar kartu Tentang Kami')
                                     ->image()
                                     ->imageEditor()
-                                    ->imagePreviewHeight('14rem')
+                                    ->imagePreviewHeight(self::TINGGI_PRATINJAU_GAMBAR)
                                     ->disk('public')
                                     ->directory('uploads/about-cards')
                                     ->maxSize(10240),
@@ -81,7 +88,7 @@ class OrganizationProfileForm
                                     ->label('Gambar kartu Visi')
                                     ->image()
                                     ->imageEditor()
-                                    ->imagePreviewHeight('14rem')
+                                    ->imagePreviewHeight(self::TINGGI_PRATINJAU_GAMBAR)
                                     ->disk('public')
                                     ->directory('uploads/about-cards')
                                     ->maxSize(10240),
@@ -89,7 +96,7 @@ class OrganizationProfileForm
                                     ->label('Gambar kartu Misi')
                                     ->image()
                                     ->imageEditor()
-                                    ->imagePreviewHeight('14rem')
+                                    ->imagePreviewHeight(self::TINGGI_PRATINJAU_GAMBAR)
                                     ->disk('public')
                                     ->directory('uploads/about-cards')
                                     ->maxSize(10240),
