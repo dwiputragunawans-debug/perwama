@@ -63,7 +63,10 @@
                                         <p class="mt-1 meta">{{ $organization->address }}</p>
                                     @endif
                                     @if ($organization->description)
-                                        <p class="mt-3 text-base leading-relaxed text-ink-soft">{!! nl2br(e(ringkas_isi($organization->description, null, 400))) !!}</p>
+                                        {{-- Deskripsi diisi lewat RichEditor: pertahankan paragraf dan bullet. --}}
+                                        <div class="prose-perwama mt-3 text-base">
+                                            {!! $organization->descriptionHtml() !!}
+                                        </div>
                                     @endif
                                 </article>
                             @endforeach

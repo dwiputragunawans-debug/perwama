@@ -72,6 +72,36 @@ class Organization extends Model
         return $this->hasMany(Event::class);
     }
 
+    /**
+     * Deskripsi siap tampil di halaman publik.
+     *
+     * Deskripsi baru diisi lewat RichEditor sehingga sudah berupa HTML.
+     * Deskripsi lama masih berupa teks biasa; baris baru diubah menjadi <br>
+     * agar tidak menyatu dalam satu paragraf. Sebagian data lama juga masih
+     * menyimpan tag sebagai entity, sehingga perlu didekode lebih dahulu.
+     */
+    public function descriptionHtml(): ?string
+    {
+        if (blank($this->description)) {
+            return null;
+        }
+
+        $description = (string) $this->description;
+
+        if (strip_tags($description) === $description) {
+            $decoded = html_entity_decode($description, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+            // Data lama seperti `&lt;br&gt;` tetap harus tampil sebagai baris baru.
+            if (strip_tags($decoded) !== $decoded) {
+                return $decoded;
+            }
+
+            return nl2br(e($description));
+        }
+
+        return $description;
+    }
+
     public function scopeActive($query)
     {
         return $query->where('is_active', true);

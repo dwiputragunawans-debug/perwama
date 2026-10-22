@@ -52,17 +52,15 @@ class RegionDescriptionTest extends TestCase
     {
         $region = Region::query()->where('slug', 'dki-jakarta')->firstOrFail();
         $organization = $region->organizations()->firstOrFail();
-        $organization->update([
-            'description' => '<p>Ketua : Ibu Corry Martha Samallo - Siahainenia</p>'
-                .'<p>Ketua I : Ibu Etty Parinusa</p>'
-                .'<p>Bendahara : Ibu Atiek S. Patty</p>',
-        ]);
+        $description = '<p>Ketua : Ibu Corry Martha Samallo - Siahainenia</p>'
+            .'<p>Ketua I : Ibu Etty Parinusa</p>'
+            .'<p>Bendahara : Ibu Atiek S. Patty</p>';
+
+        $organization->update(['description' => $description]);
 
         $this->get(route('region.show', $region->slug))
             ->assertOk()
-            ->assertSee('Ketua : Ibu Corry Martha Samallo - Siahainenia<br />', false)
-            ->assertSee('Ketua I : Ibu Etty Parinusa<br />', false)
-            ->assertSee('Bendahara : Ibu Atiek S. Patty', false)
+            ->assertSee($description, false)
             ->assertDontSee('SiahaineniaKetua', false);
     }
 
@@ -78,12 +76,11 @@ class RegionDescriptionTest extends TestCase
 
         $this->get(route('region.show', $region->slug))
             ->assertOk()
-            ->assertSee('Siahainenia<br />', false)
-            ->assertSee('Ketua I : Ibu Etty Parinusa<br />', false)
+            ->assertSee('Siahainenia<br>Ketua I : Ibu Etty Parinusa', false)
             ->assertDontSee('&amp;lt;br&amp;gt;', false);
     }
 
-    public function test_deskripsi_organisasi_tidak_menampilkan_tag_html_sebagai_teks(): void
+    public function test_deskripsi_organisasi_merender_teks_tebal_dari_rich_editor(): void
     {
         $region = Region::query()->where('slug', 'dki-jakarta')->firstOrFail();
         $organization = $region->organizations()->firstOrFail();
@@ -93,9 +90,57 @@ class RegionDescriptionTest extends TestCase
 
         $this->get(route('region.show', $region->slug))
             ->assertOk()
-            ->assertSee('Ketua : Ibu Corry<br />', false)
-            ->assertSee('Sekretaris : Ibu Suzette', false)
+            ->assertSee('<p>Ketua : <strong>Ibu Corry</strong></p>', false)
+            ->assertSee('<p>Sekretaris : Ibu Suzette</p>', false)
             ->assertDontSee('&lt;p&gt;', false)
             ->assertDontSee('&lt;strong&gt;', false);
+    }
+
+    /**
+     * Daftar berbutir dari RichEditor tetap tampil sebagai bullet.
+     *
+     * Regresi: deskripsi organisasi diratakan menjadi teks biasa sehingga
+     * `<ul>` dan `<li>` hilang dan nama pengurus tampil tanpa penanda.
+     */
+    public function test_deskripsi_organisasi_menampilkan_bullet_dari_rich_editor(): void
+    {
+        $region = Region::query()->where('slug', 'dki-jakarta')->firstOrFail();
+        $organization = $region->organizations()->firstOrFail();
+        $description = '<p>BIDANG-BIDANG</p>'
+            .'<p>BIDANG I - ORGANISASI DAN KADERISASI</p>'
+            .'<ul><li><p>Ibu Denie Ruth Unarapal</p></li>'
+            .'<li><p>Ibu Nanik Indrawati</p></li>'
+            .'<li><p>Ibu Etja Payapo</p></li></ul>';
+
+        $organization->update(['description' => $description]);
+
+        $this->get(route('region.show', $region->slug))
+            ->assertOk()
+            ->assertSee($description, false);
+    }
+
+    /**
+     * Deskripsi organisasi yang panjang tidak dipotong pada halaman wilayah.
+     *
+     * Regresi: view memakai `ringkas_isi(..., 400)` sehingga daftar pengurus
+     * berhenti di tengah dan bagian akhir tidak pernah tampil.
+     */
+    public function test_deskripsi_organisasi_panjang_tampil_seluruhnya(): void
+    {
+        $region = Region::query()->where('slug', 'dki-jakarta')->firstOrFail();
+        $organization = $region->organizations()->firstOrFail();
+
+        $pengantar = str_repeat('Baris pengantar panjang. ', 30);
+        $penutup = 'Ibu Nanik Indrawati - bagian akhir daftar pengurus';
+
+        $organization->update([
+            'description' => '<p>'.trim($pengantar).'</p><p>'.$penutup.'</p>',
+        ]);
+
+        $this->assertGreaterThan(400, mb_strlen(teks_dari_html($organization->description)));
+
+        $this->get(route('region.show', $region->slug))
+            ->assertOk()
+            ->assertSee($penutup, false);
     }
 }
