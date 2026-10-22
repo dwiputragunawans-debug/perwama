@@ -56,13 +56,54 @@ if (! function_exists('tanggal_id')) {
     }
 }
 
+if (! function_exists('teks_dari_html')) {
+    /**
+     * Ubah HTML dari editor kaya menjadi teks biasa yang tetap terbaca.
+     *
+     * `strip_tags()` saja menghilangkan batas paragraf sehingga kalimat akhir
+     * satu paragraf menempel dengan awal paragraf berikutnya. Di sini tag blok
+     * dan <br> diterjemahkan menjadi baris baru lebih dahulu. Entity HTML juga
+     * didekode agar teks lama yang menyimpan `&lt;br&gt;` tidak tampil mentah.
+     */
+    function teks_dari_html(?string $html): string
+    {
+        if (blank($html)) {
+            return '';
+        }
+
+        $text = (string) $html;
+
+        // Data lama kadang menyimpan tag sebagai entity, bahkan dua kali.
+        for ($i = 0; $i < 2; $i++) {
+            $decoded = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+            if ($decoded === $text) {
+                break;
+            }
+
+            $text = $decoded;
+        }
+
+        $text = preg_replace('~<\s*br\s*/?\s*>~i', "\n", $text) ?? $text;
+        $text = preg_replace('~<\s*/\s*(?:p|div|li|h[1-6]|blockquote|tr)\s*>~i', "\n", $text) ?? $text;
+        $text = strip_tags($text);
+
+        $text = str_replace(["\r\n", "\r", "\u{00A0}"], ["\n", "\n", ' '], $text);
+        $text = preg_replace('/[ \t]+/', ' ', $text) ?? $text;
+        $text = preg_replace('/ *\n */', "\n", $text) ?? $text;
+        $text = preg_replace('/\n{3,}/', "\n\n", $text) ?? $text;
+
+        return trim($text);
+    }
+}
+
 if (! function_exists('ringkas')) {
     /**
      * Potong teks menjadi ringkasan pendek tanpa tag HTML.
      */
     function ringkas(?string $text, int $limit = 150): string
     {
-        return Str::limit(trim(strip_tags((string) $text)), $limit);
+        return Str::limit(trim(teks_dari_html((string) $text)), $limit);
     }
 }
 
@@ -72,17 +113,18 @@ if (! function_exists('ringkas_isi')) {
      *
      * Ringkasan pendek (excerpt) hanya dipakai bila sudah cukup panjang;
      * jika terlalu pendek, isi yang lebih lengkap dipakai agar deskripsi
-     * pada kartu terasa utuh dan tidak seperti teks mikro.
+     * pada kartu terasa utuh dan tidak seperti teks mikro. Baris baru dari
+     * RichEditor tetap dipertahankan agar paragraf tidak saling menempel.
      */
     function ringkas_isi(?string $ringkas, ?string $lengkap = null, int $limit = 200): string
     {
-        $ringkas = trim(strip_tags((string) $ringkas));
+        $ringkas = trim(teks_dari_html($ringkas));
 
         if (mb_strlen($ringkas) >= (int) round($limit * 0.7)) {
             return Str::limit($ringkas, $limit);
         }
 
-        return Str::limit(trim(strip_tags((string) $lengkap)) ?: $ringkas, $limit);
+        return Str::limit(trim(teks_dari_html($lengkap)) ?: $ringkas, $limit);
     }
 }
 

@@ -63,7 +63,7 @@
                                         <p class="mt-1 meta">{{ $organization->address }}</p>
                                     @endif
                                     @if ($organization->description)
-                                        <p class="card-excerpt mt-3 text-base leading-relaxed text-ink-soft">{{ ringkas_isi($organization->description, null, 200) }}</p>
+                                        <p class="mt-3 text-base leading-relaxed text-ink-soft">{!! nl2br(e(ringkas_isi($organization->description, null, 400))) !!}</p>
                                     @endif
                                 </article>
                             @endforeach
