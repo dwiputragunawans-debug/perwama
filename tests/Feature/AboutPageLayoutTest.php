@@ -235,7 +235,7 @@ class AboutPageLayoutTest extends TestCase
         $this->assertStringContainsString('Visi & Misi Organisasi', $bagian->textContent);
         $this->assertStringContainsString('Visi Utama', $bagian->textContent);
         $this->assertStringContainsString($profil->vision, $bagian->textContent);
-        $this->assertStringContainsString('Misi Strategi Organisasi', $bagian->textContent);
+        $this->assertStringContainsString('Misi Organisasi', $bagian->textContent);
 
         // Satu butir misi = satu nomor; teksnya tampil utuh.
         $butir = $xpath->query('.//ol/li', $bagian);

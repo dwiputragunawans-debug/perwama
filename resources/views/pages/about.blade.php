@@ -201,7 +201,7 @@
 
                     @if (count($mission))
                         <div class="card p-8 md:p-10" data-reveal>
-                            <h3 class="font-display text-xl font-semibold text-navy">Misi Strategi Organisasi</h3>
+                            <h3 class="font-display text-xl font-semibold text-navy">Misi Organisasi</h3>
 
                             <ol class="mt-6 space-y-5">
                                 @foreach ($mission as $index => $item)
