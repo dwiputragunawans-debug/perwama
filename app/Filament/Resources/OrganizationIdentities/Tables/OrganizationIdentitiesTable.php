@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\OrganizationIdentities\Tables;
 
+use App\Models\OrganizationIdentity;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -20,6 +21,9 @@ class OrganizationIdentitiesTable
                     ->limit(72)
                     ->wrap()
                     ->placeholder('Belum diisi'),
+                TextColumn::make('images')
+                    ->label('Gambar')
+                    ->state(fn (OrganizationIdentity $record): string => count($record->images ?? []).' gambar'),
                 TextColumn::make('updated_at')
                     ->label('Diperbarui')
                     ->dateTime()

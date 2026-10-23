@@ -103,15 +103,18 @@ tata letak grid gambar, dan aturan tombol Buat dijaga
 
 ### Identitas Organisasi (Data Tunggal)
 
-**Tentang → Identitas Organisasi** menyimpan judul dan deskripsi bagian
-identitas pada halaman Tentang Kami dalam satu baris tabel
+**Tentang → Identitas Organisasi** menyimpan judul, deskripsi, dan gambar
+pendukung bagian identitas pada halaman Tentang Kami dalam satu baris tabel
 `organization_identities` (`OrganizationIdentity::current()`, id 1). Menu ini
 terpisah dari Profil Organisasi dan hanya memiliki form sunting — tidak ada
 aksi Buat atau Hapus. Isian **Judul** berisi nama bagian (bawaan
 `Mars PERWAMA INA`), sedangkan **Deskripsi** berisi lirik: satu baris per lirik
 dan satu baris kosong antarbait. Baris pertama yang diawali `Ciptaan:` otomatis
-tampil sebagai kredit di bawah judul. Migrasi membuat baris bawaan sehingga
-bagian langsung tayang setelah `php artisan migrate`.
+tampil sebagai kredit di bawah judul. Bagian **Gambar Pendukung** menerima
+beberapa gambar sekaligus (`images`, JSON) — misalnya lembar partitur — yang
+dapat diurutkan dengan menyeret; berkas disimpan pada disk `public` di
+`uploads/organization-identities`. Migrasi membuat baris bawaan sehingga bagian
+langsung tayang setelah `php artisan migrate`.
 
 ## Dasbor Panel (Ringkasan Pengunjung & Organisasi)
 
@@ -433,11 +436,15 @@ dan komponennya tetap memakai tema situs:
   `Tests\Feature\PublicPagesTest::test_halaman_tentang_tanpa_mitra_dan_cta_diikuti_identitas_organisasi`.
 - **Identitas Organisasi:** bagian penutup berlatarkan `.section-soft` yang sama
   dengan Sejarah, memakai label `.section-eyebrow` dan judul `.section-title`.
-  Isinya dibatasi `max-w-4xl` (896px) dan rata tengah; lirik 16px di ponsel dan
-  18px di desktop (`whitespace-pre-line`) dengan jarak antarbait `space-y-8`.
-  Judul dan lirik disunting lewat **Tentang → Identitas Organisasi**; baris
-  pertama `Ciptaan: ...` tampil sebagai kredit. Dijaga oleh
-  `Tests\Feature\OrganizationIdentityTest`.
+  Teks isinya dibatasi `max-w-4xl` (896px) dan rata tengah; lirik 16px di
+  ponsel dan 18px di desktop (`whitespace-pre-line`) dengan jarak antarbait
+  `space-y-8`. Judul dan lirik disunting lewat **Tentang → Identitas
+  Organisasi**; baris pertama `Ciptaan: ...` tampil sebagai kredit. Gambar
+  pendukung (mis. lembar partitur) tampil di bawah lirik pada wadah
+  `max-w-5xl` — satu gambar terpusat lebih besar, beberapa gambar dua kolom di
+  layar lebar, rasio asli dipertahankan tanpa crop, dan setiap gambar membuka
+  lightbox situs dalam satu grup. Bagian tetap tampil bila hanya ada gambar.
+  Dijaga oleh `Tests\Feature\OrganizationIdentityTest`.
 
 ## Aset Front-end: Kenapa Lokal Bisa Berbeda dari Hosting
 

@@ -18,6 +18,10 @@
         // ada, cover galeri pertama dipakai sebagai cadangan.
         $heroImage = media_url($profile->about_card_image ?: $heroCover);
 
+        // Gambar pendukung bagian Identitas Organisasi (mis. partitur), sudah
+        // diurutkan sesuai pengaturan admin dan siap dipakai sebagai URL.
+        $identityImages = $identity->imageUrls();
+
         // Label tingkat kepengurusan pada tab struktur pengurus.
         $levels = [
             'dpp' => 'Pengurus Inti DPP',
@@ -477,7 +481,7 @@
     {{--
         Bagian penutup halaman, tepat setelah CTA dan sebelum footer. Latar dan
         warna label/judul mengikuti bagian Sejarah (.section-soft, .section-eyebrow,
-        .section-title). Lebar isi dibatasi 896px (max-w-4xl) agar baris lirik
+        .section-title). Lebar teks dibatasi 896px (max-w-4xl) agar baris lirik
         nyaman dibaca tanpa melebar mengikuti kontainer ±1184px.
 
         Deskripsi disimpan sebagai teks biasa: satu baris per lirik dan satu
@@ -486,8 +490,14 @@
         baris "Ciptaan: ..." sebagai kredit di bawah judul. Pada ponsel teks
         16px dan pada desktop 18px, semuanya rata tengah serta membungkus
         otomatis mengikuti lebar layar.
+
+        Gambar pendukung (biasanya lembar partitur) tampil di bawah lirik pada
+        wadah yang sedikit lebih lebar (max-w-5xl). Satu gambar dibuat lebih
+        besar dan terpusat; beberapa gambar disusun dua kolom di layar lebar.
+        Rasio asli gambar dipertahankan (tanpa crop) agar notasi tetap utuh,
+        dan setiap gambar dapat diklik untuk dibuka pada lightbox situs.
     --}}
-    @if ($identity->description)
+    @if ($identity->description || $identityImages->isNotEmpty())
         <section id="identitas-organisasi" class="section-soft section-y">
             <div class="container-page">
                 <div class="mx-auto max-w-4xl text-center" data-reveal>
@@ -497,16 +507,44 @@
                     @endif
                     <div class="gold-rule mx-auto mt-6"></div>
 
-                    @if ($identity->credit())
-                        <p class="mt-5 text-sm text-meta md:text-base">{{ $identity->credit() }}</p>
-                    @endif
+                    @if ($identity->description)
+                        @if ($identity->credit())
+                            <p class="mt-5 text-sm text-meta md:text-base">{{ $identity->credit() }}</p>
+                        @endif
 
-                    <div class="mt-10 space-y-8 text-sm leading-7 text-ink-soft md:text-[1.125rem] md:leading-8">
-                        @foreach ($identity->verses() as $bait)
-                            <p class="whitespace-pre-line">{{ $bait }}</p>
-                        @endforeach
-                    </div>
+                        <div class="mt-10 space-y-8 text-sm leading-7 text-ink-soft md:text-[1.125rem] md:leading-8">
+                            @foreach ($identity->verses() as $bait)
+                                <p class="whitespace-pre-line">{{ $bait }}</p>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
+
+                @if ($identityImages->isNotEmpty())
+                    <div class="mx-auto mt-12 max-w-5xl" data-reveal>
+                        <div @class([
+                            'grid items-start gap-5' => $identityImages->count() > 1,
+                            'sm:grid-cols-2' => $identityImages->count() > 1,
+                            'mx-auto max-w-2xl' => $identityImages->count() === 1,
+                        ])>
+                            @foreach ($identityImages as $gambar)
+                                <figure class="overflow-hidden rounded-2xl border border-navy/10 bg-white p-2 shadow-sm">
+                                    <a href="{{ $gambar }}"
+                                       data-lightbox="{{ $gambar }}"
+                                       data-lightbox-group="identitas-organisasi"
+                                       data-lightbox-caption="{{ $identity->title }}"
+                                       class="group block overflow-hidden rounded-xl">
+                                        <img src="{{ $gambar }}"
+                                             alt="{{ $identity->title }} — gambar {{ $loop->iteration }}"
+                                             class="h-auto w-full transition duration-500 group-hover:scale-[1.015]"
+                                             loading="lazy">
+                                    </a>
+                                </figure>
+                            @endforeach
+                        </div>
+                        <p class="mt-4 text-center text-sm text-meta">Klik gambar untuk memperbesar.</p>
+                    </div>
+                @endif
             </div>
         </section>
     @endif

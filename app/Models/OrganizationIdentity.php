@@ -3,19 +3,27 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
 /**
  * Identitas organisasi pada halaman Tentang Kami.
  *
- * Berisi judul bagian (mis. "Mars PERWAMA INA") dan deskripsi berupa lirik.
- * Data disimpan sebagai satu baris tunggal (singleton), sama seperti
- * OrganizationProfile dan WebsiteSetting.
+ * Berisi judul bagian (mis. "Mars PERWAMA INA"), deskripsi berupa lirik, serta
+ * gambar pendukung seperti lembar partitur. Data disimpan sebagai satu baris
+ * tunggal (singleton), sama seperti OrganizationProfile dan WebsiteSetting.
  */
 class OrganizationIdentity extends Model
 {
     protected $fillable = [
-        'title', 'description',
+        'title', 'description', 'images',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'images' => 'array',
+        ];
+    }
 
     /**
      * Cache data selama satu siklus permintaan.
@@ -86,6 +94,22 @@ class OrganizationIdentity extends Model
         }
 
         return $stanzas;
+    }
+
+    /**
+     * Gambar pendukung (hasil unggahan) sebagai URL siap pakai.
+     *
+     * Urutan array mengikuti urutan yang diatur pengelola di panel admin,
+     * sehingga lembar partitur tampil berurutan.
+     *
+     * @return Collection<int, string>
+     */
+    public function imageUrls(): Collection
+    {
+        return collect($this->images ?? [])
+            ->map(fn (?string $path): ?string => media_url($path))
+            ->filter()
+            ->values();
     }
 
     /**
