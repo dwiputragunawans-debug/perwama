@@ -378,11 +378,15 @@ dan komponennya tetap memakai tema situs:
   tahun berdiri (`founded_year`) tampil sebagai satu baris keterangan di bawah
   judul **Sekilas Organisasi** (menggantikan lencana "Tahun Berdiri" pada hero
   dua kolom yang lama).
+- **Narasi dan sekretariat bertumpuk:** deskripsi profil ditampilkan selebar
+  baca, lalu kartu **Sekretariat** berada di bawahnya (bukan di samping).
+  Kartu ini membagi alamat dan kontak menjadi dua kolom pada layar lebar,
+  sehingga deskripsi panjang tidak lagi menyisakan ruang kosong di kanan.
 - **Pita statistik:** empat angka pertama dari **Tentang → Statistik** tampil
   pada satu kartu putih (kelas `.stat-band`, melintang penuh) di dasar bagian
   **Sekilas Organisasi** — nilai besar navy dengan akhiran emas, label kecil di
   bawahnya, dan garis pemisah tipis antarkolom pada layar lebar. Angka kelima
-  dan seterusnya tampil pada kartu **Capaian lainnya** di samping profil —
+  dan seterusnya tampil pada kartu **Capaian lainnya** di bawah profil —
   sehingga seluruh angka tetap terlihat tanpa terulang.
 - **Visi & Misi:** visi tampil sebagai kutipan pada kartu navy berlabel **Visi
   Utama** dengan slogan organisasi sebagai penutup, sedangkan misi tampil

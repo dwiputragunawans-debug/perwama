@@ -42,16 +42,18 @@
     {{-- ================= PROFIL ================= --}}
     <section class="section-y">
         {{--
-            `min-w-0` pada SETIAP anak kisi wajib: tanpa itu trek `1fr`
-            memakai lebar min-content anaknya (kartu sekretariat dengan surel
-            yang tak bisa dipatahkan ±265px, dan ±336px bila pengguna
-            memperbesar ukuran teks sistem), sehingga trek melebar melewati
-            padding kanan `.container-page` dan seluruh narasi ikut terpotong.
-            Dengan `min-width: 0` trek selalu selebar kontainer dan teks
-            membungkus di dalamnya, berapa pun ukuran hurufnya.
+            Narasi profil dan data sekretariat disusun atas–bawah, bukan dua
+            kolom. Deskripsi organisasi dapat sangat panjang sementara kartu
+            sekretariat relatif pendek; kisi dua kolom lama menyisakan ruang
+            kosong besar di sisi kanan.
+
+            `min-w-0` tetap dipertahankan pada setiap blok dan kolom kartu:
+            surel yang tak bisa dipatahkan (±265px, ±336px saat ukuran teks
+            sistem diperbesar) tidak boleh memaksa kontainer melebar melewati
+            padding kanan `.container-page`.
         --}}
-        <div class="container-page grid gap-14 lg:grid-cols-[1.1fr_0.9fr]">
-            <div class="min-w-0" data-reveal>
+        <div class="container-page">
+            <div class="min-w-0 max-w-4xl" data-reveal>
                 <p class="section-eyebrow">Sekilas Organisasi</p>
                 <h2 class="section-title mt-3 text-3xl md:text-4xl">{{ $profile->abbreviation ?: 'PERWAMA INA' }}</h2>
                 <div class="gold-rule mt-6"></div>
@@ -72,58 +74,62 @@
                 </div>
             </div>
 
-            <aside class="min-w-0 space-y-6" data-reveal>
+            <div class="mt-12 space-y-6" data-reveal>
                 @php
                     /*
                      * Empat angka pertama sudah tampil pada pita statistik di
-                     * dasar bagian ini; sisa angka ditampilkan di sini agar
-                     * seluruh data tetap terlihat tanpa mengulanginya.
+                     * dasar bagian ini; sisa angka ditampilkan pada kartu di
+                     * bawah agar seluruh data tetap terlihat tanpa mengulanginya.
                      */
                     $capaianLain = $statistics->skip(4);
                 @endphp
 
                 @if ($profile->address)
-                    <div class="rounded-2xl border border-navy/10 bg-white p-7">
-                        <p class="section-eyebrow">Sekretariat</p>
-                        <p class="mt-3 text-base leading-relaxed text-ink-soft">
-                            {{ $profile->address }}@if ($profile->city), {{ $profile->city }}@endif
-                            @if ($profile->province) {{ $profile->province }}@endif
-                            @if ($profile->postal_code) {{ $profile->postal_code }}@endif
-                        </p>
+                    <div class="min-w-0 rounded-2xl border border-navy/10 bg-white p-7 md:p-8">
+                        <div class="grid gap-6 md:grid-cols-2 md:gap-10">
+                            <div class="min-w-0">
+                                <p class="section-eyebrow">Sekretariat</p>
+                                <p class="mt-3 text-base leading-relaxed text-ink-soft">
+                                    {{ $profile->address }}@if ($profile->city), {{ $profile->city }}@endif
+                                    @if ($profile->province) {{ $profile->province }}@endif
+                                    @if ($profile->postal_code) {{ $profile->postal_code }}@endif
+                                </p>
+                            </div>
 
-                        <dl class="mt-5 space-y-2 text-base">
-                            @if ($profile->email)
-                                <div class="flex flex-col gap-1 sm:flex-row sm:gap-3">
-                                    <dt class="meta sm:w-24 sm:shrink-0">Email</dt>
-                                    <dd class="min-w-0 wrap-anywhere">
-                                        <a href="mailto:{{ $profile->email }}" class="font-semibold break-words text-terracotta hover:underline">{{ $profile->email }}</a>
-                                    </dd>
-                                </div>
-                            @endif
-                            @if ($profile->phone)
-                                <div class="flex flex-col gap-1 sm:flex-row sm:gap-3">
-                                    <dt class="meta sm:w-24 sm:shrink-0">Telepon</dt>
-                                    <dd class="min-w-0 wrap-anywhere">{{ $profile->phone }}</dd>
-                                </div>
-                            @endif
-                            @if (whatsapp_url($profile->whatsapp))
-                                <div class="flex flex-col gap-1 sm:flex-row sm:gap-3">
-                                    <dt class="meta sm:w-24 sm:shrink-0">WhatsApp</dt>
-                                    <dd class="min-w-0 wrap-anywhere">
-                                        <a href="{{ whatsapp_url($profile->whatsapp) }}" target="_blank" rel="noopener" class="font-semibold text-terracotta hover:underline">{{ $profile->whatsapp }}</a>
-                                    </dd>
-                                </div>
-                            @endif
-                        </dl>
+                            <dl class="min-w-0 space-y-2 text-base">
+                                @if ($profile->email)
+                                    <div class="flex flex-col gap-1 sm:flex-row sm:gap-3">
+                                        <dt class="meta sm:w-24 sm:shrink-0">Email</dt>
+                                        <dd class="min-w-0 wrap-anywhere">
+                                            <a href="mailto:{{ $profile->email }}" class="font-semibold break-words text-terracotta hover:underline">{{ $profile->email }}</a>
+                                        </dd>
+                                    </div>
+                                @endif
+                                @if ($profile->phone)
+                                    <div class="flex flex-col gap-1 sm:flex-row sm:gap-3">
+                                        <dt class="meta sm:w-24 sm:shrink-0">Telepon</dt>
+                                        <dd class="min-w-0 wrap-anywhere">{{ $profile->phone }}</dd>
+                                    </div>
+                                @endif
+                                @if (whatsapp_url($profile->whatsapp))
+                                    <div class="flex flex-col gap-1 sm:flex-row sm:gap-3">
+                                        <dt class="meta sm:w-24 sm:shrink-0">WhatsApp</dt>
+                                        <dd class="min-w-0 wrap-anywhere">
+                                            <a href="{{ whatsapp_url($profile->whatsapp) }}" target="_blank" rel="noopener" class="font-semibold text-terracotta hover:underline">{{ $profile->whatsapp }}</a>
+                                        </dd>
+                                    </div>
+                                @endif
+                            </dl>
+                        </div>
                     </div>
                 @endif
 
                 @if ($capaianLain->isNotEmpty())
-                    <div class="rounded-2xl border border-navy/10 bg-white p-7">
+                    <div class="min-w-0 rounded-2xl border border-navy/10 bg-white p-7 md:p-8">
                         <p class="section-eyebrow">Capaian lainnya</p>
-                        <div class="mt-5 grid grid-cols-2 gap-5">
+                        <div class="mt-5 grid gap-5 sm:grid-cols-2">
                             @foreach ($capaianLain as $stat)
-                                <div>
+                                <div class="min-w-0">
                                     <p class="font-display text-2xl font-semibold text-navy">
                                         {{ $stat->value }}<span class="text-base text-gold">{{ $stat->suffix }}</span>
                                     </p>
@@ -133,15 +139,15 @@
                         </div>
                     </div>
                 @endif
-            </aside>
+            </div>
 
             {{--
                 Pita statistik: empat angka utama organisasi pada satu kartu
-                putih, ditempatkan di dasar bagian Sekilas Organisasi dan
-                melintang penuh di bawah narasi profil serta data sekretariat.
+                putih, ditempatkan di dasar bagian Sekilas Organisasi setelah
+                narasi profil dan data sekretariat.
             --}}
             @if ($statistics->isNotEmpty())
-                <div class="stat-band min-w-0 lg:col-span-2" data-reveal>
+                <div class="stat-band mt-10 min-w-0" data-reveal>
                     @foreach ($statistics->take(4) as $stat)
                         <div class="stat-item">
                             <p class="stat-value">

@@ -1163,15 +1163,19 @@ class PublicPagesTest extends TestCase
     }
 
     /**
-     * Trek `1fr` pada kisi bagian profil mengambil lebar min-content anaknya
-     * selama `min-width` anak masih `auto`. Kartu sekretariat berisi surel yang
-     * tak bisa dipatahkan (±265px pada 16px, ±336px saat ukuran teks sistem
-     * diperbesar) sehingga trek melebar melewati padding kanan
-     * `.container-page`; judul, tagline, dan paragraf di kolom kiri ikut
-     * terpotong di tepi kanan. `min-w-0` pada setiap anak kisi memutus
-     * ketergantungan itu tanpa mengubah tampilan pada ukuran teks normal.
+     * Narasi profil Tentang Kami dan kartu sekretariat ditumpuk atas–bawah,
+     * bukan dua kolom.
+     *
+     * Regresi: deskripsi organisasi dapat sangat panjang, sedangkan kartu
+     * sekretariat relatif pendek. Kisi dua kolom lama menyisakan ruang kosong
+     * besar di sisi kanan bagian profil.
+     *
+     * `min-w-0` tetap wajib pada setiap blok dan kolom kartu: kartu sekretariat
+     * berisi surel yang tak bisa dipatahkan (±265px pada 16px, ±336px saat
+     * ukuran teks sistem diperbesar), sehingga tanpa `min-width: 0` isi dapat
+     * memaksa kontainer melebar melewati padding kanan `.container-page`.
      */
-    public function test_anak_kisi_bagian_profil_tentang_memakai_min_w_0(): void
+    public function test_bagian_profil_tentang_menumpuk_narasi_dan_sekretariat(): void
     {
         $dom = new DOMDocument;
         libxml_use_internal_errors(true);
@@ -1179,21 +1183,68 @@ class PublicPagesTest extends TestCase
         libxml_clear_errors();
 
         $xpath = new DOMXPath($dom);
-        $kisi = $xpath->query('//div[contains(@class, "container-page") and contains(@class, "grid") and contains(@class, "lg:grid-cols-[1.1fr_0.9fr]")]');
+        $bagian = $xpath->query(
+            '//section[.//p[contains(concat(" ", normalize-space(@class), " "), " section-eyebrow ") and normalize-space()="Sekilas Organisasi"]]',
+        )->item(0);
 
-        $this->assertGreaterThan(0, $kisi->length, 'Kisi dua kolom bagian profil tidak ditemukan pada /tentang.');
+        $this->assertNotNull($bagian, 'Bagian Sekilas Organisasi tidak ditemukan pada /tentang.');
 
-        $anak = $xpath->query('./*', $kisi->item(0));
+        $kontainer = $xpath->query('./div[contains(concat(" ", normalize-space(@class), " "), " container-page ")]', $bagian)->item(0);
 
-        $this->assertGreaterThanOrEqual(2, $anak->length, 'Kisi bagian profil harus berisi kolom narasi dan kartu sekretariat.');
+        $this->assertNotNull($kontainer, 'Kontainer bagian profil tidak ditemukan.');
 
-        foreach ($anak as $kolom) {
+        $kelasKontainer = preg_split('/\s+/', trim($kontainer->getAttribute('class'))) ?: [];
+
+        $this->assertNotContains(
+            'grid',
+            $kelasKontainer,
+            'Bagian profil harus menumpuk narasi dan sekretariat, bukan memakai kisi dua kolom.',
+        );
+        $this->assertStringNotContainsString(
+            'grid-cols',
+            $kontainer->getAttribute('class'),
+            'Bagian profil tidak boleh memakai kolom kisi yang menyisakan ruang kosong di kanan.',
+        );
+
+        $narasi = $xpath->query('.//div[contains(concat(" ", normalize-space(@class), " "), " prose-perwama ")]', $kontainer)->item(0);
+        $sekretariat = $xpath->query('.//p[normalize-space()="Sekretariat"]', $kontainer)->item(0);
+
+        $this->assertNotNull($narasi, 'Narasi profil tidak ditemukan pada bagian Sekilas Organisasi.');
+        $this->assertNotNull($sekretariat, 'Kartu sekretariat tidak ditemukan pada bagian Sekilas Organisasi.');
+
+        $this->assertGreaterThan(
+            0,
+            $xpath->query('preceding::*[contains(concat(" ", normalize-space(@class), " "), " prose-perwama ")]', $sekretariat)->length,
+            'Kartu sekretariat harus berada setelah narasi profil (tersusun atas–bawah).',
+        );
+
+        $blokNarasi = $narasi->parentNode;
+        $kartu = $xpath->query('ancestor::div[contains(concat(" ", normalize-space(@class), " "), " rounded-2xl ")][1]', $sekretariat)->item(0);
+
+        $this->assertNotNull($blokNarasi, 'Pembungkus narasi profil tidak ditemukan.');
+        $this->assertNotNull($kartu, 'Kartu sekretariat tidak memiliki pembungkus.');
+
+        foreach ([$blokNarasi, $kartu] as $blok) {
+            $kelas = preg_split('/\s+/', trim($blok->getAttribute('class'))) ?: [];
+
+            $this->assertContains(
+                'min-w-0',
+                $kelas,
+                'Setiap blok bagian profil wajib `min-w-0` agar tidak melebar di layar sempit.',
+            );
+        }
+
+        $kolomKartu = $xpath->query('.//div[contains(concat(" ", normalize-space(@class), " "), " grid ") and contains(@class, "md:grid-cols-2")]/*', $kartu);
+
+        $this->assertGreaterThanOrEqual(2, $kolomKartu->length, 'Kartu sekretariat harus berisi kolom alamat dan kontak.');
+
+        foreach ($kolomKartu as $kolom) {
             $kelas = preg_split('/\s+/', trim($kolom->getAttribute('class'))) ?: [];
 
             $this->assertContains(
                 'min-w-0',
                 $kelas,
-                'Setiap anak kisi bagian profil wajib `min-w-0`, jika tidak trek melebar melewati padding kanan pada layar sempit atau saat ukuran teks diperbesar.',
+                'Setiap kolom kartu sekretariat wajib `min-w-0`, jika tidak trek kisi melebar melewati padding kanan.',
             );
         }
     }

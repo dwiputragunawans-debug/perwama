@@ -165,7 +165,7 @@ class AboutPageLayoutTest extends TestCase
      * Pita statistik bergaya kartu putih dipertahankan, tetapi kini menutup
      * bagian Sekilas Organisasi: empat angka utama pada kartu melintang penuh,
      * sedangkan angka kelima dan seterusnya tampil pada kartu "Capaian lainnya"
-     * di samping profil agar tidak ada data yang hilang.
+     * di bawah profil agar tidak ada data yang hilang.
      */
     public function test_pita_statistik_menutup_bagian_sekilas_organisasi(): void
     {
