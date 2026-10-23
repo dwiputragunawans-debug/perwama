@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Gallery;
 use App\Models\Management;
 use App\Models\OrganizationHistory;
+use App\Models\OrganizationIdentity;
 use App\Models\OrganizationProfile;
 use App\Models\ProgramCategory;
 use App\Models\Statistic;
@@ -13,8 +14,8 @@ use Illuminate\Contracts\View\View;
 class AboutController extends Controller
 {
     /**
-     * Halaman "Tentang" — profil, visi & misi, bidang pengabdian, sejarah, dan
-     * struktur kepengurusan.
+     * Halaman "Tentang" — profil, visi & misi, bidang pengabdian, sejarah,
+     * struktur kepengurusan, dan identitas organisasi.
      */
     public function __invoke(): View
     {
@@ -22,6 +23,7 @@ class AboutController extends Controller
 
         return view('pages.about', [
             'profile' => $profile,
+            'identity' => OrganizationIdentity::current(),
             'histories' => OrganizationHistory::query()->active()->ordered()->get(),
             'management' => Management::query()->active()->ordered()->get()->groupBy('level'),
             'statistics' => Statistic::query()->active()->ordered()->get(),

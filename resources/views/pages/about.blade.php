@@ -7,9 +7,10 @@
         /*
          * Halaman Tentang Kami memakai hero bersama <x-page-hero> — sama
          * seperti halaman lain kecuali beranda — lalu sekilas organisasi yang
-         * ditutup pita statistik, visi & misi, bidang pengabdian, sejarah, dan
-         * struktur pengurus bertab. Warna, tipografi, dan komponen tetap
-         * memakai tema situs (navy, gold, terracotta, hijau, cream, Poppins).
+         * ditutup pita statistik, visi & misi, bidang pengabdian, sejarah,
+         * struktur pengurus bertab, dan identitas organisasi. Warna, tipografi,
+         * dan komponen tetap memakai tema situs (navy, gold, terracotta, hijau,
+         * cream, Poppins).
          */
         $mission = $profile->mission ?? [];
 
@@ -47,13 +48,19 @@
             sekretariat relatif pendek; kisi dua kolom lama menyisakan ruang
             kosong besar di sisi kanan.
 
+            Blok narasi sengaja tidak lagi dibatasi `max-w-4xl`: batas 896px
+            itu membuat paragraf, daftar, dan gambar dari editor berhenti jauh
+            sebelum tepi kontainer (±1184px) sehingga sisi kanan section tetap
+            kosong. Kini seluruh isi profil memakai lebar kontainer, sama
+            seperti kartu Sekretariat dan pita statistik di bawahnya.
+
             `min-w-0` tetap dipertahankan pada setiap blok dan kolom kartu:
             surel yang tak bisa dipatahkan (±265px, ±336px saat ukuran teks
             sistem diperbesar) tidak boleh memaksa kontainer melebar melewati
             padding kanan `.container-page`.
         --}}
         <div class="container-page">
-            <div class="min-w-0 max-w-4xl" data-reveal>
+            <div class="min-w-0" data-reveal>
                 <p class="section-eyebrow">Sekilas Organisasi</p>
                 <h2 class="section-title mt-3 text-3xl md:text-4xl">{{ $profile->abbreviation ?: 'PERWAMA INA' }}</h2>
                 <div class="gold-rule mt-6"></div>
@@ -438,19 +445,17 @@
 
     {{-- ================= CTA ================= --}}
     {{--
-        Bagian penutup halaman. Jeda atas dan jeda bawahnya dibuat sama besar
-        supaya kartu tidak tampak menempel pada bagian di atasnya lalu melayang
-        jauh dari pita footer.
+        Kartu ajakan sebelum bagian Identitas Organisasi. Jeda atas tetap
+        mengikuti ritme halaman: padding bawah bagian sebelumnya (.section-y:
+        5rem di ponsel, 6.25rem di layar besar) + padding atas bagian ini
+        (pt-20 / md:pt-25) = 10rem / 12.5rem.
 
-        Jeda atas = padding bawah bagian sebelumnya (.section-y: 5rem di ponsel,
-        6.25rem di layar besar) + padding atas bagian ini (pt-20 / md:pt-25,
-        nilainya mengikuti .section-y) = 10rem / 12.5rem — persis ritme antar
-        bagian di halaman ini. Padding bawah kartu (pb-40 = 10rem, md:pb-50 =
-        12.5rem) dipatok sebesar jumlah tadi, jadi jaraknya ke bagian di atas
-        sama dengan jaraknya ke footer. Ritme penutup ini sama dengan CTA
-        beranda dan halaman Cerita.
+        Karena kini diikuti bagian Identitas Organisasi — bukan langsung pita
+        footer — padding bawah kartu dikurangi menjadi satu langkah .section-y
+        (pb-20 / md:pb-25). Ditambah padding atas bagian berikutnya, jarak
+        antarbagian tetap 10rem / 12.5rem tanpa celah berlebih.
     --}}
-    <section class="pt-20 pb-40 md:pt-25 md:pb-50">
+    <section class="pt-20 pb-20 md:pt-25 md:pb-25">
         <div class="container-page">
             <div class="relative isolate overflow-hidden rounded-3xl bg-navy px-8 py-14 text-center md:px-16">
                 <div class="hero-pattern absolute inset-0" aria-hidden="true"></div>
@@ -467,5 +472,43 @@
             </div>
         </div>
     </section>
+
+    {{-- ================= IDENTITAS ORGANISASI ================= --}}
+    {{--
+        Bagian penutup halaman, tepat setelah CTA dan sebelum footer. Latar dan
+        warna label/judul mengikuti bagian Sejarah (.section-soft, .section-eyebrow,
+        .section-title). Lebar isi dibatasi 896px (max-w-4xl) agar baris lirik
+        nyaman dibaca tanpa melebar mengikuti kontainer ±1184px.
+
+        Deskripsi disimpan sebagai teks biasa: satu baris per lirik dan satu
+        baris kosong antarbait. OrganizationIdentity memecahnya menjadi bait,
+        mempertahankan pemenggalan baris (whitespace-pre-line), dan memisahkan
+        baris "Ciptaan: ..." sebagai kredit di bawah judul. Pada ponsel teks
+        16px dan pada desktop 18px, semuanya rata tengah serta membungkus
+        otomatis mengikuti lebar layar.
+    --}}
+    @if ($identity->description)
+        <section id="identitas-organisasi" class="section-soft section-y">
+            <div class="container-page">
+                <div class="mx-auto max-w-4xl text-center" data-reveal>
+                    <p class="section-eyebrow">Identitas Organisasi</p>
+                    @if ($identity->title)
+                        <h2 class="section-title mt-4 text-3xl md:text-4xl">{{ $identity->title }}</h2>
+                    @endif
+                    <div class="gold-rule mx-auto mt-6"></div>
+
+                    @if ($identity->credit())
+                        <p class="mt-5 text-sm text-meta md:text-base">{{ $identity->credit() }}</p>
+                    @endif
+
+                    <div class="mt-10 space-y-8 text-sm leading-7 text-ink-soft md:text-[1.125rem] md:leading-8">
+                        @foreach ($identity->verses() as $bait)
+                            <p class="whitespace-pre-line">{{ $bait }}</p>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </section>
+    @endif
 @endsection
 

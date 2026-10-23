@@ -101,6 +101,18 @@ Visi & Misi tetap berada pada satu bagian bersama ketiga gambar kartu beranda
 tata letak grid gambar, dan aturan tombol Buat dijaga
 `Tests\Feature\OrganizationProfileAdminFormTest`.
 
+### Identitas Organisasi (Data Tunggal)
+
+**Tentang → Identitas Organisasi** menyimpan judul dan deskripsi bagian
+identitas pada halaman Tentang Kami dalam satu baris tabel
+`organization_identities` (`OrganizationIdentity::current()`, id 1). Menu ini
+terpisah dari Profil Organisasi dan hanya memiliki form sunting — tidak ada
+aksi Buat atau Hapus. Isian **Judul** berisi nama bagian (bawaan
+`Mars PERWAMA INA`), sedangkan **Deskripsi** berisi lirik: satu baris per lirik
+dan satu baris kosong antarbait. Baris pertama yang diawali `Ciptaan:` otomatis
+tampil sebagai kredit di bawah judul. Migrasi membuat baris bawaan sehingga
+bagian langsung tayang setelah `php artisan migrate`.
+
 ## Dasbor Panel (Ringkasan Pengunjung & Organisasi)
 
 Halaman pertama setelah masuk (**Dasbor**, `App\Filament\Pages\Dashboard`)
@@ -342,9 +354,10 @@ php artisan migrate
   menghasilkan jeda atas 10rem/12.5rem (160px/200px), dan padding bawah kartu
   dipatok sebesar jumlah itu. Jadi jaraknya ke bagian di atas = jarak ke footer
   = ritme antar bagian lain di beranda, bukan lagi 8rem/12rem seperti pola
-  `pb-24 md:pb-32` yang lama. Pola ini sama dengan kartu penutup halaman Tentang
-  Kami dan Cerita, dan dijaga oleh
-  `Tests\Feature\PublicPagesTest::test_halaman_tentang_tanpa_mitra_dan_cta_memakai_ritme_penutup_berimbang`.
+  `pb-24 md:pb-32` yang lama. Pola ini juga dipakai kartu penutup halaman Cerita.
+  CTA halaman Tentang Kami kini diikuti bagian Identitas Organisasi, sehingga
+  padding bawahnya memakai satu langkah `.section-y` (lihat bagian Halaman
+  Tentang Kami di bawah).
 - **Pembungkus navigasi halaman** pada halaman daftar (Berita, Cerita, Program,
   Publikasi, Galeri, Video, Kegiatan) hanya dirender bila `hasPages()` — yaitu
   bila memang ada halaman lain. Tanpa penjagaan itu, `{{ $x->links() }}` yang
@@ -379,9 +392,10 @@ dan komponennya tetap memakai tema situs:
   judul **Sekilas Organisasi** (menggantikan lencana "Tahun Berdiri" pada hero
   dua kolom yang lama).
 - **Narasi dan sekretariat bertumpuk:** deskripsi profil ditampilkan selebar
-  baca, lalu kartu **Sekretariat** berada di bawahnya (bukan di samping).
-  Kartu ini membagi alamat dan kontak menjadi dua kolom pada layar lebar,
-  sehingga deskripsi panjang tidak lagi menyisakan ruang kosong di kanan.
+  kontainer (tanpa batas `max-w-4xl`), lalu kartu **Sekretariat** berada di
+  bawahnya (bukan di samping). Kartu ini membagi alamat dan kontak menjadi dua
+  kolom pada layar lebar, sehingga deskripsi panjang — termasuk gambar dan
+  daftar dari editor — mengisi seluruh lebar section tanpa ruang kosong di kanan.
 - **Pita statistik:** empat angka pertama dari **Tentang → Statistik** tampil
   pada satu kartu putih (kelas `.stat-band`, melintang penuh) di dasar bagian
   **Sekilas Organisasi** — nilai besar navy dengan akhiran emas, label kecil di
@@ -410,15 +424,20 @@ dan komponennya tetap memakai tema situs:
   Pengurus. Setiap peristiwa tampil sebagai satu kartu: lencana tahun &
   lokasi, judul, deskripsi, baris lokasi berpeta, dan foto pada panel navy
   (`Tentang → Sejarah`: tahun, judul, deskripsi, lokasi, gambar).
-- **Penutup:** kartu ajakan **Ingin tahu lebih banyak?** (navy) memakai ritme
-  penutup situs yang **berimbang**: `pt-20 pb-40 md:pt-25 md:pb-50`. Padding
-  atas kartu (5rem/6.25rem, sama dengan `.section-y`) ditambah padding bawah
-  bagian sebelumnya — juga 5rem/6.25rem — menghasilkan jeda atas 10rem di
-  ponsel dan 12.5rem di layar besar; padding bawah kartu dipatok sebesar
-  jumlah itu sehingga jaraknya ke bagian di atas sama dengan jaraknya ke pita
-  footer. Ritme yang sama dipakai CTA Beranda dan halaman Cerita, dan dijaga
-  oleh
-  `Tests\Feature\PublicPagesTest::test_halaman_tentang_tanpa_mitra_dan_cta_memakai_ritme_penutup_berimbang`.
+- **CTA:** kartu ajakan **Ingin tahu lebih banyak?** (navy) kini diikuti bagian
+  Identitas Organisasi, bukan langsung footer. Padding atasnya tetap
+  `pt-20 md:pt-25` sehingga jarak dari bagian sebelumnya 10rem/12.5rem,
+  sedangkan padding bawahnya satu langkah `.section-y` (`pb-20 md:pb-25`);
+  bagian berikutnya menambahkan padding atasnya sendiri sehingga jarak
+  antarbagian tetap 10rem/12.5rem tanpa celah berlebih. Dijaga oleh
+  `Tests\Feature\PublicPagesTest::test_halaman_tentang_tanpa_mitra_dan_cta_diikuti_identitas_organisasi`.
+- **Identitas Organisasi:** bagian penutup berlatarkan `.section-soft` yang sama
+  dengan Sejarah, memakai label `.section-eyebrow` dan judul `.section-title`.
+  Isinya dibatasi `max-w-4xl` (896px) dan rata tengah; lirik 16px di ponsel dan
+  18px di desktop (`whitespace-pre-line`) dengan jarak antarbait `space-y-8`.
+  Judul dan lirik disunting lewat **Tentang → Identitas Organisasi**; baris
+  pertama `Ciptaan: ...` tampil sebagai kredit. Dijaga oleh
+  `Tests\Feature\OrganizationIdentityTest`.
 
 ## Aset Front-end: Kenapa Lokal Bisa Berbeda dari Hosting
 

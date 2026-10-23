@@ -94,8 +94,7 @@
         Kartu penutup halaman. Jeda atas dan jeda bawahnya dibuat sama besar
         (10rem di ponsel, 12.5rem di layar besar): padding bawah .section-y di
         atasnya ditambah pt-20 / md:pt-25, lalu padding bawah kartu (pb-40 /
-        md:pb-50) dipatok sebesar jumlah itu. Ritmenya sama dengan CTA beranda
-        dan halaman Tentang Kami.
+        md:pb-50) dipatok sebesar jumlah itu. Ritmenya sama dengan CTA beranda.
     --}}
     <section class="pt-20 pb-40 md:pt-25 md:pb-50">
         <div class="container-page">

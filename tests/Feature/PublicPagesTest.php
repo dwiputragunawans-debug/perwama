@@ -241,18 +241,18 @@ class PublicPagesTest extends TestCase
     }
 
     /**
-     * Halaman Tentang Kami tidak lagi menampilkan bagian "Mitra", dan bagian
-     * penutup "Ingin tahu lebih banyak?" memakai ritme penutup situs yang
-     * berimbang: jeda atas dan jeda bawah kartu sama besar.
+     * Halaman Tentang Kami tidak lagi menampilkan bagian "Mitra". CTA "Ingin
+     * tahu lebih banyak?" kini diikuti bagian Identitas Organisasi, bukan
+     * langsung footer.
      *
-     * Jeda atas = padding bawah `.section-y` bagian sebelumnya (5rem di ponsel,
-     * 6.25rem di layar besar) + `pt-20` / `md:pt-25` yang nilainya sama dengan
-     * `.section-y`, yaitu 10rem / 12.5rem. Padding bawah kartu dipatok sebesar
-     * jumlah itu (`pb-40` / `md:pb-50`) sehingga kartu tidak tampak menempel
-     * pada bagian di atasnya sambil melayang dari pita footer — ritme yang sama
-     * dipakai CTA beranda dan halaman Cerita.
+     * Jeda atas CTA = padding bawah `.section-y` bagian sebelumnya (5rem di
+     * ponsel, 6.25rem di layar besar) + `pt-20` / `md:pt-25` yang nilainya sama
+     * dengan `.section-y`, yaitu 10rem / 12.5rem. Padding bawah CTA memakai satu
+     * langkah `.section-y` (`pb-20` / `md:pb-25`); bagian Identitas Organisasi
+     * menambahkan padding atasnya sendiri sehingga jarak antarbagian tetap
+     * 10rem / 12.5rem tanpa celah berlebih.
      */
-    public function test_halaman_tentang_tanpa_mitra_dan_cta_memakai_ritme_penutup_berimbang(): void
+    public function test_halaman_tentang_tanpa_mitra_dan_cta_diikuti_identitas_organisasi(): void
     {
         $response = $this->get('/tentang')->assertOk();
 
@@ -287,13 +287,14 @@ class PublicPagesTest extends TestCase
         preg_match('/\.section-y\s*\{[^}]*padding-block:\s*([\d.]+)rem;/s', $css, $ponsel);
         preg_match('/@media \(min-width: 768px\)\s*\{\s*\.section-y\s*\{[^}]*padding-block:\s*([\d.]+)rem;/s', $css, $layarBesar);
 
-        // 1rem = 4 satuan skala spasi Tailwind: padding atas kartu = padding
-        // .section-y di atasnya, padding bawah kartu = dua kali lipatnya.
+        // 1rem = 4 satuan skala spasi Tailwind: padding atas dan bawah CTA
+        // masing-masing satu langkah .section-y. Bagian berikutnya menambahkan
+        // padding atasnya sendiri sehingga ritme antarbagian tetap utuh.
         $diharapkan = [
             'pt-'.(float) $ponsel[1] * 4,
-            'pb-'.(float) $ponsel[1] * 8,
+            'pb-'.(float) $ponsel[1] * 4,
             'md:pt-'.(float) $layarBesar[1] * 4,
-            'md:pb-'.(float) $layarBesar[1] * 8,
+            'md:pb-'.(float) $layarBesar[1] * 4,
         ];
 
         $kelas = array_values(array_filter(preg_split('/\s+/', trim($cta->getAttribute('class'))) ?: []));
@@ -306,20 +307,10 @@ class PublicPagesTest extends TestCase
         $this->assertEqualsCanonicalizing(
             $diharapkan,
             $paddingBagian,
-            'Bagian penutup harus memakai '.implode(' ', $diharapkan)
-                .' agar jeda atas dan jeda bawah kartu sama besar; ritme lama '
-                .'(pb-24 md:pb-32) menyisakan jeda bawah yang berbeda dari jeda atas.',
+            'CTA halaman Tentang harus memakai '.implode(' ', $diharapkan)
+                .' agar jaraknya ke bagian di atas dan bagian Identitas Organisasi '
+                .'di bawahnya tetap mengikuti ritme antar bagian halaman.',
         );
-
-        // Ritme penutup halaman Tentang sama dengan penutup halaman lain yang
-        // memakai kartu ajakan (beranda dan halaman Cerita).
-        foreach (['/' => 'beranda', route('story.index') => 'halaman Cerita'] as $url => $nama) {
-            $this->assertSame(
-                $this->bagianPenutup($this->get($url)->assertOk()->getContent()),
-                $cta->getAttribute('class'),
-                "Ritme bagian penutup halaman Tentang harus sama dengan {$nama}.",
-            );
-        }
     }
 
     /**
@@ -373,24 +364,6 @@ class PublicPagesTest extends TestCase
             $html,
             'Tautan ke halaman kedua tidak dirender.',
         );
-    }
-
-    /**
-     * Atribut class <section> terakhir di dalam <main> — bagian penutup
-     * halaman yang berbatasan langsung dengan footer.
-     */
-    private function bagianPenutup(string $html): ?string
-    {
-        $dom = new DOMDocument;
-        libxml_use_internal_errors(true);
-        $dom->loadHTML($html);
-        libxml_clear_errors();
-
-        $sections = (new DOMXPath($dom))->query('//main//section');
-
-        return $sections->length
-            ? $sections->item($sections->length - 1)->getAttribute('class')
-            : null;
     }
 
     /**
@@ -1233,6 +1206,14 @@ class PublicPagesTest extends TestCase
                 'Setiap blok bagian profil wajib `min-w-0` agar tidak melebar di layar sempit.',
             );
         }
+
+        $kelasNarasi = preg_split('/\s+/', trim($blokNarasi->getAttribute('class'))) ?: [];
+
+        $this->assertNotContains(
+            'max-w-4xl',
+            $kelasNarasi,
+            'Blok narasi harus selebar kontainer; `max-w-4xl` membuat isi berhenti di ±75% dan menyisakan ruang kosong di kanan.',
+        );
 
         $kolomKartu = $xpath->query('.//div[contains(concat(" ", normalize-space(@class), " "), " grid ") and contains(@class, "md:grid-cols-2")]/*', $kartu);
 
