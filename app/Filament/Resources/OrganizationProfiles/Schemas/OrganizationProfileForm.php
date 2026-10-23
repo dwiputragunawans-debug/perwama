@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\OrganizationProfiles\Schemas;
 
+use App\Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;

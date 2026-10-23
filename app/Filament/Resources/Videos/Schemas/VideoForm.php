@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\Videos\Schemas;
 
+use App\Filament\Forms\Components\RichEditor;
 use App\Models\Video;
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;

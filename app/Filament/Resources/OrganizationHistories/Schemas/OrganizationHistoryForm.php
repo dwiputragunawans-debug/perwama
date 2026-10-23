@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\OrganizationHistories\Schemas;
 
+use App\Filament\Forms\Components\RichEditor;
 use App\Models\OrganizationHistory;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;

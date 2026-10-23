@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\Regions\Schemas;
 
+use App\Filament\Forms\Components\RichEditor;
 use App\Models\Region;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
