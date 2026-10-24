@@ -58,6 +58,17 @@ class AdminPanelProvider extends PanelProvider
                 PanelsRenderHook::TOPBAR_LOGO_AFTER,
                 fn (): View => view('filament.brand-text'),
             )
+            /*
+             * Animasi loading panel: overlay + spinner saat formulir dikirim,
+             * halaman berpindah, atau aksi Livewire berjalan (lihat
+             * resources/views/filament/loading-indicator.blade.php). Tujuannya
+             * memberi umpan balik bahwa proses sedang berjalan sehingga
+             * pengguna tidak menekan tombol dua kali.
+             */
+            ->renderHook(
+                PanelsRenderHook::BODY_START,
+                fn (): View => view('filament.loading-indicator'),
+            )
             ->colors([
                 'primary' => Color::hex('#1F2A44'),
                 'gold' => Color::hex('#D9B44A'),

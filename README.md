@@ -50,6 +50,52 @@ memakai istilah tetap, mis. `created_at` → "Dibuat", `updated_at` →
 agar tiap kolom pada seluruh resource memiliki label eksplisit dan halaman
 daftar tidak lagi menampilkan judul kolom berbahasa Inggris.
 
+### Indikator Proses (Loading) Panel
+
+Panel memakai navigasi halaman penuh (tanpa SPA) dan formulir Livewire. Tanpa
+umpan balik, pengguna mengira tombol tidak berfungsi lalu menekannya lagi —
+akibatnya record tersimpan dua kali. Indikator ditambahkan untuk itu:
+`resources/views/filament/loading-indicator.blade.php`, disuntikkan ke setiap
+halaman panel (termasuk halaman login) lewat `PanelsRenderHook::BODY_START`
+pada `AdminPanelProvider`.
+
+Tampilannya dua bentuk:
+
+- **Overlay penuh** (kartu + cincin berputar navy/emas) untuk proses yang
+  mengubah halaman: kirim formulir, konfirmasi aksi/hapus, dan perpindahan
+  halaman. Ketika aktif, lapisan `#panel-loading` menutup layar
+  (`pointer-events: auto`), sehingga klik berikutnya tidak sampai ke tombol.
+- **Bilah progres tipis** di tepi atas layar untuk permintaan latar seperti
+  pencarian dan filter tabel. Layar tidak dikunci karena pengguna masih perlu
+  mengetik; bilah hanya menandakan data sedang dimuat.
+
+Perilaku penting:
+
+- Overlay muncul setelah **150 ms** (`REVEAL_DELAY`) agar proses yang selesai
+  seketika tidak berkedip, tetapi klik sudah diblokir sejak milidetik pertama.
+- Kiriman formulir kedua dalam **1000 ms** (`DOUBLE_SUBMIT_WINDOW`) dibatalkan
+  dengan `preventDefault()` + `stopImmediatePropagation()` sebelum Livewire
+  mengirim permintaan, sehingga klik ganda hanya menyimpan satu record.
+- Permintaan dipantau lewat `Livewire.hook('request')`. Panggilan metode
+  komponen (mis. `mountAction`, `delete`, `create`) memakai overlay; permintaan
+  yang hanya berisi metode internal Livewire (`$commit`, `$refresh`, `$set`)
+  memakai bilah progres, dan polling widget tanpa interaksi pengguna tidak
+  menampilkan apa pun.
+- Klik tautan internal diintersepsi: tautan eksternal, `download`,
+  `target="_blank"`, klik dengan Ctrl/Cmd/Shift/Alt, dan jangkar halaman yang
+  sama dibiarkan apa adanya. Untuk mengecualikan tautan tertentu dari
+  indikator, tambahkan atribut `data-no-panel-loading`.
+- Pengaman: indikator dilepas otomatis setelah **20 s** (`SAFETY_TIMEOUT`) bila
+  respons tidak pernah datang, dan **5 s** (`NAVIGATION_TIMEOUT`) bila
+  perpindahan halaman dibatalkan (mis. dialog "perubahan belum disimpan").
+  Halaman yang dipulihkan dari cache riwayat ikut dibersihkan.
+- Menghormati `prefers-reduced-motion`: putaran diperlambat dan transisi
+  dimatikan, indikator tetap tampil.
+
+Uji `php artisan test --filter=AdminLoadingIndicatorTest` memastikan indikator
+tersuntik di halaman login maupun halaman panel, memblokir klik ganda,
+mengawasi tautan, dan memantau permintaan Livewire.
+
 ### Kategori Album (Master Data)
 
 Pilihan **Kategori Album** tidak lagi ditulis di dalam kode. Kategori dikelola
