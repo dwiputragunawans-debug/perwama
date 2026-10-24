@@ -105,4 +105,5 @@
             </aside>
         </div>
     </section>
+    @include('partials.media-attachments', ['media' => $media])
 @endsection

@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use App\Casts\EncryptedString;
+use App\Models\Concerns\MasksNik;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Member extends Model
 {
+    use MasksNik;
+
     /**
      * Label status keanggotaan dalam bahasa Indonesia.
      *
@@ -30,6 +34,7 @@ class Member extends Model
     protected function casts(): array
     {
         return [
+            'nik' => EncryptedString::class,
             'birth_date' => 'date',
             'joined_at' => 'date',
         ];

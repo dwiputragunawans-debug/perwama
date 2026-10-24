@@ -2,9 +2,11 @@
 
 namespace App\Filament\Resources\Media\Tables;
 
+use App\Models\Media;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -15,12 +17,19 @@ class MediaTable
         return $table
             ->defaultSort('sort_order')
             ->columns([
+                ImageColumn::make('path')
+                    ->label('Pratinjau')
+                    ->disk('public')
+                    ->getStateUsing(fn (Media $record): ?string => $record->isImage() ? $record->url() : null)
+                    ->imageSize(40),
                 TextColumn::make('model_type')
-                    ->label('Jenis Model')
+                    ->label('Jenis Konten')
+                    ->formatStateUsing(fn (?string $state): string => Media::SUPPORTED_MODELS[$state] ?? class_basename((string) $state))
                     ->searchable(),
                 TextColumn::make('model_id')
-                    ->label('ID Model')
-                    ->numeric()
+                    ->label('Konten')
+                    ->formatStateUsing(fn (Media $record): string => $record->targetTitle() ?: '—')
+                    ->searchable()
                     ->sortable(),
                 TextColumn::make('collection')
                     ->label('Koleksi')
@@ -33,20 +42,12 @@ class MediaTable
                     ->searchable(),
                 TextColumn::make('mime_type')
                     ->label('Tipe MIME')
-                    ->searchable(),
-                TextColumn::make('path')
-                    ->label('Lokasi Berkas')
-                    ->searchable(),
-                TextColumn::make('disk')
-                    ->label('Penyimpanan')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('size')
                     ->label('Ukuran')
-                    ->numeric()
+                    ->formatStateUsing(fn (Media $record): string => $record->sizeLabel() ?: '—')
                     ->sortable(),
-                TextColumn::make('alt')
-                    ->label('Teks Alternatif')
-                    ->searchable(),
                 TextColumn::make('sort_order')
                     ->label('Urutan')
                     ->numeric()

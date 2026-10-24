@@ -46,7 +46,7 @@ class NewsController extends Controller
         $news = News::query()
             ->published()
             ->where('slug', $slug)
-            ->with(['region', 'program', 'tags'])
+            ->with(['region', 'program', 'tags', 'seoMetadata', 'publicMedia'])
             ->firstOrFail();
 
         $news->increment('views');
@@ -54,6 +54,8 @@ class NewsController extends Controller
         return view('pages.news-show', [
             'profile' => OrganizationProfile::current(),
             'news' => $news,
+            'seo' => $news->seoMetadata,
+            'media' => $news->publicMedia,
             'related' => News::query()
                 ->published()
                 ->whereKeyNot($news->getKey())

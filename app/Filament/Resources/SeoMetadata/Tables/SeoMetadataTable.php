@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\SeoMetadata\Tables;
 
+use App\Models\SeoMetadata;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -16,11 +17,13 @@ class SeoMetadataTable
         return $table
             ->columns([
                 TextColumn::make('model_type')
-                    ->label('Jenis Model')
+                    ->label('Jenis Konten')
+                    ->formatStateUsing(fn (?string $state): string => SeoMetadata::SUPPORTED_MODELS[$state] ?? class_basename((string) $state))
                     ->searchable(),
                 TextColumn::make('model_id')
-                    ->label('ID Model')
-                    ->numeric()
+                    ->label('Konten')
+                    ->formatStateUsing(fn (SeoMetadata $record): string => $record->targetTitle() ?: '—')
+                    ->searchable()
                     ->sortable(),
                 TextColumn::make('meta_title')
                     ->label('Judul Meta')

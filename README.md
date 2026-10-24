@@ -19,8 +19,22 @@ Menambah pengelola baru (dua cara):
 2. Lewat seeder: tambahkan entri baru pada `admins` di `config/perwama.php`,
    lalu jalankan `php artisan db:seed --class=AdminUserSeeder`. Seeder bersifat
    idempotent: tidak menggandakan akun dan tidak menimpa kata sandi yang sudah
-   diganti. Akun bawaan adalah `admin@perwama-ina.or.id` / `password`, dan dapat
-   diubah lewat variabel `ADMIN_*` pada `.env`.
+   diganti.
+
+**Kata sandi admin tidak punya nilai bawaan.** Isi `ADMIN_PASSWORD` pada `.env`
+(minimal 12 karakter, tidak mudah ditebak) sebelum menjalankan seeder. Pada
+environment selain `local`/`testing`, seeder berhenti dengan pesan galat bila
+variabel itu kosong atau lemah — server tidak akan pernah membuat akun dengan
+kata sandi yang diketahui publik. Di `local`/`testing` yang belum mengisi
+variabel tersebut, seeder membuat kata sandi acak dan menampilkannya sekali di
+terminal.
+
+Bila sebuah lingkungan pernah memakai kata sandi bawaan versi lama
+(`password`), ganti kata sandi akun tersebut sekarang juga — mis. lewat panel
+**Pengguna → Ubah Pengguna**, atau dengan menjalankan
+`php artisan db:seed --class=AdminUserSeeder` setelah `ADMIN_PASSWORD` diatur
+(seeder hanya mengisi kata sandi akun **baru**, jadi untuk akun yang sudah ada
+gunakan panel atau `php artisan tinker`).
 
 Pengamanan: admin tidak dapat mencabut akses admin akun sendiri, dan admin
 terakhir tidak dapat dihapus/dicabut — lihat `app/Policies/UserPolicy.php`,
@@ -552,6 +566,120 @@ milik panel Filament — turut masuk bundel. Tanpa `view:clear`, bundel pernah
 membengkak dari ±74 kB menjadi ±89 kB tanpa satu pun kelas yang benar-benar
 dipakai halaman publik; hasil build setelah `view:clear` deterministik karena
 hanya membaca `resources/views` dan `resources/js`.
+
+## Keamanan & Privasi
+
+Bagian ini merangkum pengamanan yang dipasang di kode aplikasi (bukan hanya di
+web server), hasil tindak lanjut audit kode.
+
+### Kata sandi admin
+
+Tidak ada fallback kata sandi pada `config/perwama.php`. `AdminUserSeeder`
+menolak berjalan di luar `local`/`testing` bila `ADMIN_PASSWORD` kosong, kurang
+dari 12 karakter, atau termasuk kata sandi yang mudah ditebak. Uji:
+`Tests\Feature\AdminUserSeederSecurityTest`.
+
+### Formulir publik (kontak, pendaftaran, telemetri)
+
+Endpoint tulis tanpa login dibatasi per alamat IP lewat `RateLimiter` pada
+`AppServiceProvider` dan middleware `throttle:` di `routes/web.php`:
+
+| Endpoint | Batas |
+| --- | --- |
+| `POST /kontak` | 5 kali / 10 menit, 25 kali / hari |
+| `POST /bergabung`, `POST /bergabung/mitra` | 5 kali / jam, 15 kali / hari |
+| `POST /jejak-kunjungan` | 60 kali / menit |
+| `GET /sesi/segar` | 15 kali / menit |
+
+Selain itu, kedua formulir memuat `resources/views/partials/honeypot.blade.php`:
+kolom `website` yang tidak terlihat dan tidak dapat difokuskan. Bila terisi,
+pengirim tetap menerima pesan sukses yang sama, tetapi tidak ada baris yang
+disimpan (`App\Support\Honeypot`). Di belakang proxy/CDN, isi `TRUSTED_PROXIES`
+agar pembatasan memakai alamat pengunjung sebenarnya — tanpa nilai itu header
+`X-Forwarded-For` tidak dipercaya sehingga batas tidak dapat dilewati dengan
+memalsukannya.
+
+Halaman **Bergabung** juga memuat formulir permohonan kerja sama
+(`#mitra`, `POST /bergabung/mitra`). Isian nama, email, jenis kerja sama
+(mitra/kolaborasi), dan uraian wajib diisi; permohonan tersimpan di tabel
+`partnership_requests` dengan status `pending` dan ditinjau melalui panel
+**Permohonan Kerja Sama**.
+
+Uji: `Tests\Feature\PublicFormProtectionTest`.
+
+### Pembersihan HTML (RichEditor)
+
+Isi berita, program, kegiatan, cerita, video, deskripsi wilayah, dan deskripsi
+lembaga dirender sebagai HTML. Semuanya dibersihkan lebih dulu oleh
+`App\Support\HtmlSanitizer` (allowlist tag/atribut) lewat helper `html_aman()`;
+kolom `map_embed` memakai `peta_embed()` yang hanya mempertahankan iframe peta
+Google/OpenStreetMap. Tag berbahaya (`script`, `style`, `object`, `iframe` di
+konten biasa) dibuang beserta isinya, atribut `on*` dan skema `javascript:`
+ditolak, dan tautan `target="_blank"` selalu mendapat
+`rel="noopener noreferrer"`. Uji: `Tests\Feature\HtmlSanitizationTest`.
+
+Karena pembersihan terjadi saat render, data lama atau hasil impor ikut aman
+tanpa perlu migrasi ulang.
+
+### Publikasi agenda
+
+`App\Models\Event` kini memiliki scope `published()` seperti News/Program/
+Activity/Story/Video. Agenda dengan `published_at` kosong atau bertanggal masa
+depan tidak muncul di `/kegiatan` dan menghasilkan 404 bila slug-nya dibuka
+langsung. Pastikan **Tanggal Terbit** terisi pada setiap agenda yang ingin
+tampil (form admin sudah mengisinya dengan waktu sekarang secara bawaan). Uji:
+`Tests\Feature\EventPublicationTest`.
+
+### Header keamanan & cookie
+
+`App\Http\Middleware\SecurityHeaders` dipasang untuk semua respons dan menambah
+`X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`,
+`Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy`, serta
+CSP terbatas (`frame-ancestors`, `base-uri`, `object-src`, `form-action`) yang
+tidak membatasi skrip/gaya sehingga panel Filament tetap berjalan. HSTS tetap
+menjadi urusan web server karena bergantung pada sertifikat/domain.
+
+`config/session.php` membuat cookie sesi otomatis `Secure` bila `APP_URL`
+memakai `https://`; `SESSION_SECURE_COOKIE` dapat menimpanya bila perlu. Uji:
+`Tests\Feature\SecurityHeadersTest`.
+
+### Log Aktivitas
+
+`App\Observers\AuditObserver` mencatat create/update/delete yang dilakukan
+pengguna yang login ke tabel `audit_logs` (dibaca pada menu **Pengaturan → Log
+Aktivitas**, kini hanya baca). Kata sandi, token, stempel waktu, dan data
+pribadi sensitif (NIK, alamat, tanggal/tempat lahir) tidak ikut tersalin. Uji:
+`Tests\Feature\AuditLogTest`.
+
+### Enkripsi NIK & retensi data pribadi (SEC-04)
+
+NIK pada `membership_applications` dan `members` disimpan **terenkripsi**
+(AES-256 lewat `APP_KEY`) memakai cast `App\Casts\EncryptedString`. Data lama
+yang masih berupa teks biasa tetap dapat dibaca dan akan ikut terenkripsi saat
+record disimpan kembali. Karena kolom terenkripsi tidak bisa dicari dengan
+`LIKE`, tabel panel **Pendaftaran Anggota** dan **Anggota** menampilkan NIK
+bertopeng (`App\Models\Concerns\MasksNik`, mis. `••••••••••••1234`); formulir
+memakai kolom kata sandi yang dapat dibuka dengan ikon mata. NIK tidak pernah
+disalin ke Log Aktivitas.
+
+Retensi dijalankan otomatis tiap hari pukul 02.00 oleh
+`php artisan membership:purge-rejected` (jadwal di `routes/console.php`):
+pendaftaran berstatus **ditolak** yang telah melewati masa retensi dianonimkan
+— nama diganti keterangan anonim, NIK/alamat/tanggal lahir/kontak/motivasi/
+catatan admin dikosongkan — sementara baris dan statusnya tetap ada untuk
+statistik. Masa retensi bawaan **180 hari** sejak `reviewed_at` (atau
+`updated_at` bila `reviewed_at` kosong) dan dapat diubah lewat
+`MEMBERSHIP_RETENTION_DAYS` atau `config/perwama.php`. Perintah juga dapat
+dijalankan manual dengan `--days=N` untuk penyesuaian sekali jalan.
+
+**PENTING:** `APP_KEY` adalah kunci dekripsi NIK. Simpan cadangannya secara
+aman; kehilangan `APP_KEY` membuat NIK lama tidak dapat dibaca. Mengganti
+`APP_KEY` tanpa mendekripsi data lebih dulu akan membuat NIK tidak terbaca.
+
+Yang masih perlu diputuskan organisasi: masa retensi data **anggota aktif/
+nonaktif** dan pesan kontak (perintah ini hanya menangani pendaftaran yang
+ditolak), serta apakah `email`/`whatsapp` pendaftar perlu ikut dianonimkan
+lebih cepat. Uji: `Tests\Feature\PersonalDataProtectionTest`.
 
 ## About Laravel
 

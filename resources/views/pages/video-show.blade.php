@@ -37,7 +37,8 @@
 
                 @if ($video->description)
                     <div class="prose-perwama mt-8 text-base">
-                        {!! $video->description !!}
+                        {{-- Isi dari RichEditor dibersihkan lebih dulu (lihat App\Support\HtmlSanitizer). --}}
+                        {!! html_aman($video->description) !!}
                     </div>
                 @endif
             </article>
@@ -80,4 +81,5 @@
             </aside>
         </div>
     </section>
+    @include('partials.media-attachments', ['media' => $media])
 @endsection

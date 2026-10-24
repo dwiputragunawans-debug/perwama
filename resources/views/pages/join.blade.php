@@ -121,6 +121,8 @@
             <form action="{{ route('join.store') }}" method="POST" class="mx-auto mt-8 grid max-w-3xl gap-8">
                 @csrf
 
+                @include('partials.honeypot')
+
                 <fieldset class="rounded-2xl border border-navy/10 bg-white p-6 md:p-8" aria-labelledby="fieldset-data-diri">
                     <h3 id="fieldset-data-diri" class="font-display text-lg font-semibold text-navy">Data Diri</h3>
 
@@ -255,6 +257,100 @@
                     </label>
 
                     <button type="submit" class="btn btn-navy mt-7 w-full sm:w-auto">Kirim pendaftaran</button>
+                </fieldset>
+            </form>
+        </div>
+    </section>
+
+    {{-- ================= FORMULIR KERJA SAMA / MITRA ================= --}}
+    <section id="mitra" class="section-y">
+        <div class="container-page">
+            <div class="mx-auto max-w-3xl text-center">
+                <p class="section-eyebrow">Kerja Sama</p>
+                <h2 class="section-title mt-3 text-2xl md:text-3xl">Ajukan kemitraan atau kolaborasi</h2>
+                <p class="mt-4 text-base leading-relaxed text-ink-soft">
+                    Organisasi, lembaga, atau komunitas yang ingin bermitra dengan PERWAMA INA dapat mengirim
+                    permohonan melalui formulir berikut. Tim kami akan meninjau dan menghubungi Anda.
+                </p>
+            </div>
+
+            <div class="mx-auto mt-8 max-w-3xl">
+                <x-alert type="success" class="mb-6" />
+            </div>
+
+            <form action="{{ route('join.partnership') }}" method="POST" class="mx-auto mt-8 grid max-w-3xl gap-8">
+                @csrf
+
+                @include('partials.honeypot')
+
+                <fieldset class="rounded-2xl border border-navy/10 bg-white p-6 md:p-8" aria-labelledby="fieldset-mitra">
+                    <h3 id="fieldset-mitra" class="font-display text-lg font-semibold text-navy">Data Permohonan</h3>
+
+                    <div class="mt-4 grid gap-5 sm:grid-cols-2">
+                        <div>
+                            <label for="partner_name" class="field-label">Nama penanggung jawab <span class="text-terracotta">*</span></label>
+                            <input id="partner_name" type="text" name="name" value="{{ old('name') }}" required maxlength="255"
+                                   autocomplete="name" class="field-input" placeholder="Nama lengkap">
+                            @error('name')
+                                <p class="mt-1 text-sm text-terracotta">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label for="organization_name" class="field-label">Nama organisasi / lembaga</label>
+                            <input id="organization_name" type="text" name="organization_name" value="{{ old('organization_name') }}"
+                                   maxlength="255" autocomplete="organization" class="field-input"
+                                   placeholder="Nama organisasi atau komunitas">
+                            @error('organization_name')
+                                <p class="mt-1 text-sm text-terracotta">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label for="partner_email" class="field-label">Email <span class="text-terracotta">*</span></label>
+                            <input id="partner_email" type="email" name="email" value="{{ old('email') }}" required maxlength="255"
+                                   autocomplete="email" class="field-input" placeholder="nama@organisasi.org">
+                            @error('email')
+                                <p class="mt-1 text-sm text-terracotta">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label for="partner_phone" class="field-label">Telepon / WhatsApp</label>
+                            <input id="partner_phone" type="tel" name="phone" value="{{ old('phone') }}" maxlength="30"
+                                   autocomplete="tel" class="field-input" placeholder="08xx-xxxx-xxxx">
+                            @error('phone')
+                                <p class="mt-1 text-sm text-terracotta">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="sm:col-span-2">
+                            <label for="partner_type" class="field-label">Jenis kerja sama <span class="text-terracotta">*</span></label>
+                            <select id="partner_type" name="type" required class="field-input">
+                                <option value="mitra" @selected(old('type', 'mitra') === 'mitra')>Menjadi Mitra</option>
+                                <option value="kolaborasi" @selected(old('type') === 'kolaborasi')>Berkolaborasi</option>
+                            </select>
+                            @error('type')
+                                <p class="mt-1 text-sm text-terracotta">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="sm:col-span-2">
+                            <label for="partner_message" class="field-label">Bentuk kerja sama yang diusulkan <span class="text-terracotta">*</span></label>
+                            <textarea id="partner_message" name="message" rows="5" required maxlength="2000"
+                                      class="field-input" placeholder="Jelaskan rencana, cakupan, dan harapan kerja sama…">{{ old('message') }}</textarea>
+                            @error('message')
+                                <p class="mt-1 text-sm text-terracotta">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <label class="mt-6 flex items-start gap-3 meta">
+                        <input type="checkbox" required class="mt-1 h-4 w-4 rounded border-navy/30 text-navy focus:ring-navy">
+                        <span>Saya berwenang mewakili organisasi ini dan menyetujui data yang dikirim digunakan untuk menindaklanjuti permohonan kerja sama.</span>
+                    </label>
+
+                    <button type="submit" class="btn btn-navy mt-7 w-full sm:w-auto">Kirim permohonan</button>
                 </fieldset>
             </form>
         </div>

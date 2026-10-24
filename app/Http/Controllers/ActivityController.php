@@ -25,8 +25,8 @@ class ActivityController extends Controller
             'tab' => $tab,
             'activeCategory' => $category,
             'categories' => Activity::CATEGORIES,
-            'agendas' => Event::query()->upcoming()->take(6)->get(),
-            'pastEvents' => Event::query()->where('status', 'completed')->ordered()->take(6)->get(),
+            'agendas' => Event::query()->published()->upcoming()->take(6)->get(),
+            'pastEvents' => Event::query()->published()->where('status', 'completed')->ordered()->take(6)->get(),
             'activities' => Activity::query()
                 ->published()
                 ->with(['region', 'program'])
@@ -46,7 +46,7 @@ class ActivityController extends Controller
         $activity = Activity::query()
             ->published()
             ->where('slug', $slug)
-            ->with(['region', 'program', 'event', 'gallery.items', 'tags'])
+            ->with(['region', 'program', 'event', 'gallery.items', 'tags', 'seoMetadata', 'publicMedia'])
             ->firstOrFail();
 
         $activity->increment('views');
@@ -54,6 +54,8 @@ class ActivityController extends Controller
         return view('pages.activity-show', [
             'profile' => OrganizationProfile::current(),
             'activity' => $activity,
+            'seo' => $activity->seoMetadata,
+            'media' => $activity->publicMedia,
             'related' => Activity::query()
                 ->published()
                 ->whereKeyNot($activity->getKey())
@@ -70,8 +72,9 @@ class ActivityController extends Controller
     public function showEvent(string $slug): View
     {
         $event = Event::query()
+            ->published()
             ->where('slug', $slug)
-            ->with(['region', 'program', 'activities' => fn ($q) => $q->published()->ordered()])
+            ->with(['region', 'program', 'activities' => fn ($q) => $q->published()->ordered(), 'seoMetadata', 'publicMedia'])
             ->firstOrFail();
 
         $event->increment('views');
@@ -79,7 +82,10 @@ class ActivityController extends Controller
         return view('pages.event-show', [
             'profile' => OrganizationProfile::current(),
             'event' => $event,
+            'seo' => $event->seoMetadata,
+            'media' => $event->publicMedia,
             'agendas' => Event::query()
+                ->published()
                 ->upcoming()
                 ->whereKeyNot($event->getKey())
                 ->take(3)

@@ -11,10 +11,8 @@
         $favicon = media_url(\App\Models\PanelSetting::current()->favicon);
     @endphp
 
-    <title>@yield('title', $profile->name){{ View::hasSection('title') ? ' — '.$profile->abbreviation : '' }}</title>
-    <meta name="description" content="@yield('meta_description', $profile->short_description)">
-    <meta name="keywords" content="@yield('meta_keywords', 'PERWAMA INA, perempuan Maluku, organisasi perempuan, pemberdayaan perempuan')">
-    <meta name="theme-color" content="#1F2A44">
+    @include('partials.seo', ['profile' => $profile, 'seo' => $seo ?? null, 'seoType' => $seoType ?? 'website'])
+
     <meta name="session-refresh-url" content="{{ route('session.refresh') }}">
     {{-- Tujuan laporan lama kunjungan halaman (statistik dasbor panel). --}}
     <meta name="visit-duration-url" content="{{ route('visit.duration') }}">
@@ -23,12 +21,31 @@
         <link rel="icon" href="{{ $favicon }}">
     @endif
 
-    <meta property="og:type" content="website">
-    <meta property="og:site_name" content="{{ $profile->name }}">
-    <meta property="og:title" content="@yield('og_title', $profile->name)">
-    <meta property="og:description" content="@yield('og_description', $profile->short_description)">
-    @hasSection('og_image')
-        <meta property="og:image" content="@yield('og_image')">
+    @if (request()->routeIs('home'))
+        @php
+            $skemaOrganisasi = array_filter([
+                '@context' => 'https://schema.org',
+                '@type' => 'Organization',
+                'name' => $profile->name,
+                'alternateName' => $profile->abbreviation,
+                'url' => route('home'),
+                'logo' => media_url($profile->logo),
+                'description' => trim(strip_tags((string) $profile->short_description)),
+                'foundingDate' => $profile->founded_year,
+                'email' => $profile->email,
+                'telephone' => $profile->phone,
+                'address' => $profile->address ? array_filter([
+                    '@type' => 'PostalAddress',
+                    'streetAddress' => $profile->address,
+                    'addressLocality' => $profile->city,
+                    'addressRegion' => $profile->province,
+                    'postalCode' => $profile->postal_code,
+                    'addressCountry' => 'ID',
+                ]) : null,
+            ]);
+        @endphp
+        {{-- Data terstruktur organisasi: dibaca mesin pencari pada halaman beranda. --}}
+        <script type="application/ld+json">{!! json_encode($skemaOrganisasi, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}</script>
     @endif
 
     <link rel="preconnect" href="https://fonts.googleapis.com">

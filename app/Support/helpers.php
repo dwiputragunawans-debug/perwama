@@ -1,5 +1,6 @@
 <?php
 
+use App\Support\HtmlSanitizer;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -90,6 +91,32 @@ if (! function_exists('tanggal_id')) {
         Carbon::setLocale('id');
 
         return Carbon::parse($date)->translatedFormat($format);
+    }
+}
+
+if (! function_exists('html_aman')) {
+    /**
+     * HTML dari editor kaya yang sudah dibersihkan (allowlist).
+     *
+     * Dipakai pada view yang menampilkan isi artikel dengan `{!! !!}` — lihat
+     * App\Support\HtmlSanitizer untuk daftar tag/atribut yang diizinkan.
+     */
+    function html_aman(?string $html): string
+    {
+        return HtmlSanitizer::clean($html);
+    }
+}
+
+if (! function_exists('peta_embed')) {
+    /**
+     * Kode sematan peta (kolom `map_embed`) yang sudah dibersihkan.
+     *
+     * Hanya iframe Google Maps/OpenStreetMap yang dipertahankan; nilai lain
+     * menjadi null sehingga view tidak menampilkan kotak peta kosong.
+     */
+    function peta_embed(?string $html): ?string
+    {
+        return HtmlSanitizer::embed($html);
     }
 }
 

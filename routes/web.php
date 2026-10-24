@@ -56,12 +56,23 @@ Route::get('/galeri/video', [GalleryController::class, 'videos'])->name('video.i
 Route::get('/galeri/video/{slug}', [GalleryController::class, 'showVideo'])->name('video.show');
 Route::get('/galeri/{slug}', [GalleryController::class, 'show'])->name('gallery.show');
 
+/*
+ * Formulir publik menulis ke database tanpa login, sehingga setiap endpoint
+ * dibatasi per alamat IP (lihat AppServiceProvider). Halaman formulir tetap
+ * dapat dibuka berkali-kali; hanya pengirimannya yang dibatasi.
+ */
 Route::get('/bergabung', [JoinController::class, 'index'])->name('join');
-Route::post('/bergabung', [JoinController::class, 'storeMembership'])->name('join.store');
-Route::post('/bergabung/mitra', [JoinController::class, 'storePartnership'])->name('join.partnership');
+Route::post('/bergabung', [JoinController::class, 'storeMembership'])
+    ->middleware('throttle:formulir-gabung')
+    ->name('join.store');
+Route::post('/bergabung/mitra', [JoinController::class, 'storePartnership'])
+    ->middleware('throttle:formulir-gabung')
+    ->name('join.partnership');
 
 Route::get('/kontak', [ContactController::class, 'index'])->name('contact');
-Route::post('/kontak', [ContactController::class, 'store'])->name('contact.store');
+Route::post('/kontak', [ContactController::class, 'store'])
+    ->middleware('throttle:formulir-kontak')
+    ->name('contact.store');
 
 // Pencarian global sederhana.
 Route::get('/cari', function (Request $request) {
@@ -88,7 +99,7 @@ Route::get('/cari', function (Request $request) {
 */
 Route::get('/sesi/segar', function () {
     return response()->json(['token' => csrf_token()]);
-})->name('session.refresh');
+})->middleware('throttle:sesi-segar')->name('session.refresh');
 
 /*
 |--------------------------------------------------------------------------
@@ -99,4 +110,6 @@ Route::get('/sesi/segar', function () {
 | middleware RecordPageView dan dipakai oleh dasbor panel
 | ("Rata-rata Waktu Akses"), lihat resources/js/app.js.
 */
-Route::post('/jejak-kunjungan', [VisitController::class, 'storeDuration'])->name('visit.duration');
+Route::post('/jejak-kunjungan', [VisitController::class, 'storeDuration'])
+    ->middleware('throttle:telemetri')
+    ->name('visit.duration');

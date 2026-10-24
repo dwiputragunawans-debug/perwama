@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasMedia;
+use App\Models\Concerns\HasSeoMetadata;
 use App\Models\Concerns\HasSlug;
 use App\Support\VideoUrl;
 use Illuminate\Database\Eloquent\Builder;
@@ -9,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Video extends Model
 {
-    use HasSlug;
+    use HasMedia, HasSeoMetadata, HasSlug;
 
     public const CATEGORIES = [
         'profil' => 'Profil Organisasi',

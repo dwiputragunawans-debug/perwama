@@ -40,7 +40,8 @@
 
                 @if ($program->description)
                     <div class="prose-perwama mt-10 text-base">
-                        {!! $program->description !!}
+                        {{-- Isi dari RichEditor dibersihkan lebih dulu (lihat App\Support\HtmlSanitizer). --}}
+                        {!! html_aman($program->description) !!}
                     </div>
                 @endif
 
@@ -160,5 +161,6 @@
             </div>
         </section>
     @endif
+    @include('partials.media-attachments', ['media' => $media])
 @endsection
 

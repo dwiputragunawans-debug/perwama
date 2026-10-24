@@ -49,12 +49,14 @@ class GalleryController extends Controller
         $gallery = Gallery::query()
             ->active()
             ->where('slug', $slug)
-            ->with(['region', 'program', 'albumCategory', 'items' => fn ($q) => $q->orderBy('sort_order')])
+            ->with(['region', 'program', 'albumCategory', 'items' => fn ($q) => $q->orderBy('sort_order'), 'seoMetadata', 'publicMedia'])
             ->firstOrFail();
 
         return view('pages.gallery-show', [
             'profile' => OrganizationProfile::current(),
             'gallery' => $gallery,
+            'seo' => $gallery->seoMetadata,
+            'media' => $gallery->publicMedia,
             'others' => Gallery::query()
                 ->active()
                 ->with('albumCategory')
@@ -90,11 +92,17 @@ class GalleryController extends Controller
      */
     public function showVideo(string $slug): View
     {
-        $video = Video::query()->published()->where('slug', $slug)->firstOrFail();
+        $video = Video::query()
+            ->published()
+            ->where('slug', $slug)
+            ->with(['seoMetadata', 'publicMedia'])
+            ->firstOrFail();
 
         return view('pages.video-show', [
             'profile' => OrganizationProfile::current(),
             'video' => $video,
+            'seo' => $video->seoMetadata,
+            'media' => $video->publicMedia,
             'others' => Video::query()
                 ->published()
                 ->whereKeyNot($video->getKey())

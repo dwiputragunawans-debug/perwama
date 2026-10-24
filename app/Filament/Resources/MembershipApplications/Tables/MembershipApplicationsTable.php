@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\MembershipApplications\Tables;
 
+use App\Models\MembershipApplication;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -19,7 +20,7 @@ class MembershipApplicationsTable
                     ->searchable(),
                 TextColumn::make('nik')
                     ->label('NIK')
-                    ->searchable(),
+                    ->formatStateUsing(fn (MembershipApplication $record): string => $record->maskedNik() ?: '—'),
                 TextColumn::make('birth_place')
                     ->label('Tempat Lahir')
                     ->searchable(),

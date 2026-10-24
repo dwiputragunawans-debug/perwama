@@ -45,7 +45,8 @@
 
                 @if ($activity->description)
                     <div class="prose-perwama mt-10 text-base">
-                        {!! $activity->description !!}
+                        {{-- Isi dari RichEditor dibersihkan lebih dulu (lihat App\Support\HtmlSanitizer). --}}
+                        {!! html_aman($activity->description) !!}
                     </div>
                 @elseif ($activity->excerpt)
                     <div class="prose-perwama mt-10 text-base">
@@ -145,5 +146,6 @@
             </div>
         </section>
     @endif
+    @include('partials.media-attachments', ['media' => $media])
 @endsection
 

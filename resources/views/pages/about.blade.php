@@ -81,7 +81,8 @@
                 @endif
 
                 <div class="prose-perwama mt-6 text-base">
-                    {!! $profile->description ?: '<p>'.$profile->short_description.'</p>' !!}
+                    {{-- Deskripsi dari RichEditor dibersihkan lebih dulu; cadangan teks biasa di-escape. --}}
+                    {!! html_aman($profile->description) ?: '<p>'.e($profile->short_description).'</p>' !!}
                 </div>
             </div>
 
@@ -333,9 +334,10 @@
                                     <h3 class="history-title">{{ $history->title }}</h3>
 
                                     @if ($history->description)
-                                        {{-- Deskripsi diisi lewat editor kaya (RichEditor) pada panel admin. --}}
+                                        {{-- Deskripsi diisi lewat editor kaya (RichEditor) pada panel admin, --}}
+                                        {{-- jadi dibersihkan dulu dengan allowlist sebelum dirender. --}}
                                         <div class="prose-perwama mt-4 text-base">
-                                            {!! $history->description !!}
+                                            {!! html_aman($history->description) !!}
                                         </div>
                                     @endif
 
@@ -446,6 +448,9 @@
             </div>
         </section>
     @endif
+
+    {{-- Mitra kerja sama yang aktif, dikelola lewat panel Partners. --}}
+    @include('partials.partners', ['partners' => $partners, 'judulMitra' => 'Mitra & Jejaring Kerja Sama'])
 
     {{-- ================= CTA ================= --}}
     {{--

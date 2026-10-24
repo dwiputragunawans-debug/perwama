@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use App\Casts\EncryptedString;
+use App\Models\Concerns\MasksNik;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MembershipApplication extends Model
 {
+    use MasksNik;
+
     protected $fillable = [
         'full_name', 'nik', 'birth_place', 'birth_date', 'gender', 'address',
         'city', 'province', 'whatsapp', 'email', 'education', 'occupation',
@@ -18,6 +22,7 @@ class MembershipApplication extends Model
     protected function casts(): array
     {
         return [
+            'nik' => EncryptedString::class,
             'birth_date' => 'date',
             'reviewed_at' => 'datetime',
         ];

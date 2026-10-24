@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Members\Tables;
 
+use App\Models\Member;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -31,7 +32,7 @@ class MembersTable
                     ->searchable(),
                 TextColumn::make('nik')
                     ->label('NIK')
-                    ->searchable(),
+                    ->formatStateUsing(fn (Member $record): string => $record->maskedNik() ?: '—'),
                 TextColumn::make('birth_place')
                     ->label('Tempat Lahir')
                     ->searchable(),

@@ -7,6 +7,7 @@ use App\Models\Management;
 use App\Models\OrganizationHistory;
 use App\Models\OrganizationIdentity;
 use App\Models\OrganizationProfile;
+use App\Models\Partner;
 use App\Models\ProgramCategory;
 use App\Models\Statistic;
 use Illuminate\Contracts\View\View;
@@ -23,6 +24,7 @@ class AboutController extends Controller
 
         return view('pages.about', [
             'profile' => $profile,
+            'partners' => Partner::query()->public()->ordered()->get(),
             'identity' => OrganizationIdentity::current(),
             'histories' => OrganizationHistory::query()->active()->ordered()->get(),
             'management' => Management::query()->active()->ordered()->get()->groupBy('level'),

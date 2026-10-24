@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasMedia;
+use App\Models\Concerns\HasSeoMetadata;
 use App\Models\Concerns\HasSlug;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class News extends Model
 {
-    use HasSlug;
+    use HasMedia, HasSeoMetadata, HasSlug;
 
     protected $table = 'news';
 

@@ -104,10 +104,13 @@
                     </div>
                 @endif
 
-                @if ($profile->map_embed)
+                {{-- Hanya iframe peta Google/OpenStreetMap yang lolos pembersihan. --}}
+                @php($peta = peta_embed($profile->map_embed))
+
+                @if ($peta)
                     <div class="overflow-hidden rounded-2xl border border-navy/10 bg-white">
                         <div class="aspect-video [&>iframe]:h-full [&>iframe]:w-full">
-                            {!! $profile->map_embed !!}
+                            {!! $peta !!}
                         </div>
                     </div>
                 @endif
@@ -167,5 +170,6 @@
             </div>
         </section>
     @endif
+    @include('partials.media-attachments', ['media' => $media])
 @endsection
 

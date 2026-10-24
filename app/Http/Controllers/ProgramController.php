@@ -54,6 +54,8 @@ class ProgramController extends Controller
                 'stories' => fn ($q) => $q->published()->ordered()->take(3),
                 'news' => fn ($q) => $q->published()->ordered()->take(3),
                 'galleries' => fn ($q) => $q->active()->ordered()->take(4),
+                'seoMetadata',
+                'publicMedia',
             ])
             ->firstOrFail();
 
@@ -62,6 +64,8 @@ class ProgramController extends Controller
         return view('pages.program-show', [
             'profile' => OrganizationProfile::current(),
             'program' => $program,
+            'seo' => $program->seoMetadata,
+            'media' => $program->publicMedia,
             'others' => Program::query()
                 ->published()
                 ->whereKeyNot($program->getKey())

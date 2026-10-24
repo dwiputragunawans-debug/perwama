@@ -167,9 +167,13 @@ return [
     | to the server if the browser has a HTTPS connection. This will keep
     | the cookie from being sent to you when it can't be done securely.
     |
+    | Bila variabel .env tidak diisi, nilainya mengikuti skema APP_URL: situs
+    | produksi yang memakai https:// otomatis memakai cookie aman, sedangkan
+    | pengembangan lokal lewat http:// tetap dapat login.
+    |
     */
 
-    'secure' => env('SESSION_SECURE_COOKIE'),
+    'secure' => env('SESSION_SECURE_COOKIE', str_starts_with((string) env('APP_URL', ''), 'https://')),
 
     /*
     |--------------------------------------------------------------------------

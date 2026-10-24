@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasMedia;
+use App\Models\Concerns\HasSeoMetadata;
 use App\Models\Concerns\HasSlug;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Event extends Model
 {
-    use HasSlug;
+    use HasMedia, HasSeoMetadata, HasSlug;
 
     protected $fillable = [
         'region_id', 'organization_id', 'program_id', 'title', 'slug',
@@ -47,6 +49,18 @@ class Event extends Model
     public function activities(): HasMany
     {
         return $this->hasMany(Activity::class);
+    }
+
+    /**
+     * Agenda yang sudah dijadwalkan terbit.
+     *
+     * Sama seperti News/Program/Activity/Story/Video: agenda tanpa
+     * `published_at` atau yang tanggal terbitnya masih di masa depan tidak
+     * boleh muncul di situs publik, termasuk bila slug-nya diketahui.
+     */
+    public function scopePublished(Builder $query): Builder
+    {
+        return $query->whereNotNull('published_at')->where('published_at', '<=', now());
     }
 
     public function scopeUpcoming(Builder $query): Builder

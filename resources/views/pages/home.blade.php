@@ -357,6 +357,9 @@
         </section>
     @endif
 
+    {{-- Mitra kerja sama: logo, jenis, dan tautan dari panel Partners. --}}
+    @include('partials.partners', ['partners' => $partners, 'latarMitra' => 'section-soft'])
+
     {{-- ================= CTA BERGABUNG ================= --}}
     {{--
         Kartu penutup beranda. Jeda atas dan jeda bawahnya dibuat sama besar

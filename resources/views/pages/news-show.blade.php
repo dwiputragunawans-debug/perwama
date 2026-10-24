@@ -40,7 +40,8 @@
                 @endif
 
                 <div class="prose-perwama mt-8 text-base">
-                    {!! $news->content ?: '<p>'.e($news->excerpt).'</p>' !!}
+                    {{-- Isi dari RichEditor dibersihkan lebih dulu (lihat App\Support\HtmlSanitizer). --}}
+                    {!! html_aman($news->content) ?: '<p>'.e($news->excerpt).'</p>' !!}
                 </div>
 
                 @if ($news->source)
@@ -96,4 +97,5 @@
             </aside>
         </div>
     </section>
+    @include('partials.media-attachments', ['media' => $media])
 @endsection

@@ -7,6 +7,7 @@ use App\Models\OrganizationProfile;
 use App\Models\PartnershipRequest;
 use App\Models\Region;
 use App\Models\Statistic;
+use App\Support\Honeypot;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -31,6 +32,18 @@ class JoinController extends Controller
      */
     public function storeMembership(Request $request): RedirectResponse
     {
+        /*
+         * Bot yang mengisi kolom perangkap mendapat balasan sukses yang sama,
+         * tetapi pendaftarannya tidak disimpan.
+         */
+        if (Honeypot::triggered($request)) {
+            $form = (string) $request->input('membership_type', 'anggota');
+
+            return $this->pendaftaranDiterima(
+                in_array($form, ['anggota', 'relawan', 'mitra', 'kolaborasi'], true) ? $form : 'anggota'
+            );
+        }
+
         $data = $request->validate([
             'full_name' => ['required', 'string', 'max:255'],
             'nik' => ['nullable', 'string', 'max:32'],
@@ -59,10 +72,15 @@ class JoinController extends Controller
 
         MembershipApplication::query()->create($data);
 
+        return $this->pendaftaranDiterima($data['membership_type']);
+    }
+
+    private function pendaftaranDiterima(string $form): RedirectResponse
+    {
         return redirect()
             ->route('join')
             ->with('success', 'Terima kasih! Pendaftaran Anda sudah kami terima dan akan ditinjau oleh tim PERWAMA INA.')
-            ->with('form', $data['membership_type']);
+            ->with('form', $form);
     }
 
     /**
@@ -70,6 +88,11 @@ class JoinController extends Controller
      */
     public function storePartnership(Request $request): RedirectResponse
     {
+        // Kolom perangkap terisi: balasan sama, tetapi permohonan tidak disimpan.
+        if (Honeypot::triggered($request)) {
+            return $this->permohonanDiterima();
+        }
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'organization_name' => ['nullable', 'string', 'max:255'],
@@ -83,6 +106,11 @@ class JoinController extends Controller
 
         PartnershipRequest::query()->create($data);
 
+        return $this->permohonanDiterima();
+    }
+
+    private function permohonanDiterima(): RedirectResponse
+    {
         return redirect()
             ->route('join')
             ->with('success', 'Permohonan kerja sama Anda telah kami terima. Tim kami akan menghubungi Anda segera.')

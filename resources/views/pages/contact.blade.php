@@ -113,6 +113,8 @@
                     <form action="{{ route('contact.store') }}" method="POST" class="mt-6 grid gap-5 sm:grid-cols-2">
                         @csrf
 
+                        @include('partials.honeypot')
+
                         <div>
                             <label for="c_name" class="field-label">Nama <span class="text-terracotta">*</span></label>
                             <input id="c_name" type="text" name="name" value="{{ old('name') }}" required maxlength="255"
@@ -147,10 +149,13 @@
                     </form>
                 </div>
 
-                @if ($profile->map_embed)
+                {{-- Hanya iframe peta Google/OpenStreetMap yang lolos pembersihan. --}}
+                @php($peta = peta_embed($profile->map_embed))
+
+                @if ($peta)
                     <div class="mt-8 overflow-hidden rounded-2xl border border-navy/10 bg-white">
                         <div class="aspect-video [&>iframe]:h-full [&>iframe]:w-full">
-                            {!! $profile->map_embed !!}
+                            {!! $peta !!}
                         </div>
                     </div>
                 @endif

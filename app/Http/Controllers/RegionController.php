@@ -50,12 +50,16 @@ class RegionController extends Controller
                 'activities' => fn ($q) => $q->published()->ordered()->take(6),
                 'events' => fn ($q) => $q->upcoming()->take(4),
                 'stories' => fn ($q) => $q->published()->ordered()->take(3),
+                'seoMetadata',
+                'publicMedia',
             ])
             ->firstOrFail();
 
         return view('pages.region-show', [
             'profile' => OrganizationProfile::current(),
             'region' => $region,
+            'seo' => $region->seoMetadata,
+            'media' => $region->publicMedia,
             'provinces' => Region::query()->active()->provinces()->ordered()->get(),
         ]);
     }

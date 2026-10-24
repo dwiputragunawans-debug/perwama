@@ -75,7 +75,8 @@ class Organization extends Model
     /**
      * Deskripsi siap tampil di halaman publik.
      *
-     * Deskripsi baru diisi lewat RichEditor sehingga sudah berupa HTML.
+     * Deskripsi baru diisi lewat RichEditor sehingga sudah berupa HTML; isinya
+     * dibersihkan dengan allowlist (App\Support\HtmlSanitizer) sebelum dirender.
      * Deskripsi lama masih berupa teks biasa; baris baru diubah menjadi <br>
      * agar tidak menyatu dalam satu paragraf. Sebagian data lama juga masih
      * menyimpan tag sebagai entity, sehingga perlu didekode lebih dahulu.
@@ -93,13 +94,13 @@ class Organization extends Model
 
             // Data lama seperti `&lt;br&gt;` tetap harus tampil sebagai baris baru.
             if (strip_tags($decoded) !== $decoded) {
-                return $decoded;
+                return html_aman($decoded);
             }
 
             return nl2br(e($description));
         }
 
-        return $description;
+        return html_aman($description);
     }
 
     public function scopeActive($query)

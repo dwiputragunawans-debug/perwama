@@ -30,7 +30,11 @@ class MemberForm
                     ->label('Nama Lengkap')
                     ->required(),
                 TextInput::make('nik')
-                    ->label('NIK'),
+                    ->label('NIK')
+                    ->password()
+                    ->revealable()
+                    ->maxLength(32)
+                    ->helperText('NIK disimpan terenkripsi. Gunakan ikon mata untuk melihat atau mengubahnya.'),
                 TextInput::make('birth_place')
                     ->label('Tempat Lahir'),
                 DatePicker::make('birth_date')

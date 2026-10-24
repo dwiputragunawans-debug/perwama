@@ -39,7 +39,7 @@ class StoryController extends Controller
         $story = Story::query()
             ->published()
             ->where('slug', $slug)
-            ->with(['region', 'organization', 'program', 'tags'])
+            ->with(['region', 'organization', 'program', 'tags', 'seoMetadata', 'publicMedia'])
             ->firstOrFail();
 
         $story->increment('views');
@@ -47,6 +47,8 @@ class StoryController extends Controller
         return view('pages.story-show', [
             'profile' => OrganizationProfile::current(),
             'story' => $story,
+            'seo' => $story->seoMetadata,
+            'media' => $story->publicMedia,
             'related' => Story::query()
                 ->published()
                 ->whereKeyNot($story->getKey())

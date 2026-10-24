@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasMedia;
+use App\Models\Concerns\HasSeoMetadata;
 use App\Models\Concerns\HasSlug;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Region extends Model
 {
-    use HasSlug;
+    use HasMedia, HasSeoMetadata, HasSlug;
 
     /**
      * Jenis wilayah yang dipakai situs, dipetakan ke label bahasa Indonesia.
@@ -79,9 +81,10 @@ class Region extends Model
     /**
      * Deskripsi siap tampil di halaman publik.
      *
-     * Deskripsi baru diisi lewat RichEditor sehingga sudah berupa HTML.
-     * Deskripsi lama (mis. dari seeder) masih berupa teks biasa; untuk itu
-     * baris baru diubah menjadi <br> agar tidak menyatu dalam satu paragraf.
+     * Deskripsi baru diisi lewat RichEditor sehingga sudah berupa HTML; isinya
+     * dibersihkan dengan allowlist sebelum dirender. Deskripsi lama (mis. dari
+     * seeder) masih berupa teks biasa; untuk itu baris baru diubah menjadi <br>
+     * agar tidak menyatu dalam satu paragraf.
      */
     public function descriptionHtml(): ?string
     {
@@ -91,7 +94,7 @@ class Region extends Model
 
         return strip_tags($this->description) === $this->description
             ? nl2br(e($this->description))
-            : $this->description;
+            : html_aman($this->description);
     }
 
     public function scopeActive($query)

@@ -37,12 +37,14 @@ class PublicationController extends Controller
         $publication = Publication::query()
             ->published()
             ->where('slug', $slug)
-            ->with('program')
+            ->with(['program', 'seoMetadata', 'publicMedia'])
             ->firstOrFail();
 
         return view('pages.publication-show', [
             'profile' => OrganizationProfile::current(),
             'publication' => $publication,
+            'seo' => $publication->seoMetadata,
+            'media' => $publication->publicMedia,
             'others' => Publication::query()
                 ->published()
                 ->whereKeyNot($publication->getKey())

@@ -1251,9 +1251,9 @@ class PublicPagesTest extends TestCase
         $dropdown = (new DOMXPath($dom))->query('//form//select');
 
         $this->assertSame(
-            2,
+            3,
             $dropdown->length,
-            'Jumlah dropdown pada formulir pendaftaran berubah; periksa apakah ada dropdown baru yang belum tertata.',
+            'Jumlah dropdown pada formulir pendaftaran dan mitra berubah; periksa apakah ada dropdown baru yang belum tertata.',
         );
 
         foreach ($dropdown as $select) {

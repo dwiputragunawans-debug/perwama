@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasMedia;
+use App\Models\Concerns\HasSeoMetadata;
 use App\Models\Concerns\HasSlug;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Program extends Model
 {
-    use HasSlug;
+    use HasMedia, HasSeoMetadata, HasSlug;
 
     protected $fillable = [
         'program_category_id', 'region_id', 'title', 'slug', 'type', 'excerpt',

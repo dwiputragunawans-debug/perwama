@@ -87,4 +87,5 @@
             </div>
         </section>
     @endif
+    @include('partials.media-attachments', ['media' => $media])
 @endsection
