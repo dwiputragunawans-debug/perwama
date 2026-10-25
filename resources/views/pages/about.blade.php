@@ -8,9 +8,9 @@
          * Halaman Tentang Kami memakai hero bersama <x-page-hero> — sama
          * seperti halaman lain kecuali beranda — lalu sekilas organisasi yang
          * ditutup pita statistik, visi & misi, bidang pengabdian, sejarah,
-         * struktur pengurus bertab, dan identitas organisasi. Warna, tipografi,
-         * dan komponen tetap memakai tema situs (navy, gold, terracotta, hijau,
-         * cream, Poppins).
+         * tokoh organisasi, struktur pengurus bertab, dan identitas organisasi.
+         * Warna, tipografi, dan komponen tetap memakai tema situs (navy, gold,
+         * terracotta, hijau, cream, Poppins).
          */
         $mission = $profile->mission ?? [];
 
@@ -375,6 +375,57 @@
                                 </div>
                             </article>
                         </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
+
+    {{-- ================= TOKOH ORGANISASI ================= --}}
+    {{--
+        Para pendiri dan tokoh penting organisasi. Dikelola lewat panel
+        Tentang → Tokoh Organisasi, sehingga nama, foto, jabatan, dan urutan
+        kartu dapat diganti tanpa mengubah kode. Empat kartu tampil sejajar
+        pada layar lebar dan menyusut menjadi dua atau satu kolom di layar
+        kecil. Foto yang belum diunggah diganti inisial nama.
+    --}}
+    @if ($figures->isNotEmpty())
+        <section id="tokoh-organisasi" class="section-y">
+            <div class="container-page">
+                <div class="mx-auto max-w-3xl text-center" data-reveal>
+                    <p class="section-eyebrow">Pendiri PERWAMA INA</p>
+                    <h2 class="section-title mt-4 text-3xl md:text-4xl">Tokoh Organisasi</h2>
+                    <p class="mt-4 text-base leading-relaxed text-ink-soft">
+                        Para perempuan yang meletakkan dasar dan menjadi teladan dalam perjalanan PERWAMA INA.
+                    </p>
+                </div>
+
+                <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                    @foreach ($figures as $figure)
+                        <article class="card figure-card" data-reveal>
+                            @if ($figure->photo)
+                                {{--
+                                    Sama seperti kartu pengurus: klik foto membuka
+                                    berkas asli pada lightbox app.js. Tanpa JavaScript
+                                    tautan tetap membuka foto secara langsung.
+                                --}}
+                                <a href="{{ media_url($figure->photo) }}"
+                                   data-lightbox="{{ media_url($figure->photo) }}"
+                                   aria-label="Perbesar foto {{ $figure->name }}"
+                                   class="figure-card-photo cursor-zoom-in">
+                                    <img src="{{ media_url($figure->photo) }}"
+                                         alt="Foto {{ $figure->name }}"
+                                         loading="lazy">
+                                </a>
+                            @else
+                                <span class="figure-card-initial" aria-hidden="true">
+                                    {{ Str::substr($figure->name, 0, 1) }}
+                                </span>
+                            @endif
+
+                            <h3 class="figure-card-name">{{ $figure->name }}</h3>
+                            <p class="figure-card-role">{{ $figure->position ?: 'Pendiri' }}</p>
+                        </article>
                     @endforeach
                 </div>
             </div>

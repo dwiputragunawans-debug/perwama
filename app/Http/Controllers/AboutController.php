@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Gallery;
 use App\Models\Management;
+use App\Models\OrganizationFigure;
 use App\Models\OrganizationHistory;
 use App\Models\OrganizationIdentity;
 use App\Models\OrganizationProfile;
@@ -16,7 +17,7 @@ class AboutController extends Controller
 {
     /**
      * Halaman "Tentang" — profil, visi & misi, bidang pengabdian, sejarah,
-     * struktur kepengurusan, dan identitas organisasi.
+     * tokoh organisasi, struktur kepengurusan, dan identitas organisasi.
      */
     public function __invoke(): View
     {
@@ -27,6 +28,7 @@ class AboutController extends Controller
             'partners' => Partner::query()->public()->ordered()->get(),
             'identity' => OrganizationIdentity::current(),
             'histories' => OrganizationHistory::query()->active()->ordered()->get(),
+            'figures' => OrganizationFigure::query()->active()->ordered()->get(),
             'management' => Management::query()->active()->ordered()->get()->groupBy('level'),
             'statistics' => Statistic::query()->active()->ordered()->get(),
             /*

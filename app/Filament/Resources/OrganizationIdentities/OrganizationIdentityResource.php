@@ -22,7 +22,7 @@ class OrganizationIdentityResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Tentang';
 
-    protected static ?int $navigationSort = 6;
+    protected static ?int $navigationSort = 7;
 
     protected static ?string $navigationLabel = 'Identitas Organisasi';
 

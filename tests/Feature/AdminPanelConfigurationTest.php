@@ -301,7 +301,7 @@ class AdminPanelConfigurationTest extends TestCase
         sort($label);
 
         $this->assertSame(
-            ['Identitas Organisasi', 'Mitra & Jejaring', 'Pengurus', 'Profil Organisasi', 'Sejarah', 'Statistik'],
+            ['Identitas Organisasi', 'Mitra & Jejaring', 'Pengurus', 'Profil Organisasi', 'Sejarah', 'Statistik', 'Tokoh Organisasi'],
             $label,
         );
     }

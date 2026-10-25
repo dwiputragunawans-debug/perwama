@@ -23,7 +23,7 @@ class ManagementResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Tentang';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 4;
 
     protected static ?string $navigationLabel = 'Pengurus';
 

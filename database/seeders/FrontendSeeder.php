@@ -12,6 +12,7 @@ use App\Models\Management;
 use App\Models\Member;
 use App\Models\News;
 use App\Models\Organization;
+use App\Models\OrganizationFigure;
 use App\Models\OrganizationHistory;
 use App\Models\OrganizationProfile;
 use App\Models\OrganizationValue;
@@ -42,6 +43,7 @@ class FrontendSeeder extends Seeder
     {
         $this->seedProfile();
         $this->seedHistories();
+        $this->seedFigures();
         $this->seedValues();
         $this->seedStatistics();
         $this->seedRegions();
@@ -132,6 +134,37 @@ class FrontendSeeder extends Seeder
                 ['title' => $history['title']],
                 $history + [
                     'image' => $this->img('sejarah-'.$index),
+                    'sort_order' => $index + 1,
+                    'is_active' => true,
+                ],
+            );
+        }
+    }
+
+    /**
+     * Pendiri yang tampil pada bagian "Tokoh Organisasi".
+     *
+     * Tiga nama di bawah berasal dari data pendiri PERWAMA INA yang tercatat.
+     * Kartu keempat dapat ditambahkan lewat panel Tentang → Tokoh Organisasi
+     * (tata letak sudah menyediakan empat kolom pada layar lebar). Foto sengaja
+     * tidak diisi contoh acak karena wajah tokoh harus berasal dari unggahan
+     * asli pengelola; selama belum diunggah, kartu menampilkan inisial nama.
+     * `photo` juga tidak ikut ditulis saat seeder dijalankan ulang agar foto
+     * yang sudah diunggah tidak terhapus.
+     */
+    private function seedFigures(): void
+    {
+        $figures = [
+            'Robine Inka Caecilia M. P.',
+            'Johanna Pietersz',
+            'Evie Poetiray',
+        ];
+
+        foreach ($figures as $index => $name) {
+            OrganizationFigure::query()->updateOrCreate(
+                ['name' => $name],
+                [
+                    'position' => 'Pendiri',
                     'sort_order' => $index + 1,
                     'is_active' => true,
                 ],

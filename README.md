@@ -161,6 +161,22 @@ Visi & Misi tetap berada pada satu bagian bersama ketiga gambar kartu beranda
 tata letak grid gambar, dan aturan tombol Buat dijaga
 `Tests\Feature\OrganizationProfileAdminFormTest`.
 
+### Tokoh Organisasi
+
+**Tentang → Tokoh Organisasi** mengelola kartu pendiri/tokoh pada halaman
+Tentang Kami (`organization_figures`). Setiap baris berisi `name`, `position`
+(bawaan **Pendiri**), `photo`, `sort_order`, dan `is_active`. Foto diunggah dari
+komputer ke disk `public` pada `uploads/organization-figures`; bila kosong,
+kartu publik menampilkan bulatan inisial nama sehingga tetap rapi sebelum foto
+asli tersedia. Urutan kecil tampil lebih dulu, `is_active = false` menyembunyikan
+tokoh dari situs, dan formulir Buat otomatis mengisi urutan setelah nilai
+terbesar. Tata letak publik menyediakan empat kolom sejajar pada layar lebar
+(`sm:grid-cols-2` di tablet), tetapi jumlah tokoh mengikuti data aktif — bukan
+dipaksa empat. Seeder hanya mengisi tiga nama pendiri yang tercatat (Robine Inka
+Caecilia M. P., Johanna Pietersz, Evie Poetiray) tanpa mengarang nama keempat;
+tokoh berikutnya ditambahkan lewat panel. Dijaga oleh
+`Tests\Feature\OrganizationFigureTest` dan `Tests\Feature\SortOrderTest`.
+
 ### Identitas Organisasi (Data Tunggal)
 
 **Tentang → Identitas Organisasi** menyimpan judul, deskripsi, dan gambar
@@ -472,6 +488,13 @@ dan komponennya tetap memakai tema situs:
   Program** — kepala kartu memakai warna kategori, keterangannya berisi jumlah
   program, dan tautannya menuju daftar program kategori tersebut. Menambah
   kategori otomatis menambah kartu, tanpa mengubah kode.
+- **Tokoh Organisasi:** kartu putih bersudut tumpul dan berbayang halus
+  (`.card .figure-card`) menampilkan foto bulat, nama, dan jabatan para pendiri;
+  foto dapat diklik untuk pratinjau. Empat kartu sejajar pada layar lebar, dua
+  kolom di tablet, dan satu kolom di ponsel. Data diambil dari **Tentang → Tokoh
+  Organisasi** menurut kolom Urutan; tokoh nonaktif tidak dirender dan bagian
+  disembunyikan bila tidak ada tokoh aktif. Foto kosong diganti inisial nama.
+  Dijaga oleh `Tests\Feature\OrganizationFigureTest`.
 - **Struktur Pengurus:** dikelompokkan per tingkat (DPP/DPW/PC) dan dipilih
   lewat tab. Ketua tiap tingkat tampil lebih besar bersama masa bakti dan
   kutipannya (`bio`), sedangkan pengurus lain tampil sebagai kartu sejajar;

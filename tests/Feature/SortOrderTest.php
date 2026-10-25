@@ -11,6 +11,7 @@ use App\Models\Management;
 use App\Models\Media;
 use App\Models\MenuItem;
 use App\Models\Organization;
+use App\Models\OrganizationFigure;
 use App\Models\OrganizationHistory;
 use App\Models\OrganizationProfile;
 use App\Models\PanelSetting;
@@ -74,6 +75,7 @@ class SortOrderTest extends TestCase
             '/admin/media' => Media::class,
             '/admin/menu-items' => MenuItem::class,
             '/admin/organization-histories' => OrganizationHistory::class,
+            '/admin/organization-figures' => OrganizationFigure::class,
             '/admin/organizations' => Organization::class,
             '/admin/partners' => Partner::class,
             '/admin/program-categories' => ProgramCategory::class,
@@ -145,6 +147,7 @@ class SortOrderTest extends TestCase
             '/admin/management/create',
             '/admin/media/create',
             '/admin/menu-items/create',
+            '/admin/organization-figures/create',
             '/admin/organization-histories/create',
             '/admin/organizations/create',
             '/admin/partners/create',
@@ -208,6 +211,24 @@ class SortOrderTest extends TestCase
         $this->assertSame(
             Statistic::query()->active()->ordered()->take(4)->pluck('label')->all(),
             $this->teks($xpath, '//div[contains(@class, "stat-band")]//p[contains(@class, "stat-label")]'),
+        );
+    }
+
+    /**
+     * Kartu Tokoh Organisasi tampil menurut Urutan dan hanya berisi tokoh aktif.
+     */
+    public function test_tokoh_organisasi_tentang_mengikuti_urutan(): void
+    {
+        $this->balikUrutan(OrganizationFigure::class);
+
+        $xpath = $this->xpath('/tentang');
+
+        $this->assertSame(
+            OrganizationFigure::query()->active()->ordered()->pluck('name')->all(),
+            $this->teks(
+                $xpath,
+                '//section[@id="tokoh-organisasi"]//h3[contains(@class, "figure-card-name")]',
+            ),
         );
     }
 
