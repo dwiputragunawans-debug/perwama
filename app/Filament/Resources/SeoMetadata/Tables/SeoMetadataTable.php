@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\SeoMetadata\Tables;
 
+use App\Filament\Actions\SafeDeleteBulkAction;
 use App\Models\SeoMetadata;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -56,7 +56,7 @@ class SeoMetadataTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    SafeDeleteBulkAction::make(),
                 ]),
             ]);
     }

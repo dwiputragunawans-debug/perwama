@@ -4,9 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class OrganizationProfile extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'name', 'abbreviation', 'tagline', 'slogan', 'vision', 'mission',
         'about_card_image', 'vision_card_image', 'mission_card_image',
@@ -85,7 +88,13 @@ class OrganizationProfile extends Model
             return static::$cached;
         }
 
-        return static::$cached = static::query()->firstOrCreate(['id' => 1], [
+        /*
+         * Profil adalah data tunggal. Baris yang terlanjur di-soft-delete
+         * tetap dibaca agar halaman publik tidak kehilangan identitas dan
+         * `firstOrCreate(['id' => 1])` tidak menabrak primary key. Pemulihan
+         * tetap dapat dilakukan dari filter data terhapus di panel admin.
+         */
+        return static::$cached = static::withTrashed()->firstOrCreate(['id' => 1], [
             'name' => 'Persatuan Wanita Maluku Indonesia',
             'abbreviation' => 'PERWAMA INA',
         ]);
@@ -95,5 +104,6 @@ class OrganizationProfile extends Model
     {
         static::saved(fn () => static::flushCache());
         static::deleted(fn () => static::flushCache());
+        static::restored(fn () => static::flushCache());
     }
 }

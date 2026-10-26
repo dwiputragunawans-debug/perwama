@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\ProgramCategories\Pages;
 
+use App\Filament\Actions\SafeDeleteAction;
 use App\Filament\Resources\ProgramCategories\ProgramCategoryResource;
-use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditProgramCategory extends EditRecord
@@ -13,7 +13,7 @@ class EditProgramCategory extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            SafeDeleteAction::make(),
         ];
     }
 }

@@ -8,10 +8,11 @@ use App\Models\Concerns\HasSlug;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Region extends Model
 {
-    use HasMedia, HasSeoMetadata, HasSlug;
+    use HasMedia, HasSeoMetadata, HasSlug, SoftDeletes;
 
     /**
      * Jenis wilayah yang dipakai situs, dipetakan ke label bahasa Indonesia.

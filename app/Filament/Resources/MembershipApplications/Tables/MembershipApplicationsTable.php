@@ -2,11 +2,16 @@
 
 namespace App\Filament\Resources\MembershipApplications\Tables;
 
+use App\Filament\Actions\SafeDeleteBulkAction;
+use App\Filament\Actions\SafeForceDeleteAction;
+use App\Filament\Actions\SafeForceDeleteBulkAction;
 use App\Models\MembershipApplication;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
 class MembershipApplicationsTable
@@ -87,14 +92,19 @@ class MembershipApplicationsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                TrashedFilter::make(),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->hidden(fn ($record): bool => $record->trashed()),
+                RestoreAction::make(),
+                SafeForceDeleteAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    SafeDeleteBulkAction::make(),
+                    RestoreBulkAction::make(),
+                    SafeForceDeleteBulkAction::make(),
                 ]),
             ]);
     }

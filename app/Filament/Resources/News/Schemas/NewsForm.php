@@ -30,7 +30,7 @@ class NewsForm
                     ->label('Slug')
                     ->maxLength(255)
                     ->unique(ignoreRecord: true)
-                    ->helperText('Kosongkan untuk dibuat otomatis.'),
+                    ->helperText('Kosongkan untuk dibuat otomatis. Slug milik data terhapus tetap dianggap terpakai.'),
                 Select::make('type')
                     ->label('Jenis')
                     ->options([

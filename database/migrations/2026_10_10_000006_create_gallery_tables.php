@@ -26,7 +26,9 @@ return new class extends Migration
 
         Schema::create('gallery_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('gallery_id')->constrained('galleries')->cascadeOnDelete();
+            // Jangan hapus foto otomatis saat album dihapus; item galeri adalah
+            // konten tersendiri yang harus dipindahkan atau dihapus sadar oleh admin.
+            $table->foreignId('gallery_id')->constrained('galleries')->restrictOnDelete();
             $table->string('type')->default('photo'); // photo | video
             $table->string('file')->nullable();
             $table->string('video_url')->nullable();

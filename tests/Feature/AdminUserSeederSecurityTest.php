@@ -89,6 +89,25 @@ class AdminUserSeederSecurityTest extends TestCase
         $this->assertGreaterThan(20, strlen($admin->password));
     }
 
+    public function test_seeder_memulihkan_admin_yang_sudah_di_soft_delete(): void
+    {
+        (new AdminUserSeeder)->run();
+
+        // Admin terakhir memang dilindungi; buat admin lain agar akun uji boleh
+        // di-soft-delete sebelum diuji pemulihannya oleh seeder.
+        User::factory()->create(['is_admin' => true]);
+
+        $admin = User::query()->where('email', 'admin-uji@example.com')->firstOrFail();
+        $admin->delete();
+
+        $this->assertSoftDeleted('users', ['email' => 'admin-uji@example.com']);
+
+        (new AdminUserSeeder)->run();
+
+        $this->assertNotSoftDeleted('users', ['email' => 'admin-uji@example.com']);
+        $this->assertSame(1, User::withTrashed()->where('email', 'admin-uji@example.com')->count());
+    }
+
     /**
      * Konfigurasi bawaan tidak lagi menyimpan kata sandi apa pun.
      */

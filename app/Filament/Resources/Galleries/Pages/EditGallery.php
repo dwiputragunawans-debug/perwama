@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\Galleries\Pages;
 
+use App\Filament\Actions\SafeDeleteAction;
 use App\Filament\Resources\Galleries\GalleryResource;
 use App\Filament\Resources\GalleryItems\Actions\UploadGalleryPhotos;
 use App\Models\Gallery;
-use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditGallery extends EditRecord
@@ -19,7 +19,7 @@ class EditGallery extends EditRecord
 
         return [
             UploadGalleryPhotos::make($gallery),
-            DeleteAction::make(),
+            SafeDeleteAction::make(),
         ];
     }
 }

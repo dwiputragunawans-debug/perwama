@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\AlbumCategories\Pages;
 
+use App\Filament\Actions\SafeDeleteAction;
 use App\Filament\Resources\AlbumCategories\AlbumCategoryResource;
-use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditAlbumCategory extends EditRecord
@@ -13,7 +13,7 @@ class EditAlbumCategory extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            SafeDeleteAction::make(),
         ];
     }
 }

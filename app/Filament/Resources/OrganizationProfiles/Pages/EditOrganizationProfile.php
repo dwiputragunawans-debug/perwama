@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\OrganizationProfiles\Pages;
 
 use App\Filament\Resources\OrganizationProfiles\OrganizationProfileResource;
-use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditOrganizationProfile extends EditRecord
@@ -13,7 +12,8 @@ class EditOrganizationProfile extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            // Profil adalah data tunggal: penghapusan tidak disediakan agar
+            // halaman publik tidak kehilangan identitas organisasi.
         ];
     }
 }

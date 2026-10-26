@@ -31,7 +31,7 @@ class GalleryForm
                     ->label('Slug')
                     ->maxLength(255)
                     ->unique(ignoreRecord: true)
-                    ->helperText('Kosongkan untuk dibuat otomatis.'),
+                    ->helperText('Kosongkan untuk dibuat otomatis. Slug milik data terhapus tetap dianggap terpakai.'),
                 RichEditor::make('description')
                     ->label('Deskripsi')
                     ->columnSpanFull(),

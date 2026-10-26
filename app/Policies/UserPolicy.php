@@ -49,4 +49,33 @@ class UserPolicy
     {
         return (bool) $user->is_admin;
     }
+
+    /**
+     * Hapus permanen mengikuti aturan hapus biasa: akun sendiri dan admin
+     * terakhir tetap dilindungi. `User::deleting()` juga menegakkan aturan ini
+     * di level model untuk pemanggilan CLI/tinker.
+     */
+    public function forceDelete(User $user, User $model): bool
+    {
+        return $this->delete($user, $model);
+    }
+
+    public function forceDeleteAny(User $user): bool
+    {
+        return $this->deleteAny($user);
+    }
+
+    /**
+     * Pemulihan akun hanya untuk admin. Akun yang dipulihkan kembali tunduk
+     * pada aturan admin terakhir saat akan dihapus lagi.
+     */
+    public function restore(User $user, User $model): bool
+    {
+        return (bool) $user->is_admin;
+    }
+
+    public function restoreAny(User $user): bool
+    {
+        return (bool) $user->is_admin;
+    }
 }

@@ -36,6 +36,7 @@ class PurgeRejectedMembershipData extends Command
         $jumlah = 0;
 
         MembershipApplication::query()
+            ->withTrashed()
             ->where('status', 'rejected')
             ->whereRaw('COALESCE(reviewed_at, updated_at) <= ?', [$batas->toDateTimeString()])
             ->chunkById(100, function ($aplikasi) use (&$jumlah): void {

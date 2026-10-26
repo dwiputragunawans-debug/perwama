@@ -9,10 +9,11 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Story extends Model
 {
-    use HasMedia, HasSeoMetadata, HasSlug;
+    use HasMedia, HasSeoMetadata, HasSlug, SoftDeletes;
 
     public const CATEGORIES = [
         'kisah_inspiratif' => 'Kisah Inspiratif',

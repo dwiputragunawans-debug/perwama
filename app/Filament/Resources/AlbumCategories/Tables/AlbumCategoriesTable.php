@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\AlbumCategories\Tables;
 
+use App\Filament\Actions\SafeDeleteBulkAction;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -52,7 +52,7 @@ class AlbumCategoriesTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    SafeDeleteBulkAction::make(),
                 ]),
             ]);
     }

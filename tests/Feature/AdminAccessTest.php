@@ -148,7 +148,7 @@ class AdminAccessTest extends TestCase
         $pengguna = User::factory()->create(['is_admin' => false]);
 
         $this->assertTrue($pengguna->delete());
-        $this->assertDatabaseMissing('users', ['email' => $pengguna->email]);
+        $this->assertSoftDeleted('users', ['email' => $pengguna->email]);
     }
 
     private function adminUtama(): User

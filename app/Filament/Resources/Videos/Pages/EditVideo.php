@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\Videos\Pages;
 
+use App\Filament\Actions\SafeDeleteAction;
 use App\Filament\Resources\Videos\VideoResource;
-use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditVideo extends EditRecord
@@ -13,7 +13,7 @@ class EditVideo extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            SafeDeleteAction::make(),
         ];
     }
 }

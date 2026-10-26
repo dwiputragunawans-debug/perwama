@@ -25,7 +25,9 @@ class MemberForm
                     ->label('Wilayah')
                     ->relationship('region', 'name'),
                 TextInput::make('member_number')
-                    ->label('Nomor Anggota'),
+                    ->label('Nomor Anggota')
+                    ->maxLength(255)
+                    ->unique(ignoreRecord: true),
                 TextInput::make('full_name')
                     ->label('Nama Lengkap')
                     ->required(),

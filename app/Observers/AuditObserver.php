@@ -67,6 +67,15 @@ class AuditObserver
     }
 
     /**
+     * Pemulihan data soft-deleted juga merupakan tindakan admin yang perlu
+     * tercatat, agar riwayat hapus/pulih tidak hilang dari log aktivitas.
+     */
+    public function restored(Model $model): void
+    {
+        $this->catat('restored', $model, [], $this->saring($model->getAttributes()));
+    }
+
+    /**
      * @param  array<string, mixed>  $lama
      * @param  array<string, mixed>  $baru
      */

@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class OrganizationHistory extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'year', 'title', 'description', 'location', 'image', 'sort_order', 'is_active',
     ];

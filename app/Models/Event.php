@@ -9,10 +9,11 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Event extends Model
 {
-    use HasMedia, HasSeoMetadata, HasSlug;
+    use HasMedia, HasSeoMetadata, HasSlug, SoftDeletes;
 
     protected $fillable = [
         'region_id', 'organization_id', 'program_id', 'title', 'slug',

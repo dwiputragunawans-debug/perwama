@@ -53,7 +53,13 @@ class AdminUserSeeder extends Seeder
                 throw new RuntimeException('Setiap akun admin pada config/perwama.php harus memiliki email.');
             }
 
-            $admin = User::firstOrNew(['email' => $data['email']]);
+            /*
+             * Email tetap unik meski akun sudah di-soft-delete. Sertakan baris
+             * terhapus agar seeder tidak mencoba membuat akun kedua dengan email
+             * yang sama; akun yang dikonfigurasi lalu dipulihkan.
+             */
+            $admin = User::withTrashed()->firstOrNew(['email' => $data['email']]);
+            $dipulihkan = $admin->trashed();
 
             $admin->name = $data['name'];
 
@@ -74,7 +80,15 @@ class AdminUserSeeder extends Seeder
 
             $admin->save();
 
-            $status = $admin->wasRecentlyCreated ? 'dibuat' : 'disinkronkan';
+            if ($dipulihkan) {
+                $admin->restore();
+            }
+
+            $status = match (true) {
+                $admin->wasRecentlyCreated => 'dibuat',
+                $dipulihkan => 'dipulihkan',
+                default => 'disinkronkan',
+            };
 
             $this->command?->info("Akun admin ({$status}): {$admin->email}");
         }

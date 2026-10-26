@@ -6,10 +6,11 @@ use App\Models\Concerns\HasSlug;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Organization extends Model
 {
-    use HasSlug;
+    use HasSlug, SoftDeletes;
 
     protected $fillable = [
         'region_id', 'parent_id', 'name', 'slug', 'type', 'leader_name',

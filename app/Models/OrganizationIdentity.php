@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 
 /**
@@ -14,6 +15,8 @@ use Illuminate\Support\Collection;
  */
 class OrganizationIdentity extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'title', 'description', 'images',
     ];
@@ -39,7 +42,12 @@ class OrganizationIdentity extends Model
             return static::$cached;
         }
 
-        return static::$cached = static::query()->firstOrCreate(['id' => 1], [
+        /*
+         * Identitas adalah data tunggal. Baris yang terlanjur di-soft-delete
+         * tetap dibaca agar `firstOrCreate(['id' => 1])` tidak menabrak
+         * primary key; admin dapat memulihkannya lewat filter data terhapus.
+         */
+        return static::$cached = static::withTrashed()->firstOrCreate(['id' => 1], [
             'title' => 'Mars PERWAMA INA',
         ]);
     }
@@ -124,5 +132,6 @@ class OrganizationIdentity extends Model
     {
         static::saved(fn () => static::flushCache());
         static::deleted(fn () => static::flushCache());
+        static::restored(fn () => static::flushCache());
     }
 }

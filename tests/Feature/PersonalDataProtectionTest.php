@@ -181,6 +181,33 @@ class PersonalDataProtectionTest extends TestCase
         $this->assertSame(self::NIK, $menunggu->fresh()->nik);
     }
 
+    public function test_perintah_retensi_tetap_menganonimkan_pendaftaran_yang_di_soft_delete(): void
+    {
+        config(['perwama.membership_retention_days' => 30]);
+
+        $terhapus = MembershipApplication::query()->create([
+            'full_name' => 'Pendaftar Terhapus',
+            'nik' => self::NIK,
+            'address' => 'Jalan Rahasia Nomor 2',
+            'membership_type' => 'anggota',
+            'status' => 'rejected',
+            'reviewed_at' => now()->subDays(60),
+        ]);
+
+        $terhapus->delete();
+
+        $this->artisan('membership:purge-rejected')
+            ->expectsOutputToContain('1 pendaftaran ditolak dianonimkan')
+            ->assertSuccessful();
+
+        $terhapus = MembershipApplication::withTrashed()->findOrFail($terhapus->getKey());
+
+        $this->assertTrue($terhapus->trashed());
+        $this->assertSame('Pendaftar Ditolak (dianonimkan)', $terhapus->full_name);
+        $this->assertNull($terhapus->nik);
+        $this->assertNull($terhapus->address);
+    }
+
     public function test_perintah_retensi_menolak_masa_retensi_tidak_valid(): void
     {
         $this->artisan('membership:purge-rejected', ['--days' => 0])

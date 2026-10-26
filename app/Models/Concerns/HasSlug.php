@@ -2,6 +2,7 @@
 
 namespace App\Models\Concerns;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
 trait HasSlug
@@ -39,7 +40,19 @@ trait HasSlug
 
     protected function slugExists(string $slug): bool
     {
-        $query = static::query()->where('slug', $slug);
+        $query = static::query();
+
+        /*
+         * Unique index basis data tetap menahan slug milik baris yang sudah
+         * di-soft-delete. Saat membuat slug otomatis, baris terhapus harus
+         * ikut diperiksa agar tidak muncul QueryException; hasilnya slug baru
+         * diberi akhiran -2, -3, dan seterusnya.
+         */
+        if (in_array(SoftDeletes::class, class_uses_recursive(static::class), true)) {
+            $query->withTrashed();
+        }
+
+        $query->where('slug', $slug);
 
         if ($this->exists) {
             $query->whereKeyNot($this->getKey());

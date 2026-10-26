@@ -6,10 +6,11 @@ use App\Casts\EncryptedString;
 use App\Models\Concerns\MasksNik;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Member extends Model
 {
-    use MasksNik;
+    use MasksNik, SoftDeletes;
 
     /**
      * Label status keanggotaan dalam bahasa Indonesia.

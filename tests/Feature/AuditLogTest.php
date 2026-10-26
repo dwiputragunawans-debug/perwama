@@ -47,6 +47,35 @@ class AuditLogTest extends TestCase
         $this->assertSame('Judul Baru', $diubah->new_values['title']);
     }
 
+    public function test_soft_delete_dan_restore_tercatat_di_log(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+
+        $this->actingAs($admin);
+
+        $news = News::query()->create([
+            'title' => 'Berita untuk Dipulihkan',
+            'slug' => 'berita-untuk-dipulihkan',
+            'published_at' => now()->subDay(),
+        ]);
+
+        $news->delete();
+
+        $this->assertDatabaseHas('audit_logs', [
+            'action' => 'deleted',
+            'model_type' => News::class,
+            'model_id' => $news->getKey(),
+        ]);
+
+        News::withTrashed()->findOrFail($news->getKey())->restore();
+
+        $this->assertDatabaseHas('audit_logs', [
+            'action' => 'restored',
+            'model_type' => News::class,
+            'model_id' => $news->getKey(),
+        ]);
+    }
+
     public function test_perubahan_tanpa_login_tidak_dicatat(): void
     {
         News::query()->create([

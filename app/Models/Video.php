@@ -8,10 +8,11 @@ use App\Models\Concerns\HasSlug;
 use App\Support\VideoUrl;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Video extends Model
 {
-    use HasMedia, HasSeoMetadata, HasSlug;
+    use HasMedia, HasSeoMetadata, HasSlug, SoftDeletes;
 
     public const CATEGORIES = [
         'profil' => 'Profil Organisasi',

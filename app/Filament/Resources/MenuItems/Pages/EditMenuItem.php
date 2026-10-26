@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\MenuItems\Pages;
 
+use App\Filament\Actions\SafeDeleteAction;
 use App\Filament\Resources\MenuItems\MenuItemResource;
-use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditMenuItem extends EditRecord
@@ -13,7 +13,7 @@ class EditMenuItem extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            SafeDeleteAction::make(),
         ];
     }
 }

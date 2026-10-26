@@ -40,7 +40,7 @@ class ActivityForm
                     ->label('Slug')
                     ->maxLength(255)
                     ->unique(ignoreRecord: true)
-                    ->helperText('Kosongkan untuk dibuat otomatis.'),
+                    ->helperText('Kosongkan untuk dibuat otomatis. Slug milik data terhapus tetap dianggap terpakai.'),
                 Select::make('category')
                     ->label('Kategori')
                     ->options([

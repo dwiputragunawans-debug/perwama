@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Tokoh organisasi yang tampil pada bagian "Tokoh Organisasi" di halaman
@@ -10,6 +11,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class OrganizationFigure extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'name', 'position', 'photo', 'sort_order', 'is_active',
     ];

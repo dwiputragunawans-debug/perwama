@@ -5,9 +5,12 @@ namespace App\Models;
 use App\Support\VideoUrl;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class GalleryItem extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'gallery_id', 'type', 'file', 'video_url', 'thumbnail', 'caption', 'sort_order',
     ];

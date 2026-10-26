@@ -2,9 +2,12 @@
 
 namespace App\Filament\Resources\OrganizationIdentities\Tables;
 
+use App\Filament\Actions\SafeForceDeleteAction;
 use App\Models\OrganizationIdentity;
 use Filament\Actions\EditAction;
+use Filament\Actions\RestoreAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
 class OrganizationIdentitiesTable
@@ -29,8 +32,14 @@ class OrganizationIdentitiesTable
                     ->dateTime()
                     ->sortable(),
             ])
+            ->filters([
+                TrashedFilter::make(),
+            ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->hidden(fn ($record): bool => $record->trashed()),
+                RestoreAction::make(),
+                SafeForceDeleteAction::make(),
             ])
             ->toolbarActions([
                 // Data tunggal: tidak ada aksi massal.

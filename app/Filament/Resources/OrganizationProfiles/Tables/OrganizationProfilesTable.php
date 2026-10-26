@@ -2,10 +2,14 @@
 
 namespace App\Filament\Resources\OrganizationProfiles\Tables;
 
+use App\Filament\Actions\SafeForceDeleteAction;
+use App\Filament\Actions\SafeForceDeleteBulkAction;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
 class OrganizationProfilesTable
@@ -72,14 +76,19 @@ class OrganizationProfilesTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                TrashedFilter::make(),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->hidden(fn ($record): bool => $record->trashed()),
+                RestoreAction::make(),
+                SafeForceDeleteAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    // Profil adalah data tunggal: tidak ada aksi hapus.
+                    RestoreBulkAction::make(),
+                    SafeForceDeleteBulkAction::make(),
                 ]),
             ]);
     }

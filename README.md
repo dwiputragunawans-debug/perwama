@@ -694,7 +694,9 @@ catatan admin dikosongkan — sementara baris dan statusnya tetap ada untuk
 statistik. Masa retensi bawaan **180 hari** sejak `reviewed_at` (atau
 `updated_at` bila `reviewed_at` kosong) dan dapat diubah lewat
 `MEMBERSHIP_RETENTION_DAYS` atau `config/perwama.php`. Perintah juga dapat
-dijalankan manual dengan `--days=N` untuk penyesuaian sekali jalan.
+dijalankan manual dengan `--days=N` untuk penyesuaian sekali jalan. Pendaftaran
+yang sudah di-soft-delete ikut dianonimkan karena perintah memakai
+`withTrashed()`.
 
 **PENTING:** `APP_KEY` adalah kunci dekripsi NIK. Simpan cadangannya secara
 aman; kehilangan `APP_KEY` membuat NIK lama tidak dapat dibaca. Mengganti
@@ -704,6 +706,121 @@ Yang masih perlu diputuskan organisasi: masa retensi data **anggota aktif/
 nonaktif** dan pesan kontak (perintah ini hanya menangani pendaftaran yang
 ditolak), serta apakah `email`/`whatsapp` pendaftar perlu ikut dianonimkan
 lebih cepat. Uji: `Tests\Feature\PersonalDataProtectionTest`.
+
+### Kebijakan penghapusan data (anti-cascade)
+
+Audit skema menemukan **dua** foreign key yang sebelumnya memakai `CASCADE`:
+`gallery_items.gallery_id` dan `taggables.tag_id`. Keduanya kini memakai
+`RESTRICT`, sehingga album/tag yang masih dipakai tidak dapat dihapus dan data
+anak tidak hilang diam-diam. Sebanyak 31 foreign key lain sudah memakai
+`NULL ON DELETE`: baris anak tetap ada, hanya kolom relasinya yang dikosongkan.
+
+Untuk database yang **sudah berjalan**, perubahan file migration awal tidak
+mengubah schema lama. Jalankan migration korektif berikut setelah menarik kode:
+
+```bash
+php artisan migrate
+```
+
+Migration `2026_10_26_000001_restrict_destructive_foreign_keys.php` mengganti
+kedua constraint pada MySQL/PostgreSQL. SQLite sengaja dilewati karena database
+uji selalu dibangun ulang dari migration awal yang sudah `RESTRICT`. Method
+`down()` sengaja tidak mengembalikan `CASCADE`.
+
+Penghapusan lewat panel admin memakai `App\Filament\Actions\SafeDeleteAction`
+dan `SafeDeleteBulkAction`. Bila basis data menolak karena foreign key, admin
+menerima notifikasi **“Data tidak dapat dihapus”** berisi arahan untuk
+memindahkan/menghapus data terkait lebih dulu. Hapus massal tetap memproses
+record lain yang tidak terikat. Penghapusan langsung lewat SQL/CLI tetap
+dilindungi `RESTRICT`, tetapi tentu tidak menampilkan notifikasi panel.
+
+Model dan observer **tidak** memiliki lifecycle `deleting` yang menghapus relasi
+anak. Yang ada hanya:
+
+- `User::deleting()` menolak penghapusan admin terakhir (pengaman, bukan cascade);
+- event `deleted` pada pengaturan/menu untuk membersihkan cache;
+- `AuditObserver` yang mencatat perubahan, tanpa menghapus data lain.
+
+Tidak ada `cascadeOnDelete()` di form/table Filament; pencarian juga tidak
+menemukan pemakaian `->cascadeOnDelete()` di luar migration. Uji regresi:
+`Tests\Feature\DataDeletionSafetyTest`.
+
+Relasi polimorfik (`media`, `seo_metadata`, dan `taggables.taggable`) tidak
+memakai foreign key karena tipe modelnya dinamis. Menghapus parent **tidak**
+menghapus baris tersebut—jadi tidak ada cascade, tetapi dapat meninggalkan
+baris yatim. Jangan membersihkannya lewat observer `deleting`; buat perintah
+audit/purge terjadwal yang menampilkan kandidat lebih dulu dan meminta
+konfirmasi sebelum menghapus.
+
+#### Soft Deletes (sudah diterapkan)
+
+Soft delete tidak menggantikan backup, tetapi memberi kesempatan pemulihan
+sebelum data dipurge. Kolom `deleted_at` ditambahkan lewat migration
+`2026_10_26_000002_add_soft_deletes_to_core_tables.php`; migration awal tidak
+diubah. Jalankan `php artisan migrate` pada database yang sudah berjalan.
+
+Tabel dan model yang memakai `Illuminate\Database\Eloquent\SoftDeletes`:
+
+| Tabel | Model |
+| --- | --- |
+| `users` | `User` |
+| `members`, `membership_applications` | `Member`, `MembershipApplication` |
+| `galleries`, `gallery_items` | `Gallery`, `GalleryItem` |
+| `news`, `stories`, `activities`, `events`, `publications`, `videos` | `News`, `Story`, `Activity`, `Event`, `Publication`, `Video` |
+| `organization_profiles`, `organization_histories`, `organization_identities`, `organization_figures`, `partners` | `OrganizationProfile`, `OrganizationHistory`, `OrganizationIdentity`, `OrganizationFigure`, `Partner` |
+| `programs`, `regions`, `organizations` | `Program`, `Region`, `Organization` |
+
+Semua query Eloquent biasa otomatis mengabaikan baris terhapus, sehingga konten
+tersebut hilang dari situs publik, hitungan dasbor, dan pilihan relasi. Gunakan
+`withTrashed()` bila baris lama memang perlu dibaca (mis. pemulihan atau audit).
+
+Di panel admin, tabel resource terkait memiliki filter **Dengan data terhapus /
+Hanya data terhapus**, aksi **Pulihkan** dan **Hapus permanen**, serta aksi massal
+yang setara. `SafeDeleteAction`/`SafeDeleteBulkAction` melakukan soft delete;
+`SafeForceDeleteAction`/`SafeForceDeleteBulkAction` menangani kegagalan foreign
+key `RESTRICT` dengan notifikasi yang dapat dipahami. Hapus permanen massal tetap
+memproses record lain yang tidak terikat. Aksi **Ubah** disembunyikan untuk baris
+yang sudah terhapus; pulihkan terlebih dahulu bila ingin mengubahnya.
+
+`organization_profiles` dan `organization_identities` adalah data tunggal.
+Keduanya memakai SoftDeletes agar baris lama tidak hilang, tetapi aksi hapus
+tidak disediakan di panel. `current()` membaca baris dengan `withTrashed()` agar
+`firstOrCreate(['id' => 1])` tidak menabrak primary key bila baris terlanjur
+terhapus lewat CLI; baris tersebut dapat dipulihkan dari filter data terhapus.
+
+Hal yang perlu diperhatikan:
+
+1. **Unique index tetap berlaku untuk baris terhapus.** `users.email`,
+   `news.slug`, `members.member_number`, dan sejenisnya masih menempati nilai
+   yang sama. Validasi `unique()` memeriksa tabel langsung (termasuk baris
+   terhapus), sedangkan pembuatan slug otomatis memakai `withTrashed()` dan
+   memberi akhiran `-2`, `-3`, dan seterusnya. Pulihkan record lama atau ubah
+   nilai unik sebelum membuat record baru; jangan `forceDelete` hanya untuk
+   membebaskan nilai unik.
+2. **`forceDelete()` tetap tunduk pada foreign key `RESTRICT`.** Hapus atau
+   pindahkan anak terlebih dahulu. Tidak ada observer yang menghapus anak
+   otomatis, karena itu akan mengembalikan masalah cascade yang dihindari.
+3. **Data pribadi tetap tunduk pada retensi.** `membership:purge-rejected`
+   memakai `withTrashed()` sehingga pendaftaran yang di-soft-delete tetap
+   dianonimkan setelah masa retensi. Soft delete tidak boleh memperpanjang
+   penyimpanan NIK/alamat/kontak tanpa batas.
+4. **Seeder admin memulihkan akun yang dikonfigurasi.** `AdminUserSeeder`
+   mencari pengguna dengan `withTrashed()` agar email unik tidak bentrok, lalu
+   memulihkan akun yang sudah di-soft-delete.
+5. **Backup dan uji restore** sebelum melakukan purge permanen.
+
+Uji regresi: `Tests\Feature\SoftDeleteTest` memastikan seluruh tabel memiliki
+`deleted_at`, konten terhapus tidak tampil di publik, admin dapat memulihkannya,
+dan slug otomatis tidak menabrak slug milik data terhapus.
+`Tests\Feature\DataDeletionSafetyTest` memastikan soft delete tidak menghapus
+relasi anak dan hapus permanen yang masih terikat menampilkan pesan ramah.
+
+Tabel yang **tidak** memakai soft delete: `audit_logs` (log sebaiknya
+append-only dan dipurge sesuai kebijakan retensi), `taggables` (pivot teknis),
+`page_views` (volume tinggi; cukup diarsipkan/dipangkas), serta
+`contact_messages`/`partnership_requests` yang berisi data pribadi (lebih baik
+dianonimkan atau dihapus permanen setelah masa retensi, bukan disimpan tanpa
+batas).
 
 ## About Laravel
 
