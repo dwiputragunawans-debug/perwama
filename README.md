@@ -167,14 +167,14 @@ tata letak grid gambar, dan aturan tombol Buat dijaga
 Tentang Kami (`organization_figures`). Setiap baris berisi `name`, `position`
 (bawaan **Pendiri**), `photo`, `sort_order`, dan `is_active`. Foto diunggah dari
 komputer ke disk `public` pada `uploads/organization-figures`; bila kosong,
-kartu publik menampilkan bulatan inisial nama sehingga tetap rapi sebelum foto
+kartu publik menampilkan bidang inisial nama sehingga tetap rapi sebelum foto
 asli tersedia. Urutan kecil tampil lebih dulu, `is_active = false` menyembunyikan
 tokoh dari situs, dan formulir Buat otomatis mengisi urutan setelah nilai
 terbesar. Tata letak publik menyediakan empat kolom sejajar pada layar lebar
 (`sm:grid-cols-2` di tablet), tetapi jumlah tokoh mengikuti data aktif — bukan
-dipaksa empat. Seeder hanya mengisi tiga nama pendiri yang tercatat (Robine Inka
-Caecilia M. P., Johanna Pietersz, Evie Poetiray) tanpa mengarang nama keempat;
-tokoh berikutnya ditambahkan lewat panel. Dijaga oleh
+dipaksa empat. Seeder mengisi empat nama pendiri yang tercatat (Robine Inka
+Caecilia M. P., Johanna Pietersz, Evie Poetiray, Petrosina Jacoba (Dee)
+Tuwaahatu - Amahorseja); tokoh berikutnya ditambahkan lewat panel. Dijaga oleh
 `Tests\Feature\OrganizationFigureTest` dan `Tests\Feature\SortOrderTest`.
 
 ### Identitas Organisasi (Data Tunggal)
@@ -489,12 +489,13 @@ dan komponennya tetap memakai tema situs:
   program, dan tautannya menuju daftar program kategori tersebut. Menambah
   kategori otomatis menambah kartu, tanpa mengubah kode.
 - **Tokoh Organisasi:** kartu putih bersudut tumpul dan berbayang halus
-  (`.card .figure-card`) menampilkan foto bulat, nama, dan jabatan para pendiri;
-  foto dapat diklik untuk pratinjau. Empat kartu sejajar pada layar lebar, dua
-  kolom di tablet, dan satu kolom di ponsel. Data diambil dari **Tentang → Tokoh
-  Organisasi** menurut kolom Urutan; tokoh nonaktif tidak dirender dan bagian
-  disembunyikan bila tidak ada tokoh aktif. Foto kosong diganti inisial nama.
-  Dijaga oleh `Tests\Feature\OrganizationFigureTest`.
+  (`.card .figure-card`) menampilkan foto penuh selebar kartu pada bagian atas
+  (rasio 4:5), lalu nama dan jabatan para pendiri di bawahnya; foto dapat diklik
+  untuk pratinjau. Empat kartu sejajar pada layar lebar, dua kolom di tablet,
+  dan satu kolom di ponsel. Data diambil dari **Tentang → Tokoh Organisasi**
+  menurut kolom Urutan; tokoh nonaktif tidak dirender dan bagian disembunyikan
+  bila tidak ada tokoh aktif. Foto kosong diganti bidang inisial nama. Dijaga
+  oleh `Tests\Feature\OrganizationFigureTest`.
 - **Struktur Pengurus:** dikelompokkan per tingkat (DPP/DPW/PC) dan dipilih
   lewat tab. Ketua tiap tingkat tampil lebih besar bersama masa bakti dan
   kutipannya (`bio`), sedangkan pengurus lain tampil sebagai kartu sejajar;

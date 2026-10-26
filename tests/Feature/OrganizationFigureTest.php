@@ -17,8 +17,9 @@ use Tests\TestCase;
 
 /**
  * Bagian "Tokoh Organisasi" pada halaman Tentang Kami serta pengelolaannya
- * melalui panel admin. Setiap tokoh tampil sebagai kartu putih berfoto bulat;
- * urutan dan status aktifnya diatur dari panel Tentang → Tokoh Organisasi.
+ * melalui panel admin. Setiap tokoh tampil sebagai kartu putih dengan foto
+ * penuh selebar kartu pada bagian atas; urutan dan status aktifnya diatur dari
+ * panel Tentang → Tokoh Organisasi.
  */
 class OrganizationFigureTest extends TestCase
 {
@@ -46,7 +47,7 @@ class OrganizationFigureTest extends TestCase
             ['Robine Inka Caecilia M. P.', 1, 'uploads/organization-figures/robine.jpg', true],
             ['Johanna Pietersz', 2, 'uploads/organization-figures/johanna.jpg', true],
             ['Evie Poetiray', 3, null, true],
-            ['Tokoh Pendiri Keempat', 4, null, true],
+            ['Petrosina Jacoba (Dee) Tuwaahatu - Amahorseja', 4, null, true],
             ['Tokoh Tidak Aktif', 0, null, false],
         ] as [$name, $sortOrder, $photo, $isActive]) {
             OrganizationFigure::create([
@@ -79,7 +80,7 @@ class OrganizationFigureTest extends TestCase
 
         $this->assertCount(4, $kartu, 'Hanya empat tokoh aktif yang boleh tampil.');
         $this->assertSame(
-            ['Robine Inka Caecilia M. P.', 'Johanna Pietersz', 'Evie Poetiray', 'Tokoh Pendiri Keempat'],
+            ['Robine Inka Caecilia M. P.', 'Johanna Pietersz', 'Evie Poetiray', 'Petrosina Jacoba (Dee) Tuwaahatu - Amahorseja'],
             $this->teks($xpath, './/h3[contains(@class, "figure-card-name")]', $section),
         );
         $this->assertSame(
@@ -92,6 +93,10 @@ class OrganizationFigureTest extends TestCase
         foreach ($kartu as $item) {
             $this->assertInstanceOf(DOMElement::class, $item);
             $this->assertStringContainsString('card', $item->getAttribute('class'));
+
+            // Foto dan teks berada dalam dua bagian terpisah: foto full-bleed
+            // di atas, lalu nama/jabatan di area teks di bawahnya.
+            $this->assertSame(1, $xpath->query('.//div[contains(@class, "figure-card-body")]', $item)->length);
         }
 
         // Foto diunggah lewat disk publik dan dapat diperbesar (lightbox).
@@ -103,10 +108,11 @@ class OrganizationFigureTest extends TestCase
             'Perbesar foto Robine Inka Caecilia M. P.',
             $foto->getAttribute('aria-label'),
         );
+        $this->assertSame(1, $foto->getElementsByTagName('img')->length, 'Foto harus menjadi isi langsung area foto.');
     }
 
     /**
-     * Tokoh yang belum memiliki foto tetap tampil dengan bulatan inisial,
+     * Tokoh yang belum memiliki foto tetap tampil dengan bidang inisial,
      * sehingga kartu tidak kosong sebelum pengelola mengunggah fotonya.
      */
     public function test_tokoh_tanpa_foto_menampilkan_inisial_nama(): void

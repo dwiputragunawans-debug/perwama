@@ -387,7 +387,9 @@
         Tentang → Tokoh Organisasi, sehingga nama, foto, jabatan, dan urutan
         kartu dapat diganti tanpa mengubah kode. Empat kartu tampil sejajar
         pada layar lebar dan menyusut menjadi dua atau satu kolom di layar
-        kecil. Foto yang belum diunggah diganti inisial nama.
+        kecil. Foto tampil penuh selebar kartu pada bagian atas — bukan
+        dipotong lingkaran — sehingga wajah tokoh lebih terlihat. Foto yang
+        belum diunggah diganti bidang inisial nama.
     --}}
     @if ($figures->isNotEmpty())
         <section id="tokoh-organisasi" class="section-y">
@@ -405,9 +407,10 @@
                         <article class="card figure-card" data-reveal>
                             @if ($figure->photo)
                                 {{--
-                                    Sama seperti kartu pengurus: klik foto membuka
-                                    berkas asli pada lightbox app.js. Tanpa JavaScript
-                                    tautan tetap membuka foto secara langsung.
+                                    Foto mengisi penuh lebar kartu pada bagian
+                                    atas. Klik foto membuka berkas asli pada
+                                    lightbox app.js; tanpa JavaScript tautan
+                                    tetap membuka foto secara langsung.
                                 --}}
                                 <a href="{{ media_url($figure->photo) }}"
                                    data-lightbox="{{ media_url($figure->photo) }}"
@@ -423,8 +426,10 @@
                                 </span>
                             @endif
 
-                            <h3 class="figure-card-name">{{ $figure->name }}</h3>
-                            <p class="figure-card-role">{{ $figure->position ?: 'Pendiri' }}</p>
+                            <div class="figure-card-body">
+                                <h3 class="figure-card-name">{{ $figure->name }}</h3>
+                                <p class="figure-card-role">{{ $figure->position ?: 'Pendiri' }}</p>
+                            </div>
                         </article>
                     @endforeach
                 </div>

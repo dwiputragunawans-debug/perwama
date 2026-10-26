@@ -144,11 +144,10 @@ class FrontendSeeder extends Seeder
     /**
      * Pendiri yang tampil pada bagian "Tokoh Organisasi".
      *
-     * Tiga nama di bawah berasal dari data pendiri PERWAMA INA yang tercatat.
-     * Kartu keempat dapat ditambahkan lewat panel Tentang → Tokoh Organisasi
-     * (tata letak sudah menyediakan empat kolom pada layar lebar). Foto sengaja
-     * tidak diisi contoh acak karena wajah tokoh harus berasal dari unggahan
-     * asli pengelola; selama belum diunggah, kartu menampilkan inisial nama.
+     * Empat nama di bawah berasal dari data pendiri PERWAMA INA yang tercatat
+     * dan mengisi empat kolom pada layar lebar. Foto sengaja tidak diisi contoh
+     * acak karena wajah tokoh harus berasal dari unggahan asli pengelola;
+     * selama belum diunggah, kartu menampilkan inisial nama.
      * `photo` juga tidak ikut ditulis saat seeder dijalankan ulang agar foto
      * yang sudah diunggah tidak terhapus.
      */
@@ -158,6 +157,7 @@ class FrontendSeeder extends Seeder
             'Robine Inka Caecilia M. P.',
             'Johanna Pietersz',
             'Evie Poetiray',
+            'Petrosina Jacoba (Dee) Tuwaahatu - Amahorseja',
         ];
 
         foreach ($figures as $index => $name) {
