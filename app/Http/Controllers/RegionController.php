@@ -19,10 +19,12 @@ class RegionController extends Controller
             ->active()
             ->whereNull('parent_id')
             ->withCount([
-                // Kartu wilayah menghitung DPD saja; PC tampil terpisah pada
-                // bagian "Cabang" di halaman detail wilayah.
-                'organizations' => fn ($query) => $query->active()->where('type', 'dpw'),
-                'branches' => fn ($query) => $query->active(),
+                // Kartu wilayah memakai pembagian yang sama dengan halaman
+                // detail: DPD tampil sebagai "organisasi", PC sebagai "cabang".
+                // Tabel branches (ranting) sengaja tidak dipakai agar angkanya
+                // tidak berbeda dengan daftar PC di halaman detail.
+                'organizations as dpw_count' => fn ($query) => $query->active()->where('type', 'dpw'),
+                'organizations as pc_count' => fn ($query) => $query->active()->where('type', 'pc'),
             ])
             ->ordered()
             ->get();

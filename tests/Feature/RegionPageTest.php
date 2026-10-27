@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Branch;
 use App\Models\Organization;
 use App\Models\Region;
 use DOMDocument;
@@ -10,9 +11,9 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * Halaman publik "Wilayah" memisahkan DPD dan PC: kartu wilayah hanya
- * menghitung DPD, sedangkan PC tampil di bawah judul "Cabang" pada halaman
- * detail wilayah.
+ * Halaman publik "Wilayah" memakai pembagian yang sama dengan halaman detail:
+ * DPD dihitung sebagai "organisasi" dan PC sebagai "cabang". Baris ranting
+ * pada tabel branches tidak ikut dihitung.
  */
 class RegionPageTest extends TestCase
 {
@@ -55,6 +56,59 @@ class RegionPageTest extends TestCase
 
         $this->assertStringContainsString('1 organisasi', $text);
         $this->assertStringNotContainsString('2 organisasi', $text);
+    }
+
+    /**
+     * Jumlah "cabang" pada kartu mengikuti organisasi bertipe PC, bukan baris
+     * pada tabel branches (ranting), agar sama dengan daftar di halaman detail.
+     */
+    public function test_kartu_wilayah_menghitung_cabang_dari_organisasi_pc(): void
+    {
+        $region = Region::query()->where('slug', 'maluku')->firstOrFail();
+
+        $dpw = Organization::query()
+            ->where('region_id', $region->getKey())
+            ->where('type', 'dpw')
+            ->firstOrFail();
+
+        Organization::query()->create([
+            'region_id' => $region->getKey(),
+            'parent_id' => $dpw->getKey(),
+            'name' => 'PC Uji Maluku',
+            'slug' => 'pc-uji-maluku',
+            'type' => 'pc',
+            'member_count' => 0,
+            'sort_order' => 100,
+            'is_active' => true,
+        ]);
+
+        // Ranting pada tabel branches tidak ditampilkan di halaman detail,
+        // sehingga tidak boleh menambah angka "cabang" pada kartu.
+        foreach (['Ranting Uji Maluku 1', 'Ranting Uji Maluku 2'] as $index => $name) {
+            Branch::query()->create([
+                'organization_id' => $dpw->getKey(),
+                'region_id' => $region->getKey(),
+                'name' => $name,
+                'slug' => 'ranting-uji-maluku-'.($index + 1),
+                'type' => 'ranting',
+                'member_count' => 0,
+                'is_active' => true,
+            ]);
+        }
+
+        $xpath = $this->xpath('/wilayah');
+
+        $cards = $xpath->query('//article[.//h3/a[normalize-space()="Maluku"]]');
+        $this->assertNotFalse($cards, 'Kueri kartu wilayah tidak valid.');
+
+        $card = $cards->item(0);
+        $this->assertNotNull($card, 'Kartu wilayah Maluku tidak ditemukan.');
+
+        $text = preg_replace('/\s+/u', ' ', $card->textContent);
+
+        $this->assertStringContainsString('1 organisasi', $text);
+        $this->assertStringContainsString('1 cabang', $text);
+        $this->assertStringNotContainsString('2 cabang', $text);
     }
 
     /**

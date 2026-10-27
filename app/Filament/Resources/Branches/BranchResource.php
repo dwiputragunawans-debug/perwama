@@ -21,6 +21,13 @@ class BranchResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMapPin;
 
+    /**
+     * Menu "Cabang" disembunyikan dari sidebar panel. Resource, halaman, dan
+     * seluruh aksi CRUD tetap aktif sehingga data lama masih dapat dikelola
+     * lewat URL langsung (mis. /admin/branches).
+     */
+    protected static bool $shouldRegisterNavigation = false;
+
     protected static string|UnitEnum|null $navigationGroup = 'Wilayah';
 
     protected static ?int $navigationSort = 3;
