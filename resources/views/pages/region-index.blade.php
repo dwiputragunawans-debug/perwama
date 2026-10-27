@@ -63,7 +63,7 @@
                                     @endif
 
                                     <p class="mt-5 flex flex-wrap gap-x-4 gap-y-1 meta">
-                                        <span><strong class="text-navy">{{ $region->dpw_count }}</strong> organisasi</span>
+                                        <span><strong class="text-navy">{{ $region->dpw_count }}</strong> DPD</span>
                                         <span><strong class="text-navy">{{ $region->pc_count }}</strong> cabang</span>
                                     </p>
 

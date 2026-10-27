@@ -12,8 +12,8 @@ use Tests\TestCase;
 
 /**
  * Halaman publik "Wilayah" memakai pembagian yang sama dengan halaman detail:
- * DPD dihitung sebagai "organisasi" dan PC sebagai "cabang". Baris ranting
- * pada tabel branches tidak ikut dihitung.
+ * DPD dihitung sebagai "DPD" dan PC sebagai "cabang". Baris ranting pada tabel
+ * branches tidak ikut dihitung.
  */
 class RegionPageTest extends TestCase
 {
@@ -27,10 +27,10 @@ class RegionPageTest extends TestCase
     }
 
     /**
-     * Jumlah "organisasi" pada kartu wilayah hanya menghitung DPD (dpw),
+     * Jumlah "DPD" pada kartu wilayah hanya menghitung organisasi tipe dpw,
      * bukan DPD + PC.
      */
-    public function test_kartu_wilayah_menghitung_organisasi_dpd_saja(): void
+    public function test_kartu_wilayah_menghitung_dpd_saja(): void
     {
         $region = Region::query()->where('slug', 'maluku')->firstOrFail();
 
@@ -54,8 +54,8 @@ class RegionPageTest extends TestCase
 
         $text = preg_replace('/\s+/u', ' ', $card->textContent);
 
-        $this->assertStringContainsString('1 organisasi', $text);
-        $this->assertStringNotContainsString('2 organisasi', $text);
+        $this->assertStringContainsString('1 DPD', $text);
+        $this->assertStringNotContainsString('2 DPD', $text);
     }
 
     /**
@@ -106,7 +106,7 @@ class RegionPageTest extends TestCase
 
         $text = preg_replace('/\s+/u', ' ', $card->textContent);
 
-        $this->assertStringContainsString('1 organisasi', $text);
+        $this->assertStringContainsString('1 DPD', $text);
         $this->assertStringContainsString('1 cabang', $text);
         $this->assertStringNotContainsString('2 cabang', $text);
     }
