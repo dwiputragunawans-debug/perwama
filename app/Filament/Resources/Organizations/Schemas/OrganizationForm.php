@@ -34,11 +34,7 @@ class OrganizationForm
                     ->helperText('Kosongkan untuk dibuat otomatis. Slug milik data terhapus tetap dianggap terpakai.'),
                 Select::make('type')
                     ->label('Jenis')
-                    ->options([
-                        'dpp' => 'Dewan Pimpinan Pusat (DPP)',
-                        'dpw' => 'Dewan Pimpinan Daerah (DPD)',
-                        'pc' => 'Pimpinan Cabang (PC)',
-                    ])
+                    ->options(Organization::TYPES)
                     ->default('pc')
                     ->required(),
                 TextInput::make('leader_name')

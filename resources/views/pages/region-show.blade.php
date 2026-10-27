@@ -38,39 +38,45 @@
                     </div>
                 @endif
 
-                @if ($region->organizations->count())
-                    <div class="mt-12" data-reveal>
-                        <h2 class="section-title text-2xl">Organisasi</h2>
-                        <div class="mt-6 space-y-4">
-                            @foreach ($region->organizations as $organization)
-                                <article class="rounded-2xl border border-navy/10 bg-white p-6">
-                                    <div class="flex flex-wrap items-start justify-between gap-3">
-                                        <div>
-                                            <h3 class="card-title font-display text-xl font-semibold text-navy">{{ $organization->name }}</h3>
-                                            <p class="mt-1 text-sm font-semibold tracking-[0.01em] text-terracotta">{{ $organization->typeLabel() }}</p>
-                                        </div>
-                                        @if ($organization->member_count)
-                                            <span class="rounded-full bg-navy/5 px-3 py-1 text-sm font-semibold text-navy">
-                                                {{ number_format($organization->member_count, 0, ',', '.') }} anggota
-                                            </span>
-                                        @endif
-                                    </div>
+                @if ($organizationGroups->isNotEmpty())
+                    {{-- Jarak antarkelompok (Organisasi/Cabang) dibuat lebih besar
+                         daripada jarak judul ke kartu agar batas bagian terbaca jelas. --}}
+                    <div class="mt-12 space-y-16" data-reveal>
+                        @foreach ($organizationGroups as $group)
+                            <div>
+                                <h2 class="section-title text-2xl">{{ $group['title'] }}</h2>
+                                <div class="mt-6 space-y-4">
+                                    @foreach ($group['organizations'] as $organization)
+                                        <article class="rounded-2xl border border-navy/10 bg-white p-6">
+                                            <div class="flex flex-wrap items-start justify-between gap-3">
+                                                <div>
+                                                    <h3 class="card-title font-display text-xl font-semibold text-navy">{{ $organization->name }}</h3>
+                                                    <p class="mt-1 text-sm font-semibold tracking-[0.01em] text-terracotta">{{ $organization->typeLabel() }}</p>
+                                                </div>
+                                                @if ($organization->member_count)
+                                                    <span class="rounded-full bg-navy/5 px-3 py-1 text-sm font-semibold text-navy">
+                                                        {{ number_format($organization->member_count, 0, ',', '.') }} anggota
+                                                    </span>
+                                                @endif
+                                            </div>
 
-                                    @if ($organization->leader_name)
-                                        <p class="mt-4 meta">Ketua: <strong class="text-navy">{{ $organization->leader_name }}</strong></p>
-                                    @endif
-                                    @if ($organization->address)
-                                        <p class="mt-1 meta">{{ $organization->address }}</p>
-                                    @endif
-                                    @if ($organization->description)
-                                        {{-- Deskripsi diisi lewat RichEditor: pertahankan paragraf dan bullet. --}}
-                                        <div class="prose-perwama mt-3 text-base">
-                                            {!! $organization->descriptionHtml() !!}
-                                        </div>
-                                    @endif
-                                </article>
-                            @endforeach
-                        </div>
+                                            @if ($organization->leader_name)
+                                                <p class="mt-4 meta">Ketua: <strong class="text-navy">{{ $organization->leader_name }}</strong></p>
+                                            @endif
+                                            @if ($organization->address)
+                                                <p class="mt-1 meta">{{ $organization->address }}</p>
+                                            @endif
+                                            @if ($organization->description)
+                                                {{-- Deskripsi diisi lewat RichEditor: pertahankan paragraf dan bullet. --}}
+                                                <div class="prose-perwama mt-3 text-base">
+                                                    {!! $organization->descriptionHtml() !!}
+                                                </div>
+                                            @endif
+                                        </article>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 @endif
             </div>

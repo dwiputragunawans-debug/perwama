@@ -5,12 +5,12 @@ namespace App\Filament\Resources\Organizations\Tables;
 use App\Filament\Actions\SafeDeleteBulkAction;
 use App\Filament\Actions\SafeForceDeleteAction;
 use App\Filament\Actions\SafeForceDeleteBulkAction;
+use App\Models\Organization;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\EditAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
@@ -31,11 +31,9 @@ class OrganizationsTable
                 TextColumn::make('name')
                     ->label('Nama')
                     ->searchable(),
-                TextColumn::make('slug')
-                    ->label('Slug')
-                    ->searchable(),
                 TextColumn::make('type')
                     ->label('Jenis')
+                    ->formatStateUsing(fn (?string $state): string => Organization::TYPES[$state] ?? (string) $state)
                     ->searchable(),
                 TextColumn::make('leader_name')
                     ->label('Nama Ketua')
@@ -43,34 +41,9 @@ class OrganizationsTable
                 TextColumn::make('secretary_name')
                     ->label('Nama Sekretaris')
                     ->searchable(),
-                TextColumn::make('phone')
-                    ->label('Telepon')
-                    ->searchable(),
-                TextColumn::make('email')
-                    ->label('Alamat Email')
-                    ->searchable(),
-                TextColumn::make('whatsapp')
-                    ->label('WhatsApp')
-                    ->searchable(),
-                TextColumn::make('facebook')
-                    ->label('Facebook')
-                    ->searchable(),
-                TextColumn::make('instagram')
-                    ->label('Instagram')
-                    ->searchable(),
-                TextColumn::make('youtube')
-                    ->label('YouTube')
-                    ->searchable(),
                 TextColumn::make('logo')
                     ->label('Logo')
                     ->searchable(),
-                ImageColumn::make('cover_image')
-                    ->label('Gambar Sampul')
-                    ->disk('public'),
-                TextColumn::make('founded_at')
-                    ->label('Tanggal Berdiri')
-                    ->date()
-                    ->sortable(),
                 TextColumn::make('member_count')
                     ->label('Jumlah Anggota')
                     ->numeric()

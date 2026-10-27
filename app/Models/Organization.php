@@ -12,6 +12,17 @@ class Organization extends Model
 {
     use HasSlug, SoftDeletes;
 
+    /**
+     * Jenis organisasi yang dipakai situs, dipetakan ke label bahasa Indonesia.
+     *
+     * @var array<string, string>
+     */
+    public const TYPES = [
+        'dpp' => 'Dewan Pimpinan Pusat (DPP)',
+        'dpw' => 'Dewan Pimpinan Daerah (DPD)',
+        'pc' => 'Pimpinan Cabang (PC)',
+    ];
+
     protected $fillable = [
         'region_id', 'parent_id', 'name', 'slug', 'type', 'leader_name',
         'secretary_name', 'address', 'phone', 'email', 'whatsapp', 'facebook',
@@ -116,11 +127,6 @@ class Organization extends Model
 
     public function typeLabel(): string
     {
-        return match ($this->type) {
-            'dpp' => 'Dewan Pimpinan Pusat (DPP)',
-            'dpw' => 'Dewan Pimpinan Daerah (DPD)',
-            'pc' => 'Pimpinan Cabang (PC)',
-            default => 'Organisasi',
-        };
+        return self::TYPES[$this->type] ?? 'Organisasi';
     }
 }

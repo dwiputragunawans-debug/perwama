@@ -25,7 +25,7 @@ class OrganizationResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
-    protected static ?string $navigationLabel = 'Organisasi / Cabang';
+    protected static ?string $navigationLabel = 'Organisasi (DPD & PC)';
 
     protected static ?string $modelLabel = 'Organisasi';
 

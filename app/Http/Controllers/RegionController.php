@@ -18,7 +18,12 @@ class RegionController extends Controller
         $provinces = Region::query()
             ->active()
             ->whereNull('parent_id')
-            ->withCount(['organizations', 'branches'])
+            ->withCount([
+                // Kartu wilayah menghitung DPD saja; PC tampil terpisah pada
+                // bagian "Cabang" di halaman detail wilayah.
+                'organizations' => fn ($query) => $query->active()->where('type', 'dpw'),
+                'branches' => fn ($query) => $query->active(),
+            ])
             ->ordered()
             ->get();
 
@@ -61,6 +66,20 @@ class RegionController extends Controller
             'seo' => $region->seoMetadata,
             'media' => $region->publicMedia,
             'provinces' => Region::query()->active()->provinces()->ordered()->get(),
+            'organizationGroups' => collect([
+                [
+                    'title' => 'Organisasi',
+                    'organizations' => $region->organizations
+                        ->reject(fn (Organization $organization): bool => $organization->type === 'pc')
+                        ->values(),
+                ],
+                [
+                    'title' => 'Cabang',
+                    'organizations' => $region->organizations
+                        ->where('type', 'pc')
+                        ->values(),
+                ],
+            ])->reject(fn (array $group): bool => $group['organizations']->isEmpty()),
         ]);
     }
 }
