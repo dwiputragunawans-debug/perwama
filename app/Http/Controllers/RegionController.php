@@ -29,14 +29,20 @@ class RegionController extends Controller
             ->ordered()
             ->get();
 
+        $regionsByIsland = $provinces->groupBy(fn (Region $region) => $region->island ?: 'Lainnya');
+
         return view('pages.region-index', [
             'profile' => OrganizationProfile::current(),
             'provinces' => $provinces,
-            'regionsByIsland' => $provinces->groupBy(fn (Region $region) => $region->island ?: 'Lainnya'),
+            'regionsByIsland' => $regionsByIsland,
             'totals' => [
-                'region' => Region::query()->active()->count(),
-                'province' => Region::query()->active()->where('type', 'province')->count(),
-                'organization' => Organization::query()->active()->count(),
+                // Jumlah wilayah mengikuti kelompok pulau yang benar-benar
+                // dirender, bukan seluruh baris regions (termasuk kabupaten/kota).
+                'region' => $regionsByIsland->count(),
+                // Statistik atas memakai istilah yang sama dengan kartu:
+                // DPD = organisasi tipe dpw, Cabang = organisasi tipe pc.
+                'dpd' => Organization::query()->active()->where('type', 'dpw')->count(),
+                'branch' => Organization::query()->active()->where('type', 'pc')->count(),
                 'member' => Member::query()->active()->count(),
             ],
         ]);

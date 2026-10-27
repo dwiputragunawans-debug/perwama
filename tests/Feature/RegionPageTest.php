@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Branch;
+use App\Models\Member;
 use App\Models\Organization;
 use App\Models\Region;
 use DOMDocument;
@@ -24,6 +25,65 @@ class RegionPageTest extends TestCase
         parent::setUp();
 
         $this->seed();
+    }
+
+    /**
+     * Statistik di atas daftar kartu memakai urutan Wilayah, DPD, Cabang,
+     * Anggota dengan angka sesuai jenis organisasi masing-masing.
+     */
+    public function test_statistik_wilayah_memakai_dpd_dan_cabang(): void
+    {
+        // Region anak (kabupaten/kota) tidak dirender sebagai wilayah pada
+        // halaman ini dan tidak boleh menambah angka "Wilayah".
+        $province = Region::query()->where('slug', 'maluku')->firstOrFail();
+
+        Region::query()->create([
+            'parent_id' => $province->getKey(),
+            'name' => 'Kota Uji Statistik',
+            'slug' => 'kota-uji-statistik',
+            'type' => 'city',
+            'island' => 'Maluku',
+            'is_active' => true,
+        ]);
+
+        $xpath = $this->xpath('/wilayah');
+
+        $items = $xpath->query(
+            '//section[.//p[normalize-space()="Wilayah"] and .//p[normalize-space()="Anggota"]]'
+            .'//div[contains(concat(" ", normalize-space(@class), " "), " text-center ")]'
+        );
+
+        $this->assertNotFalse($items, 'Kueri statistik wilayah tidak valid.');
+        $this->assertSame(4, $items->length, 'Statistik wilayah harus berisi empat angka.');
+
+        $labels = [];
+        $values = [];
+
+        foreach ($items as $item) {
+            $angka = $xpath->query('.//p[1]', $item)->item(0);
+            $label = $xpath->query('.//p[2]', $item)->item(0);
+
+            $this->assertNotNull($angka, 'Angka statistik wilayah tidak ditemukan.');
+            $this->assertNotNull($label, 'Label statistik wilayah tidak ditemukan.');
+
+            $values[] = trim($angka->textContent);
+            $labels[] = trim($label->textContent);
+        }
+
+        $jumlahKelompok = Region::query()
+            ->active()
+            ->whereNull('parent_id')
+            ->get()
+            ->groupBy(fn (Region $region): string => $region->island ?: 'Lainnya')
+            ->count();
+
+        $this->assertSame(['Wilayah', 'DPD', 'Cabang', 'Anggota'], $labels);
+        $this->assertSame([
+            number_format($jumlahKelompok, 0, ',', '.'),
+            number_format(Organization::query()->active()->where('type', 'dpw')->count(), 0, ',', '.'),
+            number_format(Organization::query()->active()->where('type', 'pc')->count(), 0, ',', '.'),
+            number_format(Member::query()->active()->count(), 0, ',', '.'),
+        ], $values);
     }
 
     /**
