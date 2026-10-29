@@ -267,7 +267,7 @@
                 </div>
 
                 <div class="grid gap-4 sm:grid-cols-2" data-reveal>
-                    @foreach ($provinces->take(8) as $province)
+                    @foreach ($provinces as $province)
                         <a href="{{ route('region.show', $province->slug) }}"
                            class="group flex items-start justify-between gap-4 rounded-xl border border-white/12 bg-white/5 px-6 py-6 transition hover:border-gold/60 hover:bg-white/10">
                             <span>

@@ -208,6 +208,40 @@ class PublicPagesTest extends TestCase
     }
 
     /**
+     * Jumlah kartu wilayah pada beranda mengikuti seluruh provinsi aktif yang
+     * dikelola di Admin Panel, tanpa batas jumlah tetap.
+     */
+    public function test_kartu_wilayah_beranda_mengikuti_semua_wilayah_aktif(): void
+    {
+        $provinces = Region::query()->active()->provinces()->ordered()->get();
+
+        $this->assertGreaterThan(8, $provinces->count(), 'Data uji perlu lebih dari delapan provinsi aktif.');
+
+        $dom = new DOMDocument;
+        libxml_use_internal_errors(true);
+        $dom->loadHTML($this->get('/')->assertOk()->getContent());
+        libxml_clear_errors();
+
+        $cards = (new DOMXPath($dom))->query(
+            '//section[.//p[contains(@class, "section-eyebrow") and normalize-space()="Wilayah"]]'
+            .'//a[contains(@href, "/wilayah/")]'
+        );
+
+        $this->assertNotFalse($cards, 'Kueri kartu wilayah beranda tidak valid.');
+        $this->assertSame($provinces->count(), $cards->length);
+
+        $tautan = [];
+
+        foreach ($cards as $card) {
+            $tautan[] = $card->getAttribute('href');
+        }
+
+        foreach ($provinces as $province) {
+            $this->assertContains(route('region.show', $province->slug), $tautan);
+        }
+    }
+
+    /**
      * Bagian wilayah memakai istilah "Wilayah" (bukan "Di Indonesia") pada
      * judul halaman, navigasi, breadcrumb, dan footer.
      */
